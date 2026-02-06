@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import FoodListSidebar from "../components/FoodListSidebar";
 import CreateFoodSidebar from "../components/CreateFoodSidebar";
+import EditFoodSidebar from "../components/EditFoodSidebar";
 
 export interface FoodItem {
   id: string;
   name: string;
   measurement: string;
   calories: number;
+  baseCalories: number;
+  serving: number;
 }
 
 interface Meal {
@@ -29,12 +32,34 @@ export default function Diary() {
   );
   const [showFoodList, setShowFoodList] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editServingValue, setEditServingValue] = useState("1");
+  const [editTarget, setEditTarget] = useState<{
+    mealIndex: number;
+    itemId: string;
+  } | null>(null);
+
+  const selectedFood = useMemo(() => {
+    if (!editTarget) return null;
+    return (
+      meals[editTarget.mealIndex]?.items.find(
+        (item) => item.id === editTarget.itemId,
+      ) || null
+    );
+  }, [editTarget, meals]);
 
   const addFoodFromList = (food: FoodItem) => {
     if (selectedMealIndex === null) return;
 
     const updatedMeals = [...meals];
-    updatedMeals[selectedMealIndex].items.push(food);
+    updatedMeals[selectedMealIndex].items.push({
+      id: Date.now().toString(),
+      name: food.name,
+      measurement: food.measurement,
+      calories: food.baseCalories,
+      baseCalories: food.baseCalories,
+      serving: 1,
+    });
     setMeals(updatedMeals);
     setShowFoodList(false);
     setSelectedMealIndex(null);
@@ -47,11 +72,14 @@ export default function Diary() {
   }) => {
     if (selectedMealIndex === null || !formData.name) return;
 
+    const baseCalories = parseFloat(formData.calories) || 0;
     const newItem: FoodItem = {
       id: Date.now().toString(),
       name: formData.name,
       measurement: formData.measurement,
-      calories: parseInt(formData.calories) || 0,
+      calories: baseCalories,
+      baseCalories,
+      serving: 1,
     };
 
     const updatedMeals = [...meals];
@@ -62,18 +90,20 @@ export default function Diary() {
     setSelectedMealIndex(null);
   };
 
-  const updateFoodItem = (
-    mealIndex: number,
-    itemId: string,
-    field: keyof FoodItem,
-    value: string | number,
-  ) => {
+  const applyServingChange = (serving: number) => {
+    if (!editTarget) return;
+
     const updatedMeals = [...meals];
-    const item = updatedMeals[mealIndex].items.find((i) => i.id === itemId);
+    const item = updatedMeals[editTarget.mealIndex].items.find(
+      (i) => i.id === editTarget.itemId,
+    );
     if (item) {
-      item[field] = value as never;
+      item.serving = serving;
+      item.calories = Number((item.baseCalories * serving).toFixed(1));
     }
     setMeals(updatedMeals);
+    setShowEditForm(false);
+    setEditTarget(null);
   };
 
   const removeFood = (mealIndex: number, itemId: string) => {
@@ -85,7 +115,7 @@ export default function Diary() {
   };
 
   return (
-    <div className="min-h-full bg-zinc-50 dark:bg-black p-4">
+    <div className="min-h-full bg-zinc-50 dark:bg-black p-4 pb-24">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl font-semibold text-black dark:text-zinc-50 mb-6">
           Diary
@@ -115,57 +145,35 @@ export default function Diary() {
                   {meal.items.map((item) => (
                     <tr
                       key={item.id}
-                      className="border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      onClick={() => {
+                        setEditTarget({
+                          mealIndex,
+                          itemId: item.id,
+                        });
+                        setEditServingValue(String(item.serving));
+                        setShowEditForm(true);
+                      }}
+                      className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
                     >
                       <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={(e) =>
-                            updateFoodItem(
-                              mealIndex,
-                              item.id,
-                              "name",
-                              e.target.value,
-                            )
-                          }
-                          className="block w-full border border-zinc-200 dark:border-zinc-700 rounded px-2 py-1 bg-transparent text-black dark:text-zinc-50 font-medium mb-1"
-                          placeholder="Food name"
-                        />
-                        <input
-                          type="text"
-                          value={item.measurement}
-                          onChange={(e) =>
-                            updateFoodItem(
-                              mealIndex,
-                              item.id,
-                              "measurement",
-                              e.target.value,
-                            )
-                          }
-                          className="block w-full border border-zinc-200 dark:border-zinc-700 rounded px-2 py-1 bg-transparent text-zinc-500 dark:text-zinc-400 text-sm"
-                          placeholder="Measurement"
-                        />
+                        <p className="text-black dark:text-zinc-50 font-medium">
+                          {item.name}
+                        </p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          {item.measurement}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          value={item.calories}
-                          onChange={(e) =>
-                            updateFoodItem(
-                              mealIndex,
-                              item.id,
-                              "calories",
-                              parseInt(e.target.value) || 0,
-                            )
-                          }
-                          className="w-full border border-zinc-200 dark:border-zinc-700 rounded px-2 py-1 bg-transparent text-black dark:text-zinc-50 text-sm"
-                          placeholder="0"
-                        />
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          {item.calories} cal
+                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => removeFood(mealIndex, item.id)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removeFood(mealIndex, item.id);
+                          }}
                           className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                         >
                           Remove
@@ -173,17 +181,17 @@ export default function Diary() {
                       </td>
                     </tr>
                   ))}
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
+                  <tr
+                    className="border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                    onClick={() => {
+                      setSelectedMealIndex(mealIndex);
+                      setShowFoodList(true);
+                    }}
+                  >
                     <td colSpan={3} className="px-4 py-3">
-                      <button
-                        onClick={() => {
-                          setSelectedMealIndex(mealIndex);
-                          setShowFoodList(true);
-                        }}
-                        className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium"
-                      >
-                        + Add Food
-                      </button>
+                      <p className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium">
+                        Add Food
+                      </p>
                     </td>
                   </tr>
                 </tbody>
@@ -193,7 +201,6 @@ export default function Diary() {
         ))}
       </div>
 
-      {/* Food List Sidebar */}
       <FoodListSidebar
         isOpen={showFoodList}
         onClose={() => {
@@ -208,6 +215,18 @@ export default function Diary() {
         isOpen={showCreateForm}
         onClose={() => setShowCreateForm(false)}
         onSubmit={addCustomFood}
+      />
+
+      <EditFoodSidebar
+        isOpen={showEditForm}
+        food={selectedFood}
+        servingValue={editServingValue}
+        onServingChange={setEditServingValue}
+        onClose={() => {
+          setShowEditForm(false);
+          setEditTarget(null);
+        }}
+        onSubmit={applyServingChange}
       />
     </div>
   );

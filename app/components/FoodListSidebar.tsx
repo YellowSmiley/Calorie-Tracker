@@ -19,12 +19,54 @@ export default function FoodListSidebar({
   const [searchQuery, setSearchQuery] = useState("");
 
   const [FoodItems] = useState<FoodItem[]>([
-    { id: "1", name: "Chicken Breast", measurement: "100g", calories: 165 },
-    { id: "2", name: "Brown Rice", measurement: "1 cup cooked", calories: 215 },
-    { id: "3", name: "Broccoli", measurement: "1 cup", calories: 55 },
-    { id: "4", name: "Eggs", measurement: "1 large", calories: 78 },
-    { id: "5", name: "Salmon", measurement: "100g", calories: 206 },
-    { id: "6", name: "Oatmeal", measurement: "1 cup cooked", calories: 150 },
+    {
+      id: "1",
+      name: "Chicken Breast",
+      measurement: "100g",
+      calories: 165,
+      baseCalories: 165,
+      serving: 1,
+    },
+    {
+      id: "2",
+      name: "Brown Rice",
+      measurement: "1 cup cooked",
+      calories: 215,
+      baseCalories: 215,
+      serving: 1,
+    },
+    {
+      id: "3",
+      name: "Broccoli",
+      measurement: "1 cup",
+      calories: 55,
+      baseCalories: 55,
+      serving: 1,
+    },
+    {
+      id: "4",
+      name: "Eggs",
+      measurement: "1 large",
+      calories: 78,
+      baseCalories: 78,
+      serving: 1,
+    },
+    {
+      id: "5",
+      name: "Salmon",
+      measurement: "100g",
+      calories: 206,
+      baseCalories: 206,
+      serving: 1,
+    },
+    {
+      id: "6",
+      name: "Oatmeal",
+      measurement: "1 cup cooked",
+      calories: 150,
+      baseCalories: 150,
+      serving: 1,
+    },
   ]);
 
   const filteredFoods = FoodItems.filter(
@@ -53,7 +95,7 @@ export default function FoodListSidebar({
       <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
         <button
           onClick={handleClose}
-          className="text-black dark:text-zinc-50 font-semibold"
+          className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
         >
           Back
         </button>
@@ -65,13 +107,15 @@ export default function FoodListSidebar({
 
       {/* Search Box */}
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-        <input
-          type="text"
-          placeholder="Search foods..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
-        />
+        <div className="mx-auto w-full max-w-6xl">
+          <input
+            type="text"
+            placeholder="Search foods..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
+          />
+        </div>
       </div>
 
       {/* Food List */}
@@ -96,12 +140,14 @@ export default function FoodListSidebar({
 
       {/* Create Button - Fixed at Bottom */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800">
-        <button
-          onClick={onOpenCreateForm}
-          className="w-full h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-        >
-          Create +
-        </button>
+        <div className="mx-auto w-full max-w-6xl">
+          <button
+            onClick={onOpenCreateForm}
+            className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+          >
+            Create
+          </button>
+        </div>
       </div>
     </div>
   );

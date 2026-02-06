@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <div className="bg-zinc-50 dark:bg-black p-4">
+    <div className="bg-zinc-50 dark:bg-black p-4 pb-24">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl font-semibold text-black dark:text-zinc-50 mb-4">
           Dashboard
