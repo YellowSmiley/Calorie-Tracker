@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FoodItem } from "../diary/page";
+import { FoodItem } from "../diary/types";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectFood: (food: FoodItem) => void;
   onOpenCreateForm: () => void;
+  foods: FoodItem[];
 }
 
 export default function FoodListSidebar({
@@ -15,97 +16,11 @@ export default function FoodListSidebar({
   onClose,
   onSelectFood,
   onOpenCreateForm,
+  foods,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [FoodItems] = useState<FoodItem[]>([
-    {
-      id: "1",
-      name: "Chicken Breast",
-      measurement: "100g",
-      calories: 165,
-      baseCalories: 165,
-      serving: 1,
-      protein: 31,
-      carbs: 0,
-      fat: 3.6,
-      baseProtein: 31,
-      baseCarbs: 0,
-      baseFat: 3.6,
-    },
-    {
-      id: "2",
-      name: "Brown Rice",
-      measurement: "1 cup cooked",
-      calories: 215,
-      baseCalories: 215,
-      serving: 1,
-      protein: 5,
-      carbs: 45,
-      fat: 1.8,
-      baseProtein: 5,
-      baseCarbs: 45,
-      baseFat: 1.8,
-    },
-    {
-      id: "3",
-      name: "Broccoli",
-      measurement: "1 cup",
-      calories: 55,
-      baseCalories: 55,
-      serving: 1,
-      protein: 3.7,
-      carbs: 11,
-      fat: 0.6,
-      baseProtein: 3.7,
-      baseCarbs: 11,
-      baseFat: 0.6,
-    },
-    {
-      id: "4",
-      name: "Eggs",
-      measurement: "1 large",
-      calories: 78,
-      baseCalories: 78,
-      serving: 1,
-      protein: 6,
-      carbs: 0.6,
-      fat: 5,
-      baseProtein: 6,
-      baseCarbs: 0.6,
-      baseFat: 5,
-    },
-    {
-      id: "5",
-      name: "Salmon",
-      measurement: "100g",
-      calories: 206,
-      baseCalories: 206,
-      serving: 1,
-      protein: 22,
-      carbs: 0,
-      fat: 13,
-      baseProtein: 22,
-      baseCarbs: 0,
-      baseFat: 13,
-    },
-    {
-      id: "6",
-      name: "Oatmeal",
-      measurement: "1 cup cooked",
-      calories: 150,
-      baseCalories: 150,
-      serving: 1,
-      protein: 6,
-      carbs: 27,
-      fat: 3,
-      baseProtein: 6,
-      baseCarbs: 27,
-      baseFat: 3,
-    },
-  ]);
-
-  const filteredFoods = FoodItems.filter(
+  const filteredFoods = foods.filter(
     (food) =>
       food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       food.measurement.toLowerCase().includes(searchQuery.toLowerCase()),

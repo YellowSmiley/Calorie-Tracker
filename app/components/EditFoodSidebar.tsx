@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { FoodItem } from "../diary/page";
+import type { FoodItem } from "../diary/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
