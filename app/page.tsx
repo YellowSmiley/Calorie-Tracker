@@ -1,4 +1,8 @@
-export default function Home() {
+import { auth } from "@/auth";
+
+export default async function Home() {
+  const session = await auth();
+
   return (
     <div className="min-h-full flex flex-col">
       {/* Header */}
@@ -12,10 +16,44 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Your calorie tracking dashboard will appear here.
-          </p>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
+            <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
+              Welcome, {session?.user?.name || "User"}!
+            </h2>
+            <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+              Track your daily calorie intake and macronutrients to reach your
+              health goals.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Daily Goal
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  2000 cal
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Protein Goal
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  150 g
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
+            <h3 className="text-lg font-semibold text-black dark:text-zinc-50 mb-2">
+              Quick Actions
+            </h3>
+            <p className="text-zinc-600 dark:text-zinc-400">
+              Use the navigation below to access your food diary and start
+              tracking your meals.
+            </p>
+          </div>
         </div>
       </div>
     </div>

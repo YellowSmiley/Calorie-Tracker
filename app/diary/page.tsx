@@ -49,15 +49,9 @@ export default async function DiaryPage() {
   const session = await auth();
   const activeDate = new Date().toISOString().split("T")[0];
 
+  // User must be authenticated due to middleware, but add safety check
   if (!session?.user?.id) {
-    return (
-      <DiaryClient
-        initialMeals={initialMeals}
-        initialFoods={[]}
-        isAuthenticated={false}
-        activeDate={activeDate}
-      />
-    );
+    return null;
   }
 
   const count = await prisma.food.count();
@@ -122,7 +116,6 @@ export default async function DiaryPage() {
     <DiaryClient
       initialMeals={meals.length ? meals : initialMeals}
       initialFoods={foods.map(mapFoodToItem)}
-      isAuthenticated={true}
       activeDate={activeDate}
     />
   );

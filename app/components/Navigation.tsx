@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  if (!session) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
@@ -29,6 +33,12 @@ export default function Navigation() {
         >
           Diary
         </Link>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex h-12 items-center justify-center rounded-lg px-5 text-base font-medium transition-colors border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+        >
+          Sign Out
+        </button>
       </div>
     </nav>
   );

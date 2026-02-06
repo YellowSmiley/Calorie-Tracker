@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { signIn } from "next-auth/react";
 import FoodListSidebar from "../components/FoodListSidebar";
 import CreateFoodSidebar from "../components/CreateFoodSidebar";
 import EditFoodSidebar from "../components/EditFoodSidebar";
@@ -11,14 +10,12 @@ import type { FoodItem, Meal } from "./types";
 interface DiaryClientProps {
   initialMeals: Meal[];
   initialFoods: FoodItem[];
-  isAuthenticated: boolean;
   activeDate: string;
 }
 
 export default function DiaryClient({
   initialMeals,
   initialFoods,
-  isAuthenticated,
   activeDate,
 }: DiaryClientProps) {
   const [goals] = useState({
@@ -247,111 +244,95 @@ export default function DiaryClient({
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
         <div className="max-w-3xl mx-auto">
-          {!isAuthenticated ? (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 text-center">
-              <p className="text-black dark:text-zinc-50 font-medium">
-                Sign in to sync your diary.
-              </p>
-              <button
-                onClick={() => signIn("google")}
-                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-              >
-                Continue with Google
-              </button>
-            </div>
-          ) : (
-            <>
-              <DailySummaryAccordion totals={totals} goals={goals} />
-              {meals.map((meal, mealIndex) => (
-                <div key={meal.name} className="mb-8">
-                  <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
-                    {meal.name}
-                  </h2>
-                  <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <table className="w-full border-collapse bg-white dark:bg-zinc-950">
-                      <thead>
-                        <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                            Food Item
-                          </th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                            Calories
-                          </th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {meal.items.map((item) => (
-                          <tr
-                            key={item.id}
-                            onClick={() => {
-                              setEditTarget({
-                                mealIndex,
-                                itemId: item.id,
-                              });
-                              setEditServingValue(String(item.serving));
-                              setShowEditForm(true);
+          <DailySummaryAccordion totals={totals} goals={goals} />
+          {meals.map((meal, mealIndex) => (
+            <div key={meal.name} className="mb-8">
+              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
+                {meal.name}
+              </h2>
+              <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+                <table className="w-full border-collapse bg-white dark:bg-zinc-950">
+                  <thead>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                        Food Item
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                        Calories
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {meal.items.map((item) => (
+                      <tr
+                        key={item.id}
+                        onClick={() => {
+                          setEditTarget({
+                            mealIndex,
+                            itemId: item.id,
+                          });
+                          setEditServingValue(String(item.serving));
+                          setShowEditForm(true);
+                        }}
+                        className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      >
+                        <td className="px-4 py-3">
+                          <p className="text-black dark:text-zinc-50 font-medium">
+                            {item.name}
+                          </p>
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            {item.measurement}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            {item.calories} cal
+                          </p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              removeFood(mealIndex, item.id);
                             }}
-                            className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                           >
-                            <td className="px-4 py-3">
-                              <p className="text-black dark:text-zinc-50 font-medium">
-                                {item.name}
-                              </p>
-                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                                {item.measurement}
-                              </p>
-                            </td>
-                            <td className="px-4 py-3">
-                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                                {item.calories} cal
-                              </p>
-                            </td>
-                            <td className="px-4 py-3">
-                              <button
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  removeFood(mealIndex, item.id);
-                                }}
-                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
-                              >
-                                Remove
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                        {/* Totals Row */}
-                        <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-                          <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
-                            Total
-                          </td>
-                          <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
-                            {Math.round(getMealTotals(mealIndex).calories)} cal
-                          </td>
-                          <td className="px-4 py-3"></td>
-                        </tr>
-                        <tr
-                          className="hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                          onClick={() => {
-                            setSelectedMealIndex(mealIndex);
-                            setShowFoodList(true);
-                          }}
-                        >
-                          <td colSpan={3} className="px-4 py-3">
-                            <p className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium">
-                              Add Food
-                            </p>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Totals Row */}
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                      <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
+                        Total
+                      </td>
+                      <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
+                        {Math.round(getMealTotals(mealIndex).calories)} cal
+                      </td>
+                      <td className="px-4 py-3"></td>
+                    </tr>
+                    <tr
+                      className="hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      onClick={() => {
+                        setSelectedMealIndex(mealIndex);
+                        setShowFoodList(true);
+                      }}
+                    >
+                      <td colSpan={3} className="px-4 py-3">
+                        <p className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium">
+                          Add Food
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
