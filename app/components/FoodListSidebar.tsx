@@ -26,6 +26,12 @@ export default function FoodListSidebar({
       calories: 165,
       baseCalories: 165,
       serving: 1,
+      protein: 31,
+      carbs: 0,
+      fat: 3.6,
+      baseProtein: 31,
+      baseCarbs: 0,
+      baseFat: 3.6,
     },
     {
       id: "2",
@@ -34,6 +40,12 @@ export default function FoodListSidebar({
       calories: 215,
       baseCalories: 215,
       serving: 1,
+      protein: 5,
+      carbs: 45,
+      fat: 1.8,
+      baseProtein: 5,
+      baseCarbs: 45,
+      baseFat: 1.8,
     },
     {
       id: "3",
@@ -42,6 +54,12 @@ export default function FoodListSidebar({
       calories: 55,
       baseCalories: 55,
       serving: 1,
+      protein: 3.7,
+      carbs: 11,
+      fat: 0.6,
+      baseProtein: 3.7,
+      baseCarbs: 11,
+      baseFat: 0.6,
     },
     {
       id: "4",
@@ -50,6 +68,12 @@ export default function FoodListSidebar({
       calories: 78,
       baseCalories: 78,
       serving: 1,
+      protein: 6,
+      carbs: 0.6,
+      fat: 5,
+      baseProtein: 6,
+      baseCarbs: 0.6,
+      baseFat: 5,
     },
     {
       id: "5",
@@ -58,6 +82,12 @@ export default function FoodListSidebar({
       calories: 206,
       baseCalories: 206,
       serving: 1,
+      protein: 22,
+      carbs: 0,
+      fat: 13,
+      baseProtein: 22,
+      baseCarbs: 0,
+      baseFat: 13,
     },
     {
       id: "6",
@@ -66,6 +96,12 @@ export default function FoodListSidebar({
       calories: 150,
       baseCalories: 150,
       serving: 1,
+      protein: 6,
+      carbs: 27,
+      fat: 3,
+      baseProtein: 6,
+      baseCarbs: 27,
+      baseFat: 3,
     },
   ]);
 
@@ -87,12 +123,12 @@ export default function FoodListSidebar({
 
   return (
     <div
-      className={`fixed top-0 right-0 h-full w-full bg-white dark:bg-zinc-950 shadow-lg z-50 flex flex-col transition-transform duration-300 ${
+      className={`fixed top-0 right-0 h-full w-full bg-zinc-50 dark:bg-zinc-950 shadow-lg z-50 flex flex-col transition-transform duration-300 ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
         <button
           onClick={handleClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
@@ -139,8 +175,8 @@ export default function FoodListSidebar({
       </div>
 
       {/* Create Button - Fixed at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto w-full max-w-6xl">
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800">
+        <div className="mx-auto w-full max-w-3xl">
           <button
             onClick={onOpenCreateForm}
             className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
