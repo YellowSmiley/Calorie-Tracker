@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import {
+  convertCaloriesFromInput,
+  convertMacroFromInput,
+} from "@/lib/unitConversions";
 
 interface CreateFoodSidebarProps {
   isOpen: boolean;
@@ -13,16 +17,26 @@ interface CreateFoodSidebarProps {
     carbs: number;
     fat: number;
   }) => void;
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+    weightUnit: string;
+    volumeUnit: string;
+  };
+  isLoading?: boolean;
 }
 
 export default function CreateFoodSidebar({
   isOpen,
   onClose,
   onSubmit,
+  userSettings,
+  isLoading = false,
 }: CreateFoodSidebarProps) {
   const [formData, setFormData] = useState({
     name: "",
-    measurement: "",
+    measurementValue: "",
+    measurementType: "weight",
     calories: "",
     protein: "",
     carbs: "",
@@ -31,17 +45,38 @@ export default function CreateFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Build measurement string from value and unit
+    const unit =
+      formData.measurementType === "weight"
+        ? userSettings.weightUnit
+        : userSettings.volumeUnit;
+    const measurement = `${formData.measurementValue}${unit}`;
+
+    // Convert from user's input units to database storage units (kcal, grams)
     onSubmit({
       name: formData.name,
-      measurement: formData.measurement,
-      calories: parseFloat(formData.calories) || 0,
-      protein: parseFloat(formData.protein) || 0,
-      carbs: parseFloat(formData.carbs) || 0,
-      fat: parseFloat(formData.fat) || 0,
+      measurement: measurement,
+      calories: convertCaloriesFromInput(
+        parseFloat(formData.calories) || 0,
+        userSettings.calorieUnit,
+      ),
+      protein: convertMacroFromInput(
+        parseFloat(formData.protein) || 0,
+        userSettings.macroUnit,
+      ),
+      carbs: convertMacroFromInput(
+        parseFloat(formData.carbs) || 0,
+        userSettings.macroUnit,
+      ),
+      fat: convertMacroFromInput(
+        parseFloat(formData.fat) || 0,
+        userSettings.macroUnit,
+      ),
     });
     setFormData({
       name: "",
-      measurement: "",
+      measurementValue: "",
+      measurementType: "weight",
       calories: "",
       protein: "",
       carbs: "",
@@ -52,7 +87,8 @@ export default function CreateFoodSidebar({
   const handleClose = () => {
     setFormData({
       name: "",
-      measurement: "",
+      measurementValue: "",
+      measurementType: "weight",
       calories: "",
       protein: "",
       carbs: "",
@@ -107,22 +143,76 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Measurement
+                  Measurement Type
                 </label>
-                <input
-                  type="text"
-                  value={formData.measurement}
+                <select
+                  value={formData.measurementType}
                   onChange={(e) =>
-                    setFormData({ ...formData, measurement: e.target.value })
+                    setFormData({
+                      ...formData,
+                      measurementType: e.target.value,
+                    })
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="e.g., 100g"
+                >
+                  <option value="weight">Weight</option>
+                  <option value="volume">Volume</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Measurement Value
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.measurementValue}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      measurementValue: e.target.value,
+                    })
+                  }
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  placeholder="100"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Calories
+                  Unit (
+                  {formData.measurementType === "weight"
+                    ? userSettings.weightUnit
+                    : userSettings.volumeUnit}
+                  )
+                </label>
+                {formData.measurementType === "weight" ? (
+                  <select
+                    value={userSettings.weightUnit}
+                    disabled
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 opacity-60 cursor-not-allowed"
+                  >
+                    <option value={userSettings.weightUnit}>
+                      {userSettings.weightUnit}
+                    </option>
+                  </select>
+                ) : (
+                  <select
+                    value={userSettings.volumeUnit}
+                    disabled
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 opacity-60 cursor-not-allowed"
+                  >
+                    <option value={userSettings.volumeUnit}>
+                      {userSettings.volumeUnit}
+                    </option>
+                  </select>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Calories ({userSettings.calorieUnit})
                 </label>
                 <input
                   type="number"
@@ -137,7 +227,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Protein (g)
+                  Protein ({userSettings.macroUnit})
                 </label>
                 <input
                   type="number"
@@ -153,7 +243,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Carbs (g)
+                  Carbs ({userSettings.macroUnit})
                 </label>
                 <input
                   type="number"
@@ -169,7 +259,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fat (g)
+                  Fat ({userSettings.macroUnit})
                 </label>
                 <input
                   type="number"
@@ -191,9 +281,10 @@ export default function CreateFoodSidebar({
           <div className="mx-auto w-full max-w-3xl">
             <button
               type="submit"
-              className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+              disabled={isLoading}
+              className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add Food
+              {isLoading ? "Adding..." : "Add Food"}
             </button>
           </div>
         </div>

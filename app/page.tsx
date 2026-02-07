@@ -1,7 +1,28 @@
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { formatCalories, formatMacro } from "@/lib/unitConversions";
 
 export default async function Home() {
   const session = await auth();
+
+  // Fetch user settings for goals
+  const user = await prisma.user.findUnique({
+    where: { id: session?.user?.id },
+    select: {
+      calorieGoal: true,
+      proteinGoal: true,
+      calorieUnit: true,
+      macroUnit: true,
+    },
+  });
+
+  const userSettings = {
+    calorieUnit: user?.calorieUnit ?? "kcal",
+    macroUnit: user?.macroUnit ?? "g",
+  };
+
+  const calorieGoal = user?.calorieGoal ?? 3000;
+  const proteinGoal = user?.proteinGoal ?? 150;
 
   return (
     <div className="min-h-full flex flex-col">
@@ -31,7 +52,7 @@ export default async function Home() {
                   Daily Goal
                 </p>
                 <p className="text-2xl font-bold text-black dark:text-zinc-50">
-                  2000 cal
+                  {formatCalories(calorieGoal, userSettings)}
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
@@ -39,7 +60,7 @@ export default async function Home() {
                   Protein Goal
                 </p>
                 <p className="text-2xl font-bold text-black dark:text-zinc-50">
-                  150 g
+                  {formatMacro(proteinGoal, userSettings)}
                 </p>
               </div>
             </div>

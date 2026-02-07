@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FoodItem } from "../diary/types";
+import { formatCalories } from "@/lib/unitConversions";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -9,6 +10,11 @@ interface FoodListSidebarProps {
   onSelectFood: (food: FoodItem) => void;
   onOpenCreateForm: () => void;
   foods: FoodItem[];
+  isLoading?: boolean;
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+  };
 }
 
 export default function FoodListSidebar({
@@ -17,6 +23,8 @@ export default function FoodListSidebar({
   onSelectFood,
   onOpenCreateForm,
   foods,
+  isLoading = false,
+  userSettings,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -70,19 +78,28 @@ export default function FoodListSidebar({
       </div>
 
       {/* Food List */}
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="flex-1 overflow-y-auto pb-24 relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
+            <div className="text-sm text-zinc-700 dark:text-zinc-300">
+              Adding food...
+            </div>
+          </div>
+        )}
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
           {filteredFoods.map((food) => (
             <button
               key={food.id}
               onClick={() => handleSelectFood(food)}
-              className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+              disabled={isLoading}
+              className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <p className="font-medium text-black dark:text-zinc-50">
                 {food.name}
               </p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {food.measurement} • {food.calories} cal
+                {food.measurement} •{" "}
+                {formatCalories(food.calories, userSettings)}
               </p>
             </button>
           ))}

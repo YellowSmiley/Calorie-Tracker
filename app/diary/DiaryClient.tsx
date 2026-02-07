@@ -4,26 +4,37 @@ import { useMemo, useState } from "react";
 import FoodListSidebar from "../components/FoodListSidebar";
 import CreateFoodSidebar from "../components/CreateFoodSidebar";
 import EditFoodSidebar from "../components/EditFoodSidebar";
+import DeleteFoodModal from "../components/DeleteFoodModal";
 import DailySummaryAccordion from "../components/DailySummaryAccordion";
+import { formatCalories } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
 
 interface DiaryClientProps {
   initialMeals: Meal[];
   initialFoods: FoodItem[];
   activeDate: string;
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+    weightUnit: string;
+    volumeUnit: string;
+  };
+  userGoals: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 }
 
 export default function DiaryClient({
   initialMeals,
   initialFoods,
   activeDate,
+  userSettings,
+  userGoals,
 }: DiaryClientProps) {
-  const [goals] = useState({
-    calories: 2000,
-    protein: 150,
-    carbs: 200,
-    fat: 65,
-  });
+  const [goals] = useState(userGoals);
 
   const [foods, setFoods] = useState<FoodItem[]>(initialFoods);
   const [meals, setMeals] = useState<Meal[]>(initialMeals);
@@ -39,6 +50,20 @@ export default function DiaryClient({
     mealIndex: number;
     itemId: string;
   } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    mealIndex: number;
+    itemId: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Loading states for async operations
+  const [isLoadingFood, setIsLoadingFood] = useState(false);
+  const [isLoadingCustom, setIsLoadingCustom] = useState(false);
+  const [isLoadingServing, setIsLoadingServing] = useState(false);
+
+  // Error state
+  const [error, setError] = useState<string | null>(null);
 
   const selectedFood = useMemo(() => {
     if (!editTarget) return null;
@@ -48,6 +73,15 @@ export default function DiaryClient({
       ) || null
     );
   }, [editTarget, meals]);
+
+  const deleteItem = useMemo(() => {
+    if (!deleteTarget) return null;
+    return (
+      meals[deleteTarget.mealIndex]?.items.find(
+        (item) => item.id === deleteTarget.itemId,
+      ) || null
+    );
+  }, [deleteTarget, meals]);
 
   const mealTypeByIndex = useMemo(
     () => ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const,
@@ -100,18 +134,25 @@ export default function DiaryClient({
   const addFoodFromList = async (food: FoodItem) => {
     if (selectedMealIndex === null) return;
 
-    const response = await fetch("/api/meals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mealType: mealTypeByIndex[selectedMealIndex],
-        foodId: food.id,
-        serving: 1,
-        date: activeDate,
-      }),
-    });
+    setIsLoadingFood(true);
+    setError(null);
 
-    if (response.ok) {
+    try {
+      const response = await fetch("/api/meals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mealType: mealTypeByIndex[selectedMealIndex],
+          foodId: food.id,
+          serving: 1,
+          date: activeDate,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add food to meal");
+      }
+
       const data = await response.json();
       if (data.item) {
         setMeals((prev) =>
@@ -124,6 +165,10 @@ export default function DiaryClient({
       }
       setShowFoodList(false);
       setSelectedMealIndex(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add food");
+    } finally {
+      setIsLoadingFood(false);
     }
   };
 
@@ -137,31 +182,41 @@ export default function DiaryClient({
   }) => {
     if (selectedMealIndex === null || !formData.name) return;
 
-    const createResponse = await fetch("/api/foods", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    setIsLoadingCustom(true);
+    setError(null);
 
-    if (!createResponse.ok) return;
-    const created = await createResponse.json();
-    if (created.food) {
-      setFoods((prev) => [...prev, mapFoodToItem(created.food)]);
-    }
-
-    if (created.food?.id) {
-      const entryResponse = await fetch("/api/meals", {
+    try {
+      const createResponse = await fetch("/api/foods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mealType: mealTypeByIndex[selectedMealIndex],
-          foodId: created.food.id,
-          serving: 1,
-          date: activeDate,
-        }),
+        body: JSON.stringify(formData),
       });
 
-      if (entryResponse.ok) {
+      if (!createResponse.ok) {
+        throw new Error("Failed to create food");
+      }
+
+      const created = await createResponse.json();
+      if (created.food) {
+        setFoods((prev) => [...prev, mapFoodToItem(created.food)]);
+      }
+
+      if (created.food?.id) {
+        const entryResponse = await fetch("/api/meals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mealType: mealTypeByIndex[selectedMealIndex],
+            foodId: created.food.id,
+            serving: 1,
+            date: activeDate,
+          }),
+        });
+
+        if (!entryResponse.ok) {
+          throw new Error("Failed to add food to meal");
+        }
+
         const data = await entryResponse.json();
         if (data.item) {
           setMeals((prev) =>
@@ -173,23 +228,36 @@ export default function DiaryClient({
           );
         }
       }
-    }
 
-    setShowCreateForm(false);
-    setShowFoodList(false);
-    setSelectedMealIndex(null);
+      setShowCreateForm(false);
+      setShowFoodList(false);
+      setSelectedMealIndex(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to add custom food",
+      );
+    } finally {
+      setIsLoadingCustom(false);
+    }
   };
 
   const applyServingChange = async (serving: number) => {
     if (!editTarget) return;
 
-    const response = await fetch(`/api/meals/${editTarget.itemId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ serving }),
-    });
+    setIsLoadingServing(true);
+    setError(null);
 
-    if (response.ok) {
+    try {
+      const response = await fetch(`/api/meals/${editTarget.itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serving }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update serving size");
+      }
+
       const data = await response.json();
       if (data.item) {
         setMeals((prev) =>
@@ -205,18 +273,26 @@ export default function DiaryClient({
           ),
         );
       }
-    }
 
-    setShowEditForm(false);
-    setEditTarget(null);
+      setShowEditForm(false);
+      setEditTarget(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update serving");
+    } finally {
+      setIsLoadingServing(false);
+    }
   };
 
   const removeFood = async (mealIndex: number, itemId: string) => {
-    const response = await fetch(`/api/meals/${itemId}`, {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetch(`/api/meals/${itemId}`, {
+        method: "DELETE",
+      });
 
-    if (response.ok) {
+      if (!response.ok) {
+        throw new Error("Failed to remove food");
+      }
+
       setMeals((prev) =>
         prev.map((meal, index) =>
           index === mealIndex
@@ -227,7 +303,32 @@ export default function DiaryClient({
             : meal,
         ),
       );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove food");
+      throw err;
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      await removeFood(deleteTarget.mealIndex, deleteTarget.itemId);
+      setShowDeleteConfirm(false);
+      setDeleteTarget(null);
+    } catch (err) {
+      // Error is already set in removeFood
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const showDeleteModal = (mealIndex: number, itemId: string) => {
+    setError(null);
+    setDeleteTarget({ mealIndex, itemId });
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -241,10 +342,31 @@ export default function DiaryClient({
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800 p-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
         <div className="max-w-3xl mx-auto">
-          <DailySummaryAccordion totals={totals} goals={goals} />
+          <DailySummaryAccordion
+            totals={totals}
+            goals={goals}
+            userSettings={userSettings}
+          />
           {meals.map((meal, mealIndex) => (
             <div key={meal.name} className="mb-8">
               <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
@@ -289,14 +411,14 @@ export default function DiaryClient({
                         </td>
                         <td className="px-4 py-3">
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                            {item.calories} cal
+                            {formatCalories(item.calories, userSettings)}
                           </p>
                         </td>
                         <td className="px-4 py-3">
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
-                              removeFood(mealIndex, item.id);
+                              showDeleteModal(mealIndex, item.id);
                             }}
                             className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                           >
@@ -311,7 +433,10 @@ export default function DiaryClient({
                         Total
                       </td>
                       <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
-                        {Math.round(getMealTotals(mealIndex).calories)} cal
+                        {formatCalories(
+                          getMealTotals(mealIndex).calories,
+                          userSettings,
+                        )}
                       </td>
                       <td className="px-4 py-3"></td>
                     </tr>
@@ -341,16 +466,27 @@ export default function DiaryClient({
         onClose={() => {
           setShowFoodList(false);
           setSelectedMealIndex(null);
+          setError(null);
         }}
         onSelectFood={addFoodFromList}
-        onOpenCreateForm={() => setShowCreateForm(true)}
+        onOpenCreateForm={() => {
+          setError(null);
+          setShowCreateForm(true);
+        }}
         foods={foods}
+        userSettings={userSettings}
+        isLoading={isLoadingFood}
       />
 
       <CreateFoodSidebar
         isOpen={showCreateForm}
-        onClose={() => setShowCreateForm(false)}
+        onClose={() => {
+          setShowCreateForm(false);
+          setError(null);
+        }}
         onSubmit={addCustomFood}
+        userSettings={userSettings}
+        isLoading={isLoadingCustom}
       />
 
       <EditFoodSidebar
@@ -361,8 +497,26 @@ export default function DiaryClient({
         onClose={() => {
           setShowEditForm(false);
           setEditTarget(null);
+          setError(null);
         }}
         onSubmit={applyServingChange}
+        userSettings={userSettings}
+        isLoading={isLoadingServing}
+      />
+
+      <DeleteFoodModal
+        isOpen={showDeleteConfirm}
+        item={deleteItem}
+        mealName={deleteTarget ? mealTypeByIndex[deleteTarget.mealIndex] : ""}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setDeleteTarget(null);
+          setError(null);
+        }}
+        isLoading={isDeleting}
+        error={error}
+        userSettings={userSettings}
       />
     </div>
   );

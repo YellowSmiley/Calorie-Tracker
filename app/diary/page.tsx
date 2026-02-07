@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { defaultFoods } from "@/lib/defaultFoods";
 import DiaryClient from "./DiaryClient";
 import type { FoodItem, Meal } from "./types";
 
@@ -54,10 +53,34 @@ export default async function DiaryPage() {
     return null;
   }
 
-  const count = await prisma.food.count();
-  if (count === 0) {
-    await prisma.food.createMany({ data: defaultFoods });
-  }
+  // Fetch user settings for unit preferences
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      calorieUnit: true,
+      macroUnit: true,
+      weightUnit: true,
+      volumeUnit: true,
+      calorieGoal: true,
+      proteinGoal: true,
+      carbGoal: true,
+      fatGoal: true,
+    },
+  });
+
+  const userSettings = {
+    calorieUnit: user?.calorieUnit ?? "kcal",
+    macroUnit: user?.macroUnit ?? "g",
+    weightUnit: user?.weightUnit ?? "g",
+    volumeUnit: user?.volumeUnit ?? "ml",
+  };
+
+  const userGoals = {
+    calories: user?.calorieGoal ?? 3000,
+    protein: user?.proteinGoal ?? 150,
+    carbs: user?.carbGoal ?? 410,
+    fat: user?.fatGoal ?? 83,
+  };
 
   const foods = await prisma.food.findMany({
     orderBy: { name: "asc" },
@@ -117,6 +140,8 @@ export default async function DiaryPage() {
       initialMeals={meals.length ? meals : initialMeals}
       initialFoods={foods.map(mapFoodToItem)}
       activeDate={activeDate}
+      userSettings={userSettings}
+      userGoals={userGoals}
     />
   );
 }

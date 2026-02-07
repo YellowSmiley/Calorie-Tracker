@@ -22,6 +22,18 @@ model User {
   accounts      Account[]
   sessions      Session[]
   mealEntries   MealEntry[]
+  
+  // Nutritional goals
+  calorieGoal   Float?     @default(3000)
+  proteinGoal   Float?     @default(150)
+  carbGoal      Float?     @default(410)
+  fatGoal       Float?     @default(83)
+  
+  // Measurement preferences
+  calorieUnit   String?    @default("kcal")
+  macroUnit     String?    @default("g")
+  weightUnit    String?    @default("g")
+  volumeUnit    String?    @default("ml")
 }
 
 model Account {

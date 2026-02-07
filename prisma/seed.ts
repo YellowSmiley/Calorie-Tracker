@@ -1,4 +1,6 @@
-export const defaultFoods = [
+import { prisma } from "@/lib/prisma";
+
+const defaultFoods = [
     {
         name: "Chicken Breast",
         measurement: "100g",
@@ -48,3 +50,33 @@ export const defaultFoods = [
         fat: 3,
     },
 ];
+
+async function main() {
+    console.log("Start seeding ...");
+
+    // Check if foods already exist
+    const count = await prisma.food.count();
+
+    if (count === 0) {
+        for (const food of defaultFoods) {
+            const created = await prisma.food.create({
+                data: food,
+            });
+            console.log(`Created food with id: ${created.id}`);
+        }
+    } else {
+        console.log(`Foods already seeded (${count} foods found)`);
+    }
+
+    console.log("Seeding finished.");
+}
+
+main()
+    .then(async () => {
+        await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+        console.error(e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });

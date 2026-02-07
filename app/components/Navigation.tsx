@@ -33,6 +33,16 @@ export default function Navigation() {
         >
           Diary
         </Link>
+        <Link
+          className={`flex h-12 flex-1 items-center justify-center rounded-lg px-5 text-base font-medium transition-colors ${
+            pathname === "/settings"
+              ? "bg-foreground text-background"
+              : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+          }`}
+          href="/settings"
+        >
+          Settings
+        </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="flex h-12 items-center justify-center rounded-lg px-5 text-base font-medium transition-colors border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"

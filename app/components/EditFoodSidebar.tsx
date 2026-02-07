@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { FoodItem } from "../diary/types";
+import { formatCalories } from "@/lib/unitConversions";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -10,6 +11,11 @@ interface EditFoodSidebarProps {
   onServingChange: (value: string) => void;
   onClose: () => void;
   onSubmit: (serving: number) => void;
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+  };
+  isLoading?: boolean;
 }
 
 export default function EditFoodSidebar({
@@ -19,6 +25,8 @@ export default function EditFoodSidebar({
   onServingChange,
   onClose,
   onSubmit,
+  userSettings,
+  isLoading = false,
 }: EditFoodSidebarProps) {
   const calculatedCalories = useMemo(() => {
     if (!food) return 0;
@@ -83,7 +91,7 @@ export default function EditFoodSidebar({
                   placeholder="1"
                 />
                 <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  Calories: {calculatedCalories}
+                  Calories: {formatCalories(calculatedCalories, userSettings)}
                 </p>
               </div>
             </div>
@@ -95,9 +103,10 @@ export default function EditFoodSidebar({
           <div className="mx-auto w-full max-w-3xl">
             <button
               type="submit"
-              className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+              disabled={isLoading}
+              className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Update
+              {isLoading ? "Updating..." : "Update"}
             </button>
           </div>
         </div>

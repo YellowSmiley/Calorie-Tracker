@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatCalories, formatMacro } from "@/lib/unitConversions";
 
 interface DailySummaryAccordionProps {
   totals: {
@@ -15,11 +16,16 @@ interface DailySummaryAccordionProps {
     carbs: number;
     fat: number;
   };
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+  };
 }
 
 export default function DailySummaryAccordion({
   totals,
   goals,
+  userSettings,
 }: DailySummaryAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -78,13 +84,16 @@ export default function DailySummaryAccordion({
                   Calories
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(totals.calories)}
+                  {formatCalories(totals.calories, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {goals.calories}
+                  {formatCalories(goals.calories, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(goals.calories - totals.calories)}
+                  {formatCalories(
+                    goals.calories - totals.calories,
+                    userSettings,
+                  )}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -92,13 +101,13 @@ export default function DailySummaryAccordion({
                   Protein
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(totals.protein)}g
+                  {formatMacro(totals.protein, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {goals.protein}g
+                  {formatMacro(goals.protein, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(goals.protein - totals.protein)}g
+                  {formatMacro(goals.protein - totals.protein, userSettings)}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -106,13 +115,13 @@ export default function DailySummaryAccordion({
                   Carbohydrates
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(totals.carbs)}g
+                  {formatMacro(totals.carbs, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {goals.carbs}g
+                  {formatMacro(goals.carbs, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(goals.carbs - totals.carbs)}g
+                  {formatMacro(goals.carbs - totals.carbs, userSettings)}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -120,13 +129,13 @@ export default function DailySummaryAccordion({
                   Fat
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(totals.fat)}g
+                  {formatMacro(totals.fat, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {goals.fat}g
+                  {formatMacro(goals.fat, userSettings)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-                  {Math.round(goals.fat - totals.fat)}g
+                  {formatMacro(goals.fat - totals.fat, userSettings)}
                 </td>
               </tr>
             </tbody>
