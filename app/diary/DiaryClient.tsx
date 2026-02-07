@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import FoodListSidebar from "../components/FoodListSidebar";
 import CreateFoodSidebar from "../components/CreateFoodSidebar";
 import EditFoodSidebar from "../components/EditFoodSidebar";
@@ -34,10 +35,21 @@ export default function DiaryClient({
   userSettings,
   userGoals,
 }: DiaryClientProps) {
+  const router = useRouter();
+  const [currentDate, setCurrentDate] = useState(activeDate);
   const [goals] = useState(userGoals);
 
   const [foods, setFoods] = useState<FoodItem[]>(initialFoods);
   const [meals, setMeals] = useState<Meal[]>(initialMeals);
+
+  // Sync state when server data changes
+  useEffect(() => {
+    setMeals(initialMeals);
+  }, [initialMeals]);
+
+  useEffect(() => {
+    setCurrentDate(activeDate);
+  }, [activeDate]);
 
   const [selectedMealIndex, setSelectedMealIndex] = useState<number | null>(
     null,
@@ -145,7 +157,7 @@ export default function DiaryClient({
           mealType: mealTypeByIndex[selectedMealIndex],
           foodId: food.id,
           serving: 1,
-          date: activeDate,
+          date: currentDate,
         }),
       });
 
@@ -209,7 +221,7 @@ export default function DiaryClient({
             mealType: mealTypeByIndex[selectedMealIndex],
             foodId: created.food.id,
             serving: 1,
-            date: activeDate,
+            date: currentDate,
           }),
         });
 
@@ -331,6 +343,36 @@ export default function DiaryClient({
     setShowDeleteConfirm(true);
   };
 
+  const handleDateChange = (newDate: string) => {
+    setCurrentDate(newDate);
+    router.push(`/diary?date=${newDate}`);
+    router.refresh();
+  };
+
+  const handlePreviousDay = () => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - 1);
+    const newDate = date.toISOString().split("T")[0];
+    handleDateChange(newDate);
+  };
+
+  const handleNextDay = () => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() + 1);
+    const newDate = date.toISOString().split("T")[0];
+    handleDateChange(newDate);
+  };
+
+  const getFormattedDate = () => {
+    const date = new Date(currentDate);
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="min-h-full flex flex-col">
       {/* Header */}
@@ -342,15 +384,72 @@ export default function DiaryClient({
         </div>
       </div>
 
+      {/* Date Navigation */}
+      <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={handlePreviousDay}
+              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+              aria-label="Previous day"
+            >
+              <svg
+                className="w-5 h-5 text-black dark:text-zinc-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            <input
+              type="date"
+              value={currentDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+              style={{ minWidth: "160px" }}
+            />
+
+            <button
+              onClick={handleNextDay}
+              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+              aria-label="Next day"
+            >
+              <svg
+                className="w-5 h-5 text-black dark:text-zinc-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800 p-4">
+        <div className="bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 p-4">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                {error}
+              </p>
               <button
                 onClick={() => setError(null)}
-                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm"
+                className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300 text-sm"
               >
                 Dismiss
               </button>
@@ -420,7 +519,7 @@ export default function DiaryClient({
                               event.stopPropagation();
                               showDeleteModal(mealIndex, item.id);
                             }}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+                            className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                           >
                             Remove
                           </button>

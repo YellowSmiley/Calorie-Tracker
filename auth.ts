@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth from "next-auth"
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
@@ -24,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         strategy: "database",
     },
     callbacks: {
-        signIn: async ({ user }) => {
+        async signIn({ user }) {
             // Apply defaults on first sign-in
             if (user.id) {
                 const existingUser = await prisma.user.findUnique({
@@ -32,6 +32,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     select: {
                         calorieGoal: true,
                         calorieUnit: true,
+                        carbGoal: true,
+                        fatGoal: true,
+                        macroUnit: true,
+                        weightUnit: true,
+                        volumeUnit: true,
+                        proteinGoal: true,
                     },
                 });
 
@@ -45,20 +51,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         where: { id: user.id },
                         data: {
                             calorieGoal: existingUser.calorieGoal ?? DEFAULT_CALORIE_GOAL,
-                            proteinGoal: DEFAULT_PROTEIN_GOAL,
-                            carbGoal: DEFAULT_CARB_GOAL,
-                            fatGoal: DEFAULT_FAT_GOAL,
+                            proteinGoal: existingUser.proteinGoal ?? DEFAULT_PROTEIN_GOAL,
+                            carbGoal: existingUser.carbGoal ?? DEFAULT_CARB_GOAL,
+                            fatGoal: existingUser.fatGoal ?? DEFAULT_FAT_GOAL,
                             calorieUnit: existingUser.calorieUnit ?? DEFAULT_CALORIE_UNIT,
-                            macroUnit: DEFAULT_MACRO_UNIT,
-                            weightUnit: DEFAULT_WEIGHT_UNIT,
-                            volumeUnit: DEFAULT_VOLUME_UNIT,
+                            macroUnit: existingUser.macroUnit ?? DEFAULT_MACRO_UNIT,
+                            weightUnit: existingUser.weightUnit ?? DEFAULT_WEIGHT_UNIT,
+                            volumeUnit: existingUser.volumeUnit ?? DEFAULT_VOLUME_UNIT,
                         },
                     });
                 }
             }
             return true;
         },
-        session: ({ session, user }) => {
+        session({ session, user }) {
             if (session.user) {
                 session.user.id = user.id;
             }

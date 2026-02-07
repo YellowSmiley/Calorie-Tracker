@@ -52,8 +52,10 @@ export default function DeleteFoodModal({
           </p>
 
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-900/30 p-3 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+            <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 p-3 border border-zinc-300 dark:border-zinc-700">
+              <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                {error}
+              </p>
             </div>
           )}
 
@@ -116,7 +118,7 @@ export default function DeleteFoodModal({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Removing..." : "Remove Item"}
           </button>

@@ -132,7 +132,7 @@ export default function SettingsClient() {
                       onChange={(e) =>
                         handleChange("calorieGoal", parseFloat(e.target.value))
                       }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       required
                     />
                   </div>
@@ -153,7 +153,7 @@ export default function SettingsClient() {
                       onChange={(e) =>
                         handleChange("proteinGoal", parseFloat(e.target.value))
                       }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       required
                     />
                   </div>
@@ -176,7 +176,7 @@ export default function SettingsClient() {
                       onChange={(e) =>
                         handleChange("carbGoal", parseFloat(e.target.value))
                       }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       required
                     />
                   </div>
@@ -197,7 +197,7 @@ export default function SettingsClient() {
                       onChange={(e) =>
                         handleChange("fatGoal", parseFloat(e.target.value))
                       }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       required
                     />
                   </div>
@@ -225,7 +225,7 @@ export default function SettingsClient() {
                     onChange={(e) =>
                       handleChange("calorieUnit", e.target.value)
                     }
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
                     <option value="cal">cal</option>
                     <option value="kcal">kcal</option>
@@ -244,7 +244,7 @@ export default function SettingsClient() {
                     id="macroUnit"
                     value={settings.macroUnit}
                     onChange={(e) => handleChange("macroUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
                     <option value="g">grams (g)</option>
                     <option value="oz">ounces (oz)</option>
@@ -272,7 +272,7 @@ export default function SettingsClient() {
                     id="weightUnit"
                     value={settings.weightUnit}
                     onChange={(e) => handleChange("weightUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
                     <option value="g">grams (g)</option>
                     <option value="oz">ounces (oz)</option>
@@ -292,7 +292,7 @@ export default function SettingsClient() {
                     id="volumeUnit"
                     value={settings.volumeUnit}
                     onChange={(e) => handleChange("volumeUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
                     <option value="ml">milliliters (ml)</option>
                     <option value="cup">cups</option>
@@ -309,8 +309,8 @@ export default function SettingsClient() {
               <div
                 className={`rounded-lg p-4 ${
                   message.type === "success"
-                    ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                    : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
+                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
                 }`}
               >
                 {message.text}

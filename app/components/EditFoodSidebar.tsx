@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { FoodItem } from "../diary/types";
-import { formatCalories } from "@/lib/unitConversions";
+import { formatCalories, formatMacro } from "@/lib/unitConversions";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -28,11 +28,15 @@ export default function EditFoodSidebar({
   userSettings,
   isLoading = false,
 }: EditFoodSidebarProps) {
-  const calculatedCalories = useMemo(() => {
-    if (!food) return 0;
-    const serving = parseFloat(servingValue);
-    if (Number.isNaN(serving)) return 0;
-    return Number((food.baseCalories * serving).toFixed(1));
+  const calculatedNutrition = useMemo(() => {
+    if (!food) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    const serving = parseFloat(servingValue) || 0;
+    return {
+      calories: Number((food.baseCalories * serving).toFixed(1)),
+      protein: Number((food.baseProtein * serving).toFixed(1)),
+      carbs: Number((food.baseCarbs * serving).toFixed(1)),
+      fat: Number((food.baseFat * serving).toFixed(1)),
+    };
   }, [food, servingValue]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -55,7 +59,7 @@ export default function EditFoodSidebar({
           Back
         </button>
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          Edit Food
+          Edit Serving
         </h2>
         <div className="w-12" />
       </div>
@@ -65,34 +69,130 @@ export default function EditFoodSidebar({
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-3">
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">Food</p>
-                <p className="text-base font-medium text-black dark:text-zinc-50">
-                  {food?.name || ""}
-                </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {food?.measurement || ""}
-                </p>
-              </div>
+          <div className="mx-auto w-full max-w-3xl space-y-6">
+            {/* Food Name - Centered */}
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-black dark:text-zinc-50 mb-2">
+                {food?.name || ""}
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Per serving: {food?.measurement || ""}
+              </p>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Serving
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  value={servingValue}
-                  onChange={(e) => onServingChange(e.target.value)}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="1"
-                />
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  Calories: {formatCalories(calculatedCalories, userSettings)}
-                </p>
+            {/* Base Nutrition Info */}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+              <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
+                Base Nutrition (1 serving)
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Calories
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatCalories(food?.baseCalories || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Protein
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseProtein || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Carbs
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseCarbs || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Fat
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseFat || 0, userSettings)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Serving Adjuster */}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+              <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
+                Number of Servings
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                value={servingValue}
+                onChange={(e) => onServingChange(e.target.value)}
+                className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
+                placeholder="1.0"
+              />
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center mt-2">
+                {servingValue
+                  ? `${servingValue} × ${food?.measurement || ""}`
+                  : "Enter servings"}
+              </p>
+            </div>
+
+            {/* Calculated Nutrition */}
+            <div className="rounded-lg border-2 border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900 p-4">
+              <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3 flex items-center gap-2">
+                <svg
+                  className="w-4 h-4 text-black dark:text-zinc-50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+                Your Total Nutrition
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                    Calories
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatCalories(calculatedNutrition.calories, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                    Protein
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.protein, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                    Carbs
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.carbs, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                    Fat
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.fat, userSettings)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -106,7 +206,7 @@ export default function EditFoodSidebar({
               disabled={isLoading}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Updating..." : "Update"}
+              {isLoading ? "Updating..." : "Update Serving"}
             </button>
           </div>
         </div>

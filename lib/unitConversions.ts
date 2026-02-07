@@ -2,15 +2,18 @@
 // These functions convert for display based on user preferences
 
 interface UserSettings {
-    calorieUnit: string;
-    macroUnit: string;
+    calorieUnit: string | null | undefined;
+    macroUnit: string | null | undefined;
 }
 
 // Calorie conversions (stored as kcal)
 export function convertCaloriesForDisplay(
-    kcalValue: number,
-    targetUnit: string
+    kcalValue: number | null | undefined,
+    targetUnit: string | null | undefined
 ): number {
+    if (kcalValue === null || kcalValue === undefined || !targetUnit) {
+        return 0;
+    }
     switch (targetUnit) {
         case "cal":
             return kcalValue * 1000;
@@ -22,9 +25,12 @@ export function convertCaloriesForDisplay(
 }
 
 export function convertCaloriesFromInput(
-    inputValue: number,
-    inputUnit: string
+    inputValue: number | null | undefined,
+    inputUnit: string | null | undefined
 ): number {
+    if (inputValue === null || inputValue === undefined || !inputUnit) {
+        return 0;
+    }
     switch (inputUnit) {
         case "cal":
             return inputValue / 1000;
@@ -37,9 +43,12 @@ export function convertCaloriesFromInput(
 
 // Macro conversions (stored as grams)
 export function convertMacroForDisplay(
-    gramsValue: number,
-    targetUnit: string
+    gramsValue: number | null | undefined,
+    targetUnit: string | null | undefined
 ): number {
+    if (gramsValue === null || gramsValue === undefined) {
+        return 0;
+    }
     switch (targetUnit) {
         case "oz":
             return gramsValue * 0.035274;
@@ -52,9 +61,12 @@ export function convertMacroForDisplay(
 }
 
 export function convertMacroFromInput(
-    inputValue: number,
+    inputValue: number | null | undefined,
     inputUnit: string
 ): number {
+    if (inputValue === null || inputValue === undefined) {
+        return 0;
+    }
     switch (inputUnit) {
         case "oz":
             return inputValue / 0.035274;
@@ -68,7 +80,7 @@ export function convertMacroFromInput(
 
 // Format display value with unit
 export function formatCalories(
-    kcalValue: number,
+    kcalValue: number | null | undefined,
     settings: UserSettings
 ): string {
     const converted = convertCaloriesForDisplay(kcalValue, settings.calorieUnit);
@@ -76,7 +88,7 @@ export function formatCalories(
 }
 
 export function formatMacro(
-    gramsValue: number,
+    gramsValue: number | null | undefined,
     settings: UserSettings
 ): string {
     const converted = convertMacroForDisplay(gramsValue, settings.macroUnit);

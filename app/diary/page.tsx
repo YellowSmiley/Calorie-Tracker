@@ -44,9 +44,14 @@ const mapFoodToItem = (food: {
   baseFat: food.fat,
 });
 
-export default async function DiaryPage() {
+export default async function DiaryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
   const session = await auth();
-  const activeDate = new Date().toISOString().split("T")[0];
+  const params = await searchParams;
+  const activeDate = params.date || new Date().toISOString().split("T")[0];
 
   // User must be authenticated due to middleware, but add safety check
   if (!session?.user?.id) {
