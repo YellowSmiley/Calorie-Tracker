@@ -36,6 +36,7 @@ export async function POST(request: Request) {
             protein: typeof protein === "number" ? protein : 0,
             carbs: typeof carbs === "number" ? carbs : 0,
             fat: typeof fat === "number" ? fat : 0,
+            createdBy: session.user.id,
         },
     });
 

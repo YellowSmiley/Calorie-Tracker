@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
-    request: Request,
-    context: { params: { id: string } },
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
 ) {
     const session = await auth();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { serving } = body ?? {};
 
@@ -19,7 +20,7 @@ export async function PATCH(
     }
 
     const existing = await prisma.mealEntry.findFirst({
-        where: { id: context.params.id, userId: session.user.id },
+        where: { id, userId: session.user.id },
         include: { food: true },
     });
 
@@ -58,16 +59,16 @@ export async function PATCH(
 }
 
 export async function DELETE(
-    _request: Request,
-    context: { params: { id: string } },
+    { params }: { params: Promise<{ id: string }> },
 ) {
     const session = await auth();
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const existing = await prisma.mealEntry.findFirst({
-        where: { id: context.params.id, userId: session.user.id },
+        where: { id, userId: session.user.id },
     });
 
     if (!existing) {

@@ -284,11 +284,20 @@ export default function DashboardClient({
                         : "opacity-0 max-h-0 mt-0"
                     }`}
                   >
-                    Avg: {formatCalories(getDailyAverage(totals.calories), userSettings)}/day
+                    Avg:{" "}
+                    {formatCalories(
+                      getDailyAverage(totals.calories),
+                      userSettings,
+                    )}
+                    /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Goal: {formatCalories(userGoals.calories * getGoalMultiplier(), userSettings)}
+                  Goal:{" "}
+                  {formatCalories(
+                    userGoals.calories * getGoalMultiplier(),
+                    userSettings,
+                  )}
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -316,11 +325,17 @@ export default function DashboardClient({
                         : "opacity-0 max-h-0 mt-0"
                     }`}
                   >
-                    Avg: {formatMacro(getDailyAverage(totals.protein), userSettings)}/day
+                    Avg:{" "}
+                    {formatMacro(getDailyAverage(totals.protein), userSettings)}
+                    /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Goal: {formatMacro(userGoals.protein * getGoalMultiplier(), userSettings)}
+                  Goal:{" "}
+                  {formatMacro(
+                    userGoals.protein * getGoalMultiplier(),
+                    userSettings,
+                  )}
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -348,11 +363,17 @@ export default function DashboardClient({
                         : "opacity-0 max-h-0 mt-0"
                     }`}
                   >
-                    Avg: {formatMacro(getDailyAverage(totals.carbs), userSettings)}/day
+                    Avg:{" "}
+                    {formatMacro(getDailyAverage(totals.carbs), userSettings)}
+                    /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Goal: {formatMacro(userGoals.carbs * getGoalMultiplier(), userSettings)}
+                  Goal:{" "}
+                  {formatMacro(
+                    userGoals.carbs * getGoalMultiplier(),
+                    userSettings,
+                  )}
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -380,11 +401,16 @@ export default function DashboardClient({
                         : "opacity-0 max-h-0 mt-0"
                     }`}
                   >
-                    Avg: {formatMacro(getDailyAverage(totals.fat), userSettings)}/day
+                    Avg:{" "}
+                    {formatMacro(getDailyAverage(totals.fat), userSettings)}/day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Goal: {formatMacro(userGoals.fat * getGoalMultiplier(), userSettings)}
+                  Goal:{" "}
+                  {formatMacro(
+                    userGoals.fat * getGoalMultiplier(),
+                    userSettings,
+                  )}
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div

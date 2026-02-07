@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface SettingsData {
   calorieGoal: number;
@@ -14,6 +16,7 @@ interface SettingsData {
 }
 
 export default function SettingsClient() {
+  const { data: session } = useSession();
   const [settings, setSettings] = useState<SettingsData>({
     calorieGoal: 3000,
     proteinGoal: 150,
@@ -105,7 +108,7 @@ export default function SettingsClient() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-40">
+      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nutritional Goals Section */}
@@ -316,11 +319,36 @@ export default function SettingsClient() {
                 {message.text}
               </div>
             )}
+
+            {/* Actions Section */}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6 mb-40">
+              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
+                Actions
+              </h2>
+
+              <div className="space-y-3">
+                {session?.user?.isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
 
-      {/* Fixed Save Button */}
+      {/* Fixed Buttons */}
       <div className="fixed bottom-20 left-0 right-0 z-30 border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black p-4">
         <div className="mx-auto max-w-3xl">
           <button
