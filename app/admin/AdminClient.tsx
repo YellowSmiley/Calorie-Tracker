@@ -20,25 +20,25 @@ export default function AdminClient() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - styled like bottom nav */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="max-w-6xl mx-auto flex gap-2">
+        <div className="max-w-6xl mx-auto flex gap-4">
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex h-12 items-center justify-center rounded-lg px-6 text-base font-medium transition-colors ${
               activeTab === "users"
                 ? "bg-foreground text-background"
-                : "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
             }`}
           >
             Users
           </button>
           <button
             onClick={() => setActiveTab("foods")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex h-12 items-center justify-center rounded-lg px-6 text-base font-medium transition-colors ${
               activeTab === "foods"
                 ? "bg-foreground text-background"
-                : "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
             }`}
           >
             Foods

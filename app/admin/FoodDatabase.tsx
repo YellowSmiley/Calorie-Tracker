@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CreateFoodSidebar from "../components/CreateFoodSidebar";
 
 interface Food {
   id: string;
@@ -19,10 +20,18 @@ export default function FoodDatabase() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Partial<Food>>({});
-  const [isSaving, setIsSaving] = useState(false);
+  const [editingFood, setEditingFood] = useState<Food | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isLoadingCustom, setIsLoadingCustom] = useState(false);
+
+  // Default user settings for admin create
+  const defaultUserSettings = {
+    calorieUnit: "kcal",
+    macroUnit: "g",
+    weightUnit: "g",
+    volumeUnit: "ml",
+  };
 
   useEffect(() => {
     fetchFoods();
@@ -47,39 +56,62 @@ export default function FoodDatabase() {
     }
   };
 
-  const startEditing = (food: Food) => {
-    setEditingId(food.id);
-    setEditData({ ...food });
-  };
+  const handleFoodSubmit = async (formData: {
+    name: string;
+    measurement: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }) => {
+    setIsLoadingCustom(true);
+    setError(null);
 
-  const handleSaveEdit = async () => {
-    if (!editingId) return;
-
-    setIsSaving(true);
     try {
-      const response = await fetch(`/api/admin/foods/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
-      });
+      if (editingFood) {
+        // Update existing food
+        const response = await fetch(`/api/admin/foods/${editingFood.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
 
-      if (response.ok) {
-        const updated = await response.json();
-        setFoods(foods.map((f) => (f.id === editingId ? updated : f)));
-        setEditingId(null);
-        setEditData({});
-        setError(null);
+        if (response.ok) {
+          const updated = await response.json();
+          setFoods(foods.map((f) => (f.id === editingFood.id ? updated : f)));
+          setEditingFood(null);
+          setShowCreateForm(false);
+        } else {
+          setError("Failed to update food");
+        }
       } else {
-        setError("Failed to update food");
+        // Create new food
+        const response = await fetch("/api/admin/foods", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          const newFood = await response.json();
+          setFoods([...foods, newFood]);
+          setShowCreateForm(false);
+        } else {
+          setError("Failed to create food");
+        }
       }
     } catch (err) {
-      console.error("Error updating food:", err);
-      setError("Error updating food");
+      console.error("Error saving food:", err);
+      setError("Error saving food");
     } finally {
-      setIsSaving(false);
+      setIsLoadingCustom(false);
     }
   };
 
+  const startEditing = (food: Food) => {
+    setEditingFood(food);
+    setShowCreateForm(true);
+  };
   const handleDeleteFood = async (foodId: string) => {
     try {
       const response = await fetch(`/api/admin/foods/${foodId}`, {
@@ -115,15 +147,25 @@ export default function FoodDatabase() {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
-        <input
-          type="text"
-          placeholder="Search by name or measurement..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-400"
-        />
+      {/* Search and Create */}
+      <div className="flex gap-4 items-center">
+        <div className="flex-1 p-4">
+          <input
+            type="text"
+            placeholder="Search foods..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
+          />
+        </div>
+        <div className="px-4">
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-2 font-medium transition-colors text-black dark:text-zinc-50 whitespace-nowrap"
+          >
+            Create Food
+          </button>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -142,32 +184,32 @@ export default function FoodDatabase() {
       )}
 
       {/* Foods Table */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden overflow-x-auto">
-        <table className="w-full">
-          <thead className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-            <tr>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+      <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <table className="w-full border-collapse bg-white dark:bg-zinc-950">
+          <thead>
+            <tr className="border-b border-zinc-200 dark:border-zinc-800">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Name
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Measurement
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Calories
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Protein (g)
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Carbs (g)
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Fat (g)
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Created By
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Actions
               </th>
             </tr>
@@ -183,174 +225,77 @@ export default function FoodDatabase() {
               filteredFoods.map((food) => (
                 <tr
                   key={food.id}
-                  className="border-t border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  className="border-t border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 cursor-pointer"
+                  onClick={() => startEditing(food)}
                 >
-                  {editingId === food.id ? (
-                    <>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={editData.name || ""}
-                          onChange={(e) =>
-                            setEditData({ ...editData, name: e.target.value })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={editData.measurement || ""}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              measurement: e.target.value,
-                            })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={editData.calories || ""}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              calories: parseFloat(e.target.value),
-                            })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={editData.protein || ""}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              protein: parseFloat(e.target.value),
-                            })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={editData.carbs || ""}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              carbs: parseFloat(e.target.value),
-                            })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={editData.fat || ""}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              fat: parseFloat(e.target.value),
-                            })
-                          }
-                          className="w-full px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50"
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50 text-sm">
-                        {food.createdByName || "Unknown"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleSaveEdit}
-                            disabled={isSaving}
-                            className="px-3 py-1 rounded text-sm font-medium bg-black text-white dark:bg-zinc-50 dark:text-black hover:opacity-90 disabled:opacity-50"
-                          >
-                            {isSaving ? "..." : "Save"}
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.name}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.measurement}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.calories}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.protein}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.carbs}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50">
-                        {food.fat}
-                      </td>
-                      <td className="px-4 py-3 text-black dark:text-zinc-50 text-sm">
-                        {food.createdByName || "Unknown"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {deleteConfirm === food.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleDeleteFood(food.id)}
-                              className="px-3 py-1 rounded text-sm font-medium bg-black text-white dark:bg-zinc-50 dark:text-black hover:opacity-90"
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(null)}
-                              className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => startEditing(food)}
-                              className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(food.id)}
-                              className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </>
-                  )}
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.name}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.measurement}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.calories}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.protein}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.carbs}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50">
+                    {food.fat}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50 text-sm">
+                    {food.createdByName || "Unknown"}
+                  </td>
+                  <td
+                    className="px-4 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {deleteConfirm === food.id ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDeleteFood(food.id)}
+                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeleteConfirm(food.id)}
+                        className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      <CreateFoodSidebar
+        isOpen={showCreateForm}
+        onClose={() => {
+          setShowCreateForm(false);
+          setEditingFood(null);
+          setError(null);
+        }}
+        onSubmit={handleFoodSubmit}
+        userSettings={defaultUserSettings}
+        isLoading={isLoadingCustom}
+        editingFood={editingFood}
+      />
     </div>
   );
 }

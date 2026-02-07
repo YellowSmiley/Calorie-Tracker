@@ -76,13 +76,13 @@ export default function UserManagement() {
   return (
     <div className="space-y-4">
       {/* Search */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+      <div className="p-4">
         <input
           type="text"
-          placeholder="Search by name or email..."
+          placeholder="Search users..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+          className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
         />
       </div>
 
@@ -102,20 +102,20 @@ export default function UserManagement() {
       )}
 
       {/* Users Table */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
-        <table className="w-full">
-          <thead className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-            <tr>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50">
+      <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <table className="w-full border-collapse bg-white dark:bg-zinc-950">
+          <thead>
+            <tr className="border-b border-zinc-200 dark:border-zinc-800">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
                 Name
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
                 Email
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
                 Admin
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-black dark:text-zinc-50">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
                 Actions
               </th>
             </tr>
@@ -155,13 +155,13 @@ export default function UserManagement() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDeleteUser(user.id)}
-                          className="px-3 py-1 rounded text-sm font-medium bg-black text-white dark:bg-zinc-50 dark:text-black hover:opacity-90"
+                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                         >
                           Confirm
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(null)}
-                          className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
+                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                         >
                           Cancel
                         </button>
@@ -169,7 +169,7 @@ export default function UserManagement() {
                     ) : (
                       <button
                         onClick={() => setDeleteConfirm(user.id)}
-                        className="px-3 py-1 rounded text-sm font-medium bg-zinc-200 dark:bg-zinc-800 text-black dark:text-zinc-50 hover:opacity-90"
+                        className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                       >
                         Delete
                       </button>

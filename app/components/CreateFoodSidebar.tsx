@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   convertCaloriesFromInput,
   convertMacroFromInput,
 } from "@/lib/unitConversions";
+
+interface Food {
+  id: string;
+  name: string;
+  measurement: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
 
 interface CreateFoodSidebarProps {
   isOpen: boolean;
@@ -24,6 +34,7 @@ interface CreateFoodSidebarProps {
     volumeUnit: string;
   };
   isLoading?: boolean;
+  editingFood?: Food | null;
 }
 
 export default function CreateFoodSidebar({
@@ -32,6 +43,7 @@ export default function CreateFoodSidebar({
   onSubmit,
   userSettings,
   isLoading = false,
+  editingFood = null,
 }: CreateFoodSidebarProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -42,6 +54,56 @@ export default function CreateFoodSidebar({
     carbs: "",
     fat: "",
   });
+
+  const hasInitialized = useRef<string | null>(null);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (editingFood && isOpen) {
+      const foodKey = `edit-${editingFood.id}`;
+
+      if (hasInitialized.current !== foodKey) {
+        hasInitialized.current = foodKey;
+
+        const measurement = editingFood.measurement;
+        const match = measurement.match(/^([\d.]+)(.*)$/);
+        const measurementValue = match ? match[1] : "";
+        const measurementUnit = match ? match[2] : "";
+
+        const isWeight = ["g", "kg", "oz", "lbs", "lb"].includes(
+          measurementUnit,
+        );
+
+        setFormData({
+          name: editingFood.name,
+          measurementValue,
+          measurementType: isWeight ? "weight" : "volume",
+          calories: String(editingFood.calories),
+          protein: String(editingFood.protein),
+          carbs: String(editingFood.carbs),
+          fat: String(editingFood.fat),
+        });
+      }
+    } else if (!editingFood && isOpen) {
+      const foodKey = "create-new";
+
+      if (hasInitialized.current !== foodKey) {
+        hasInitialized.current = foodKey;
+
+        setFormData({
+          name: "",
+          measurementValue: "",
+          measurementType: "weight",
+          calories: "",
+          protein: "",
+          carbs: "",
+          fat: "",
+        });
+      }
+    } else if (!isOpen) {
+      hasInitialized.current = null;
+    }
+  }, [editingFood?.id, isOpen]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,15 +135,6 @@ export default function CreateFoodSidebar({
         userSettings.macroUnit,
       ),
     });
-    setFormData({
-      name: "",
-      measurementValue: "",
-      measurementType: "weight",
-      calories: "",
-      protein: "",
-      carbs: "",
-      fat: "",
-    });
   };
 
   const handleClose = () => {
@@ -112,7 +165,7 @@ export default function CreateFoodSidebar({
           Back
         </button>
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          Create Food
+          {editingFood ? "Edit Food" : "Create Food"}
         </h2>
         <div className="w-12" />
       </div>
@@ -153,16 +206,30 @@ export default function CreateFoodSidebar({
                       measurementType: e.target.value,
                     })
                   }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50"
                 >
-                  <option value="weight">Weight</option>
-                  <option value="volume">Volume</option>
+                  <option
+                    value="weight"
+                    className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
+                  >
+                    Weight
+                  </option>
+                  <option
+                    value="volume"
+                    className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
+                  >
+                    Volume
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Measurement Value
+                  Measurement Value (
+                  {formData.measurementType === "weight"
+                    ? userSettings.weightUnit
+                    : userSettings.volumeUnit}
+                  ) *
                 </label>
                 <input
                   type="number"
@@ -176,43 +243,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="100"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Unit (
-                  {formData.measurementType === "weight"
-                    ? userSettings.weightUnit
-                    : userSettings.volumeUnit}
-                  )
-                </label>
-                {formData.measurementType === "weight" ? (
-                  <select
-                    value={userSettings.weightUnit}
-                    disabled
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 opacity-60 cursor-not-allowed"
-                  >
-                    <option value={userSettings.weightUnit}>
-                      {userSettings.weightUnit}
-                    </option>
-                  </select>
-                ) : (
-                  <select
-                    value={userSettings.volumeUnit}
-                    disabled
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 opacity-60 cursor-not-allowed"
-                  >
-                    <option value={userSettings.volumeUnit}>
-                      {userSettings.volumeUnit}
-                    </option>
-                  </select>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Calories ({userSettings.calorieUnit})
+                  Calories ({userSettings.calorieUnit}) *
                 </label>
                 <input
                   type="number"
@@ -222,12 +259,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Protein ({userSettings.macroUnit})
+                  Protein ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -238,12 +276,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Carbs ({userSettings.macroUnit})
+                  Carbs ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -254,12 +293,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fat ({userSettings.macroUnit})
+                  Fat ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -270,6 +310,7 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
             </div>
@@ -284,7 +325,13 @@ export default function CreateFoodSidebar({
               disabled={isLoading}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Adding..." : "Add Food"}
+              {isLoading
+                ? editingFood
+                  ? "Updating..."
+                  : "Adding..."
+                : editingFood
+                  ? "Update Food"
+                  : "Add Food"}
             </button>
           </div>
         </div>

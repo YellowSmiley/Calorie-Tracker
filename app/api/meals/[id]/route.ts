@@ -59,6 +59,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const session = await auth();
