@@ -1,9 +1,14 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import SettingsClient from "./SettingsClient";
+import UserFoodsClient from "./UserFoodsClient";
 import { prisma } from "@/lib/prisma";
 
-export default async function SettingsPage() {
+export const metadata = {
+  title: "My Foods - Calorie Tracker",
+  description: "View and manage your created foods",
+};
+
+export default async function UserFoodsPage() {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -20,7 +25,7 @@ export default async function SettingsPage() {
     },
   });
 
-  // Fetch user settings for the MyFoodsSidebar
+  // Fetch user settings for the CreateFoodSidebar
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -38,5 +43,9 @@ export default async function SettingsPage() {
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 
-  return <SettingsClient initialFoods={foods} userSettings={userSettings} />;
+  return (
+    <div className="min-h-full">
+      <UserFoodsClient initialFoods={foods} userSettings={userSettings} />
+    </div>
+  );
 }

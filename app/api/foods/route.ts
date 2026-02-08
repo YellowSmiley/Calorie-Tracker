@@ -42,3 +42,79 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ food });
 }
+
+export async function PUT(request: Request) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, name, measurement, calories, protein, carbs, fat } = body ?? {};
+
+    if (!id || !name || typeof calories !== "number") {
+        return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+
+    // Verify the food belongs to the current user
+    const existingFood = await prisma.food.findUnique({
+        where: { id },
+    });
+
+    if (!existingFood) {
+        return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    }
+
+    if (existingFood.createdBy !== session.user.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Update the food
+    const food = await prisma.food.update({
+        where: { id },
+        data: {
+            name,
+            measurement: measurement ?? "",
+            calories,
+            protein: typeof protein === "number" ? protein : 0,
+            carbs: typeof carbs === "number" ? carbs : 0,
+            fat: typeof fat === "number" ? fat : 0,
+        },
+    });
+
+    return NextResponse.json(food);
+}
+
+export async function DELETE(request: Request) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id } = body ?? {};
+
+    if (!id) {
+        return NextResponse.json({ error: "Food ID is required" }, { status: 400 });
+    }
+
+    // Verify the food belongs to the current user
+    const food = await prisma.food.findUnique({
+        where: { id },
+    });
+
+    if (!food) {
+        return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    }
+
+    if (food.createdBy !== session.user.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Delete the food
+    await prisma.food.delete({
+        where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+}

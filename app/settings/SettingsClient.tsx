@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { Food } from "@prisma/client";
+import MyFoodsSidebar from "../components/MyFoodsSidebar";
 
 interface SettingsData {
   calorieGoal: number;
@@ -15,7 +17,20 @@ interface SettingsData {
   volumeUnit: string;
 }
 
-export default function SettingsClient() {
+interface SettingsClientProps {
+  initialFoods: Food[];
+  userSettings: {
+    calorieUnit: string;
+    macroUnit: string;
+    weightUnit: string;
+    volumeUnit: string;
+  };
+}
+
+export default function SettingsClient({
+  initialFoods,
+  userSettings,
+}: SettingsClientProps) {
   const { data: session } = useSession();
   const [settings, setSettings] = useState<SettingsData>({
     calorieGoal: 3000,
@@ -33,6 +48,7 @@ export default function SettingsClient() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [showMyFoods, setShowMyFoods] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -327,6 +343,13 @@ export default function SettingsClient() {
               </h2>
 
               <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setShowMyFoods(true)}
+                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+                >
+                  My Foods
+                </button>
                 {session?.user?.isAdmin && (
                   <Link
                     href="/admin"
@@ -361,6 +384,14 @@ export default function SettingsClient() {
           </button>
         </div>
       </div>
+
+      {/* My Foods Sidebar */}
+      <MyFoodsSidebar
+        isOpen={showMyFoods}
+        onClose={() => setShowMyFoods(false)}
+        initialFoods={initialFoods}
+        userSettings={userSettings}
+      />
     </div>
   );
 }
