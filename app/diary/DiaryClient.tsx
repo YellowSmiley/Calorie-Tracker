@@ -10,7 +10,7 @@ import DailySummaryAccordion from "../components/DailySummaryAccordion";
 import { formatCalories } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
 
-interface DiaryClientProps {
+export interface DiaryClientProps {
   initialMeals: Meal[];
   initialFoods: FoodItem[];
   activeDate: string;
