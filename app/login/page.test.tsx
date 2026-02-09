@@ -7,90 +7,213 @@ jest.mock("next-auth/react", () => ({
   signIn: jest.fn(),
 }));
 
+// Mock next/link
+jest.mock("next/link", () => {
+  return function MockLink({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) {
+    return <a href={href}>{children}</a>;
+  };
+});
+
+// Mock fetch for check-verified endpoint
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
 describe("LoginPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetch.mockReset();
   });
 
-  it("renders the page title and description", () => {
-    render(<LoginPage />);
+  describe("Google sign-in", () => {
+    it("calls signIn with google provider and correct callback", async () => {
+      const mockSignIn = jest.fn().mockResolvedValue(undefined);
+      (nextAuth.signIn as jest.Mock).mockImplementation(mockSignIn);
 
-    expect(screen.getByText("Calorie Tracker")).toBeInTheDocument();
-    expect(
-      screen.getByText("Track your daily food intake and macronutrients"),
-    ).toBeInTheDocument();
-  });
+      render(<LoginPage />);
+      fireEvent.click(
+        screen.getByRole("button", { name: /continue with google/i }),
+      );
 
-  it("renders the sign-in prompt text", () => {
-    render(<LoginPage />);
-
-    expect(
-      screen.getByText("Sign in to access your diary"),
-    ).toBeInTheDocument();
-  });
-
-  it("renders the Google sign-in button", () => {
-    render(<LoginPage />);
-
-    const button = screen.getByRole("button", {
-      name: /continue with google/i,
-    });
-    expect(button).toBeInTheDocument();
-  });
-
-  it("calls signIn with correct parameters when button is clicked", async () => {
-    const mockSignIn = jest.fn();
-    (nextAuth.signIn as jest.Mock).mockImplementation(mockSignIn);
-
-    render(<LoginPage />);
-
-    const button = screen.getByRole("button", {
-      name: /continue with google/i,
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("google", {
+          callbackUrl: "/",
+        });
+      });
     });
 
-    fireEvent.click(button);
+    it("only shows Google loading spinner during Google sign-in", async () => {
+      (nextAuth.signIn as jest.Mock).mockImplementation(
+        () => new Promise(() => {}),
+      );
 
-    await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith("google", {
-        callbackUrl: "/diary",
+      render(<LoginPage />);
+      fireEvent.click(
+        screen.getByRole("button", { name: /continue with google/i }),
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Signing in...")).toBeInTheDocument();
+      });
+    });
+
+    it("disables all buttons while Google sign-in is in progress", async () => {
+      (nextAuth.signIn as jest.Mock).mockImplementation(
+        () => new Promise(() => {}),
+      );
+
+      render(<LoginPage />);
+      fireEvent.click(
+        screen.getByRole("button", { name: /continue with google/i }),
+      );
+
+      await waitFor(() => {
+        const buttons = screen.getAllByRole("button");
+        buttons.forEach((btn) => expect(btn).toBeDisabled());
       });
     });
   });
 
-  it("shows loading state while signing in", async () => {
-    // Mock signIn to be a slow promise
-    (nextAuth.signIn as jest.Mock).mockImplementation(
-      () => new Promise(() => {}), // Never resolves
-    );
+  describe("Credentials sign-in", () => {
+    it("calls signIn with credentials provider and redirect: false", async () => {
+      const mockSignIn = jest.fn().mockResolvedValue({ ok: true });
+      (nextAuth.signIn as jest.Mock).mockImplementation(mockSignIn);
 
-    render(<LoginPage />);
+      render(<LoginPage />);
 
-    const button = screen.getByRole("button", {
-      name: /continue with google/i,
+      fireEvent.change(screen.getByLabelText(/email/i), {
+        target: { value: "user@test.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(screen.getByTestId("sign-in-button"));
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith("credentials", {
+          email: "user@test.com",
+          password: "password123",
+          redirect: false,
+        });
+      });
     });
 
-    fireEvent.click(button);
+    it("does not show error and does not call check-verified on successful sign-in", async () => {
+      (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: true });
 
-    // The button should show loading state
-    await waitFor(() => {
-      expect(screen.getByText("Signing in...")).toBeInTheDocument();
-      expect(button).toBeDisabled();
+      render(<LoginPage />);
+
+      fireEvent.change(screen.getByLabelText(/email/i), {
+        target: { value: "user@test.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(screen.getByTestId("sign-in-button"));
+
+      await waitFor(() => {
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+      expect(
+        screen.queryByText("Invalid email or password"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/email has not been verified/i),
+      ).not.toBeInTheDocument();
     });
-  });
 
-  it("renders terms of service notice", () => {
-    render(<LoginPage />);
+    it("shows unverified error when check-verified returns unverified", async () => {
+      (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve({ unverified: true }),
+      });
 
-    expect(
-      screen.getByText(/By signing in, you agree to our Terms of Service/i),
-    ).toBeInTheDocument();
-  });
+      render(<LoginPage />);
 
-  it("renders copyright notice", () => {
-    render(<LoginPage />);
+      fireEvent.change(screen.getByLabelText(/email/i), {
+        target: { value: "user@test.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(screen.getByTestId("sign-in-button"));
 
-    expect(
-      screen.getByText(/Copyright © 2026 Michael Smith/i),
-    ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByText(/email has not been verified/i),
+        ).toBeInTheDocument();
+      });
+
+      // Verify the check-verified endpoint was called with correct email
+      expect(mockFetch).toHaveBeenCalledWith("/api/auth/check-verified", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "user@test.com" }),
+      });
+    });
+
+    it("shows generic error when credentials are invalid", async () => {
+      (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve({ unverified: false }),
+      });
+
+      render(<LoginPage />);
+
+      fireEvent.change(screen.getByLabelText(/email/i), {
+        target: { value: "user@test.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: "wrongpassword" },
+      });
+      fireEvent.click(screen.getByTestId("sign-in-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Invalid email or password"),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("clears previous error on new sign-in attempt", async () => {
+      // First attempt fails
+      (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve({ unverified: false }),
+      });
+
+      render(<LoginPage />);
+
+      fireEvent.change(screen.getByLabelText(/email/i), {
+        target: { value: "user@test.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: "wrong" },
+      });
+      fireEvent.click(screen.getByTestId("sign-in-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Invalid email or password"),
+        ).toBeInTheDocument();
+      });
+
+      // Second attempt — error should be cleared while loading
+      (nextAuth.signIn as jest.Mock).mockImplementation(
+        () => new Promise(() => {}),
+      );
+      fireEvent.click(screen.getByTestId("sign-in-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Invalid email or password"),
+        ).not.toBeInTheDocument();
+      });
+    });
   });
 });
