@@ -1,17 +1,58 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useState } from "react";
+import type { FormEvent } from "react";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const isLoading = isGoogleLoading || isFormLoading;
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
+    setIsGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/diary" });
+      await signIn("google", { callbackUrl: "/" });
     } finally {
-      setIsLoading(false);
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setIsFormLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
+      if (!result?.ok) {
+        // Check if this is an unverified email
+        const checkRes = await fetch("/api/auth/check-verified", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const checkData = await checkRes.json();
+        if (checkData.unverified) {
+          setError(
+            "Your email has not been verified. Please check your inbox for the verification link.",
+          );
+        } else {
+          setError("Invalid email or password");
+        }
+      } else {
+        window.location.href = "/";
+      }
+    } finally {
+      setIsFormLoading(false);
     }
   };
 
@@ -37,7 +78,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isGoogleLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
                   Signing in...
@@ -66,9 +107,83 @@ export default function LoginPage() {
                 </>
               )}
             </button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-black px-2 text-zinc-500">
+                  or
+                </span>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            )}
+
+            <form onSubmit={handleSignIn} className="space-y-3">
+              <div className="grid gap-2 text-left">
+                <label
+                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                  htmlFor="email"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  data-testid="email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+              <div className="grid gap-2 text-left">
+                <label
+                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                  htmlFor="password"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  data-testid="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full inline-flex h-10 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 px-4 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                data-testid="sign-in-button"
+              >
+                Sign in
+              </button>
+            </form>
           </div>
 
-          <p className="mt-6 text-xs text-zinc-500 dark:text-zinc-500">
+          <p className="mt-6 text-sm text-zinc-600 dark:text-zinc-400">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-black dark:text-zinc-50 underline underline-offset-4 hover:no-underline"
+            >
+              Create one
+            </Link>
+          </p>
+
+          <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-500">
             By signing in, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

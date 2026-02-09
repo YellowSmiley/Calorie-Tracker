@@ -1,0 +1,131 @@
+"use client";
+
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+
+function VerifyContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
+
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    !token || !email ? "error" : "loading",
+  );
+  const [message, setMessage] = useState(
+    !token || !email ? "Invalid verification link." : "",
+  );
+
+  useEffect(() => {
+    if (!token || !email) {
+      return;
+    }
+
+    fetch(`/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          setStatus("success");
+          setMessage("Your email has been verified!");
+        } else {
+          setStatus("error");
+          setMessage(data.error || "Verification failed.");
+        }
+      })
+      .catch(() => {
+        setStatus("error");
+        setMessage("Something went wrong. Please try again.");
+      });
+  }, [token, email]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
+      <div className="w-full max-w-md">
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 text-center">
+          {status === "loading" && (
+            <>
+              <div className="w-8 h-8 border-2 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-white rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-black dark:text-zinc-50 font-medium">
+                Verifying your email...
+              </p>
+            </>
+          )}
+
+          {status === "success" && (
+            <>
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-6 h-6 text-green-600 dark:text-green-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-black dark:text-zinc-50 mb-2">
+                Email Verified
+              </h1>
+              <p className="text-zinc-600 dark:text-zinc-400 mb-6">{message}</p>
+              <Link
+                href="/login"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+              >
+                Sign in
+              </Link>
+            </>
+          )}
+
+          {status === "error" && (
+            <>
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-black dark:text-zinc-50 mb-2">
+                Verification Failed
+              </h1>
+              <p className="text-zinc-600 dark:text-zinc-400 mb-6">{message}</p>
+              <Link
+                href="/register"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+              >
+                Register again
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+          <div className="w-8 h-8 border-2 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-white rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
+  );
+}

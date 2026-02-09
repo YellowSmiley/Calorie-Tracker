@@ -1,7 +1,9 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 const DEFAULT_CALORIE_GOAL = 3000;
 const DEFAULT_PROTEIN_GOAL = 150;
@@ -19,9 +21,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientId: process.env.AUTH_GOOGLE_ID ?? "",
             clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
         }),
+        Credentials({
+            name: "Credentials",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" },
+            },
+            async authorize(credentials) {
+                const email = String(credentials?.email ?? "").toLowerCase().trim();
+                const password = String(credentials?.password ?? "");
+
+                if (!email || !password) {
+                    return null;
+                }
+
+                const user = await prisma.user.findUnique({
+                    where: { email },
+                    select: { id: true, email: true, name: true, passwordHash: true, emailVerified: true },
+                });
+
+                if (!user || !user.passwordHash) {
+                    return null;
+                }
+
+                const isValid = await bcrypt.compare(password, user.passwordHash);
+                if (!isValid) {
+                    return null;
+                }
+
+                if (!user.emailVerified) {
+                    return null;
+                }
+
+                return {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                };
+            },
+        }),
     ],
     session: {
-        strategy: "database",
+        strategy: "jwt",
     },
     callbacks: {
         async signIn({ user }) {
@@ -64,15 +105,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return true;
         },
-        async session({ session, user }) {
-            if (session.user) {
-                session.user.id = user.id;
-                // Fetch the user's isAdmin status from the database
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+            }
+            // Fetch isAdmin on every token refresh to stay in sync
+            if (token.id) {
                 const dbUser = await prisma.user.findUnique({
-                    where: { id: user.id },
-                    select: { isAdmin: true }
+                    where: { id: token.id as string },
+                    select: { isAdmin: true },
                 });
-                session.user.isAdmin = dbUser?.isAdmin ?? false;
+                token.isAdmin = dbUser?.isAdmin ?? false;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.id as string;
+                session.user.isAdmin = (token.isAdmin as boolean) ?? false;
             }
             return session;
         },

@@ -20,6 +20,7 @@ const config: Config = {
             },
         }],
     },
+    testPathIgnorePatterns: ["e2e/"],
 };
 
 export default config;

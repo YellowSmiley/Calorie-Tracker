@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
+    _request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await auth();

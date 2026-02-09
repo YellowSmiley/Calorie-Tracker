@@ -15,7 +15,9 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -41,6 +43,8 @@ export default function UserManagement() {
   };
 
   const handleDeleteUser = async (userId: string) => {
+    setIsDeleting(true);
+    setDeleteError(null);
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: "DELETE",
@@ -48,14 +52,17 @@ export default function UserManagement() {
 
       if (response.ok) {
         setUsers(users.filter((u) => u.id !== userId));
-        setDeleteConfirm(null);
+        setDeleteUser(null);
         setError(null);
       } else {
-        setError("Failed to delete user");
+        const data = await response.json();
+        setDeleteError(data.error || "Failed to delete user");
       }
     } catch (err) {
       console.error("Error deleting user:", err);
-      setError("Error deleting user");
+      setDeleteError("Error deleting user");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -151,7 +158,7 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {deleteConfirm === user.id ? (
+                    {deleteUser?.id === user.id ? (
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDeleteUser(user.id)}
@@ -160,7 +167,10 @@ export default function UserManagement() {
                           Confirm
                         </button>
                         <button
-                          onClick={() => setDeleteConfirm(null)}
+                          onClick={() => {
+                            setDeleteUser(null);
+                            setDeleteError(null);
+                          }}
                           className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                         >
                           Cancel
@@ -168,7 +178,10 @@ export default function UserManagement() {
                       </div>
                     ) : (
                       <button
-                        onClick={() => setDeleteConfirm(user.id)}
+                        onClick={() => {
+                          setDeleteUser(user);
+                          setDeleteError(null);
+                        }}
                         className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                       >
                         Delete
@@ -181,6 +194,79 @@ export default function UserManagement() {
           </tbody>
         </table>
       </div>
+
+      {/* Delete User Modal */}
+      {deleteUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-zinc-950 shadow-xl">
+            {/* Header */}
+            <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
+              <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+                Delete User?
+              </h2>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Are you sure you want to delete this user? This will permanently
+                remove their account and all associated data.
+              </p>
+
+              {deleteError && (
+                <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 p-3 border border-zinc-300 dark:border-zinc-700">
+                  <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                    {deleteError}
+                  </p>
+                </div>
+              )}
+
+              {/* User Details */}
+              <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3">
+                <div>
+                  <p className="font-medium text-black dark:text-zinc-50">
+                    {deleteUser.name || "No name"}
+                  </p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                    {deleteUser.email || "No email"}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-zinc-600 dark:text-zinc-400">
+                      Admin:
+                    </span>
+                    <span className="font-medium text-black dark:text-zinc-50">
+                      {deleteUser.isAdmin ? "Yes" : "No"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-zinc-200 dark:border-zinc-800 p-4 flex gap-3 sm:flex-row flex-col">
+              <button
+                onClick={() => {
+                  setDeleteUser(null);
+                  setDeleteError(null);
+                }}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-50 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteUser(deleteUser.id)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete User"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
