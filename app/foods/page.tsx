@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import UserFoodsClient from "./UserFoodsClient";
 import { prisma } from "@/lib/prisma";
+import UserFoodsClient from "./UserFoodsClient";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "My Foods - Calorie Tracker",
   description: "View and manage your created foods",
 };
