@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItem } from "../diary/types";
 import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
 
@@ -9,7 +9,6 @@ interface FoodListSidebarProps {
   onClose: () => void;
   onSelectFood: (food: FoodItem, quantity: number) => void;
   onOpenCreateForm: () => void;
-  foods: FoodItem[];
   isLoading?: boolean;
   userSettings: {
     calorieUnit: string;
@@ -17,23 +16,115 @@ interface FoodListSidebarProps {
   };
 }
 
+const PAGE_SIZE = 50;
+
+const mapFood = (food: {
+  id: string;
+  name: string;
+  measurement: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  defaultServingAmount?: number | null;
+  defaultServingDescription?: string | null;
+}): FoodItem => ({
+  id: food.id,
+  name: food.name,
+  measurement: food.measurement,
+  calories: food.calories,
+  baseCalories: food.calories,
+  serving: 1,
+  protein: food.protein,
+  carbs: food.carbs,
+  fat: food.fat,
+  baseProtein: food.protein,
+  baseCarbs: food.carbs,
+  baseFat: food.fat,
+  defaultServingAmount: food.defaultServingAmount,
+  defaultServingDescription: food.defaultServingDescription,
+});
+
 export default function FoodListSidebar({
   isOpen,
   onClose,
   onSelectFood,
   onOpenCreateForm,
-  foods,
   isLoading = false,
   userSettings,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [quantities, setQuantities] = useState<Record<string, string>>({});
+  const [foods, setFoods] = useState<FoodItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const filteredFoods = foods.filter(
-    (food) =>
-      food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      food.measurement.toLowerCase().includes(searchQuery.toLowerCase()),
+  const fetchFoods = useCallback(
+    async (search: string, skip: number, append: boolean) => {
+      loadingTimerRef.current = setTimeout(() => setIsFetching(true), 100);
+      try {
+        const params = new URLSearchParams({
+          search,
+          take: String(PAGE_SIZE),
+          skip: String(skip),
+        });
+        const res = await fetch(`/api/foods?${params}`);
+        if (!res.ok) {
+          console.error("Failed to fetch foods");
+          return;
+        }
+        const data = await res.json();
+        const mapped = (data.foods || []).map(mapFood);
+        setFoods((prev) => (append ? [...prev, ...mapped] : mapped));
+        setTotal(data.total ?? 0);
+        setHasLoaded(true);
+      } catch (err) {
+        console.error("Error fetching foods:", err);
+      } finally {
+        if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
+        setIsFetching(false);
+      }
+    },
+    [],
   );
+
+  // Fetch on open
+  useEffect(() => {
+    if (isOpen && !hasLoaded) {
+      fetchFoods("", 0, false);
+    }
+  }, [isOpen, hasLoaded, fetchFoods]);
+
+  // Debounced search
+  useEffect(() => {
+    if (!isOpen) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchFoods(searchQuery, 0, false);
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    }, 1000);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, isOpen, fetchFoods]);
+
+  const loadMore = useCallback(() => {
+    if (isFetching || foods.length >= total) return;
+    fetchFoods(searchQuery, foods.length, true);
+  }, [isFetching, foods.length, total, searchQuery, fetchFoods]);
+
+  // Infinite scroll
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+      loadMore();
+    }
+  }, [loadMore]);
 
   const getQty = (foodId: string): number => {
     const raw = quantities[foodId];
@@ -45,6 +136,9 @@ export default function FoodListSidebar({
   const handleClose = () => {
     setSearchQuery("");
     setQuantities({});
+    setFoods([]);
+    setTotal(0);
+    setHasLoaded(false);
     onClose();
   };
 
@@ -110,7 +204,11 @@ export default function FoodListSidebar({
       </div>
 
       {/* Food List */}
-      <div className="flex-1 overflow-y-auto pb-24 relative">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto relative"
+      >
         {isLoading && (
           <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
             <div className="text-sm text-zinc-700 dark:text-zinc-300">
@@ -119,7 +217,7 @@ export default function FoodListSidebar({
           </div>
         )}
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
-          {filteredFoods.map((food) => (
+          {foods.map((food) => (
             <div key={food.id} className="flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-black dark:text-zinc-50">
@@ -162,18 +260,40 @@ export default function FoodListSidebar({
               </div>
             </div>
           ))}
-        </div>
-      </div>
 
-      {/* Create Button - Fixed at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto w-full max-w-3xl">
-          <button
-            onClick={onOpenCreateForm}
-            className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-          >
-            Create
-          </button>
+          {/* Loading indicator */}
+          {isFetching && (
+            <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
+              Loading...
+            </div>
+          )}
+
+          {/* No results */}
+          {!isFetching && hasLoaded && foods.length === 0 && (
+            <div className="px-4 py-6 text-center">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+                No foods found{searchQuery ? ` for "${searchQuery}"` : ""}
+              </p>
+              <button
+                onClick={onOpenCreateForm}
+                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+              >
+                Create Food
+              </button>
+            </div>
+          )}
+
+          {/* Create button at end of list */}
+          {!isFetching && foods.length > 0 && foods.length >= total && (
+            <div className="px-4 py-4 text-center">
+              <button
+                onClick={onOpenCreateForm}
+                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+              >
+                Create Food
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

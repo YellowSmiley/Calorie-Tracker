@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Food } from "@prisma/client";
 import MyFoodsSidebar from "../components/MyFoodsSidebar";
 
 interface SettingsData {
@@ -18,7 +17,6 @@ interface SettingsData {
 }
 
 interface SettingsClientProps {
-  initialFoods: Food[];
   userSettings: {
     calorieUnit: string;
     macroUnit: string;
@@ -27,10 +25,7 @@ interface SettingsClientProps {
   };
 }
 
-export default function SettingsClient({
-  initialFoods,
-  userSettings,
-}: SettingsClientProps) {
+export default function SettingsClient({ userSettings }: SettingsClientProps) {
   const { data: session } = useSession();
   const [settings, setSettings] = useState<SettingsData>({
     calorieGoal: 3000,
@@ -389,7 +384,6 @@ export default function SettingsClient({
       <MyFoodsSidebar
         isOpen={showMyFoods}
         onClose={() => setShowMyFoods(false)}
-        initialFoods={initialFoods}
         userSettings={userSettings}
       />
     </div>

@@ -1,10 +1,8 @@
 "use client";
 
-import { Food } from "@prisma/client";
 import FoodTable from "../components/FoodTable";
 
 interface UserFoodsClientProps {
-  initialFoods: Food[];
   userSettings: {
     calorieUnit: string;
     macroUnit: string;
@@ -14,12 +12,10 @@ interface UserFoodsClientProps {
 }
 
 export default function UserFoodsClient({
-  initialFoods,
   userSettings,
 }: UserFoodsClientProps) {
   return (
     <FoodTable
-      initialFoods={initialFoods}
       userSettings={userSettings}
       apiBasePath="/api/foods"
       showCreatedBy={false}

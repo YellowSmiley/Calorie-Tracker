@@ -10,7 +10,7 @@ export default function AdminClient() {
   const [activeTab, setActiveTab] = useState<AdminTab>("users");
 
   return (
-    <div className="min-h-full flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
         <div className="max-w-6xl mx-auto">
@@ -47,11 +47,9 @@ export default function AdminClient() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
-        <div className="max-w-6xl mx-auto">
-          {activeTab === "users" && <UserManagement />}
-          {activeTab === "foods" && <FoodDatabase />}
-        </div>
+      <div className="flex-1 flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-24">
+        {activeTab === "users" && <UserManagement />}
+        {activeTab === "foods" && <FoodDatabase />}
       </div>
     </div>
   );

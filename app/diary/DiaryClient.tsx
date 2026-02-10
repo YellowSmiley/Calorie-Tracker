@@ -12,7 +12,6 @@ import type { FoodItem, Meal } from "./types";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
-  initialFoods: FoodItem[];
   activeDate: string;
   userSettings: {
     calorieUnit: string;
@@ -28,15 +27,8 @@ export interface DiaryClientProps {
   };
 }
 
-/**
- * TODO:
- * - Fix email verification
- * - Select Food needs add button not just row click now with qty input
- */
-
 export default function DiaryClient({
   initialMeals,
-  initialFoods,
   activeDate,
   userSettings,
   userGoals,
@@ -45,7 +37,6 @@ export default function DiaryClient({
   const [currentDate, setCurrentDate] = useState(activeDate);
   const [goals] = useState(userGoals);
 
-  const [foods, setFoods] = useState<FoodItem[]>(initialFoods);
   const [meals, setMeals] = useState<Meal[]>(initialMeals);
 
   // Sync state when server data changes
@@ -63,7 +54,6 @@ export default function DiaryClient({
   const [showFoodList, setShowFoodList] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [editAmountValue, setEditAmountValue] = useState("");
   const [editTarget, setEditTarget] = useState<{
     mealIndex: number;
     itemId: string;
@@ -105,33 +95,6 @@ export default function DiaryClient({
     () => ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const,
     [],
   );
-
-  const mapFoodToItem = (food: {
-    id: string;
-    name: string;
-    measurement: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    defaultServingAmount?: number | null;
-    defaultServingDescription?: string | null;
-  }): FoodItem => ({
-    id: food.id,
-    name: food.name,
-    measurement: food.measurement,
-    calories: food.calories,
-    baseCalories: food.calories,
-    serving: 1,
-    protein: food.protein,
-    carbs: food.carbs,
-    fat: food.fat,
-    baseProtein: food.protein,
-    baseCarbs: food.carbs,
-    baseFat: food.fat,
-    defaultServingAmount: food.defaultServingAmount,
-    defaultServingDescription: food.defaultServingDescription,
-  });
 
   const totals = useMemo(() => {
     const allItems = meals.flatMap((meal) => meal.items);
@@ -230,9 +193,6 @@ export default function DiaryClient({
       }
 
       const created = await createResponse.json();
-      if (created.food) {
-        setFoods((prev) => [...prev, mapFoodToItem(created.food)]);
-      }
 
       if (created.food?.id) {
         // Calculate serving multiplier from default serving amount if available
@@ -523,12 +483,6 @@ export default function DiaryClient({
                             mealIndex,
                             itemId: item.id,
                           });
-                          const parsed = parseMeasurement(item.measurement);
-                          setEditAmountValue(
-                            String(
-                              Number((item.serving * parsed.amount).toFixed(2)),
-                            ),
-                          );
                           setShowEditForm(true);
                         }}
                         className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
@@ -627,7 +581,6 @@ export default function DiaryClient({
           setError(null);
           setShowCreateForm(true);
         }}
-        foods={foods}
         userSettings={userSettings}
         isLoading={isLoadingFood}
       />
@@ -646,8 +599,6 @@ export default function DiaryClient({
       <EditFoodSidebar
         isOpen={showEditForm}
         food={selectedFood}
-        amountValue={editAmountValue}
-        onAmountChange={setEditAmountValue}
         onClose={() => {
           setShowEditForm(false);
           setEditTarget(null);

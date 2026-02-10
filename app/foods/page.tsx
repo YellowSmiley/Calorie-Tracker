@@ -16,17 +16,7 @@ export default async function UserFoodsPage() {
     redirect("/login");
   }
 
-  // Fetch user's created foods
-  const foods = await prisma.food.findMany({
-    where: {
-      createdBy: session.user.id,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  // Fetch user settings for the CreateFoodSidebar
+  // Fetch user settings
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -46,7 +36,7 @@ export default async function UserFoodsPage() {
 
   return (
     <div className="min-h-full">
-      <UserFoodsClient initialFoods={foods} userSettings={userSettings} />
+      <UserFoodsClient userSettings={userSettings} />
     </div>
   );
 }

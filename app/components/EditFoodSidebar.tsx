@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { FoodItem } from "../diary/types";
 import {
   formatCalories,
@@ -11,8 +11,6 @@ import {
 interface EditFoodSidebarProps {
   isOpen: boolean;
   food: FoodItem | null;
-  amountValue: string;
-  onAmountChange: (value: string) => void;
   onClose: () => void;
   onSubmit: (serving: number) => void;
   userSettings: {
@@ -25,8 +23,6 @@ interface EditFoodSidebarProps {
 export default function EditFoodSidebar({
   isOpen,
   food,
-  amountValue,
-  onAmountChange,
   onClose,
   onSubmit,
   userSettings,
@@ -37,22 +33,41 @@ export default function EditFoodSidebar({
     [food?.measurement],
   );
 
+  const defaultServing = food?.defaultServingAmount || parsed.amount;
+
+  const [servingSize, setServingSize] = useState("");
+  const [quantity, setQuantity] = useState("");
+
+  // Initialise when food / sidebar opens (adjust state during render)
+  const [prevKey, setPrevKey] = useState("");
+  const currentKey = `${food?.id}-${food?.serving}-${isOpen}`;
+
+  if (currentKey !== prevKey && food && isOpen) {
+    setPrevKey(currentKey);
+    const totalAmount = food.serving * parsed.amount;
+    const qty = Number((totalAmount / defaultServing).toFixed(2));
+    setServingSize(String(defaultServing));
+    setQuantity(String(qty));
+  }
+
+  const servingSizeNum = parseFloat(servingSize) || 0;
+  const quantityNum = parseFloat(quantity) || 0;
+  const totalAmount = servingSizeNum * quantityNum;
+
   const calculatedNutrition = useMemo(() => {
     if (!food) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    const amount = parseFloat(amountValue) || 0;
-    const serving = amount / parsed.amount;
+    const serving = totalAmount / parsed.amount;
     return {
       calories: Number((food.baseCalories * serving).toFixed(1)),
       protein: Number((food.baseProtein * serving).toFixed(1)),
       carbs: Number((food.baseCarbs * serving).toFixed(1)),
       fat: Number((food.baseFat * serving).toFixed(1)),
     };
-  }, [food, amountValue, parsed.amount]);
+  }, [food, totalAmount, parsed.amount]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const amount = parseFloat(amountValue);
-    const serving = (Number.isNaN(amount) ? 0 : amount) / parsed.amount;
+    const serving = totalAmount / parsed.amount;
     onSubmit(serving);
   };
 
@@ -83,18 +98,20 @@ export default function EditFoodSidebar({
           <div className="mx-auto w-full max-w-3xl space-y-6">
             {/* Food Name - Centered */}
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-black dark:text-zinc-50 mb-2">
+              <h3 className="text-2xl font-bold text-black dark:text-zinc-50 mb-1">
                 {food?.name || ""}
               </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Per serving: {food?.measurement || ""}
-              </p>
+              {food?.defaultServingDescription && (
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {food.defaultServingDescription}
+                </p>
+              )}
             </div>
 
             {/* Base Nutrition Info */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
-                Base Nutrition (1 serving)
+                Base Nutrition (Per {food?.measurement || ""})
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -132,53 +149,53 @@ export default function EditFoodSidebar({
               </div>
             </div>
 
-            {/* Amount Input */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
-              <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
-                {parsed.inputLabel}
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="any"
-                  min="0"
-                  value={amountValue}
-                  onChange={(e) => onAmountChange(e.target.value)}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center pr-14"
-                  placeholder={String(parsed.amount)}
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500 dark:text-zinc-400">
-                  {parsed.inputUnit}
-                </span>
+            {/* Serving Size + Quantity Inputs */}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
+                    Serving Size ({parsed.inputUnit})
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={servingSize}
+                    onChange={(e) => setServingSize(e.target.value)}
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
+                    placeholder={String(defaultServing)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
+                    placeholder="1"
+                  />
+                </div>
               </div>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center mt-2">
-                {amountValue
-                  ? `${amountValue}${parsed.inputUnit}${parsed.description ? ` ${parsed.description}` : ""} (base: ${food?.measurement || ""})`
-                  : `Enter amount in ${parsed.inputUnit}`}
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center">
+                {totalAmount > 0
+                  ? `Total: ${Number(totalAmount.toFixed(2))}${parsed.inputUnit}${parsed.description ? ` ${parsed.description}` : ""}`
+                  : "Enter serving size and quantity"}
               </p>
             </div>
 
             {/* Calculated Nutrition */}
-            <div className="rounded-lg border-2 border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900 p-4">
-              <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3 flex items-center gap-2">
-                <svg
-                  className="w-4 h-4 text-black dark:text-zinc-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
-                Your Total Nutrition
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+              <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
+                Nutrition for this entry
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Calories
                   </p>
                   <p className="text-xl font-bold text-black dark:text-zinc-50">
@@ -186,7 +203,7 @@ export default function EditFoodSidebar({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Protein
                   </p>
                   <p className="text-xl font-bold text-black dark:text-zinc-50">
@@ -194,7 +211,7 @@ export default function EditFoodSidebar({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Carbs
                   </p>
                   <p className="text-xl font-bold text-black dark:text-zinc-50">
@@ -202,7 +219,7 @@ export default function EditFoodSidebar({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Fat
                   </p>
                   <p className="text-xl font-bold text-black dark:text-zinc-50">
@@ -219,7 +236,7 @@ export default function EditFoodSidebar({
           <div className="mx-auto w-full max-w-3xl">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || totalAmount <= 0}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Updating..." : "Update Serving"}

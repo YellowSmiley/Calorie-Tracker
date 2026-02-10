@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id || !session.user.isAdmin) {
@@ -10,9 +10,29 @@ export async function GET() {
     }
 
     try {
-        const foods = await prisma.food.findMany({
-            orderBy: { name: "asc" },
-        });
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get("search") || "";
+        const take = Math.min(parseInt(searchParams.get("take") || "50") || 50, 200);
+        const skip = parseInt(searchParams.get("skip") || "0") || 0;
+
+        const where = search
+            ? {
+                OR: [
+                    { name: { contains: search, mode: "insensitive" as const } },
+                    { measurement: { contains: search, mode: "insensitive" as const } },
+                ],
+            }
+            : {};
+
+        const [foods, total] = await Promise.all([
+            prisma.food.findMany({
+                where,
+                orderBy: { name: "asc" },
+                take,
+                skip,
+            }),
+            prisma.food.count({ where }),
+        ]);
 
         // Fetch creator names separately
         const foodsWithCreator = await Promise.all(
@@ -30,7 +50,7 @@ export async function GET() {
             })
         );
 
-        return NextResponse.json(foodsWithCreator);
+        return NextResponse.json({ foods: foodsWithCreator, total, take, skip });
     } catch (error) {
         console.error("Error fetching foods:", error);
         return NextResponse.json(

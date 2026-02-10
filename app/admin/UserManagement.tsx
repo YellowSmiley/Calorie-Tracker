@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface User {
   id: string;
@@ -10,37 +10,85 @@ interface User {
   createdAt?: string;
 }
 
+const PAGE_SIZE = 50;
+
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/admin/users");
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-        setError(null);
-      } else {
-        setError("Failed to fetch users");
+  const fetchUsers = useCallback(
+    async (search: string, skip: number, append: boolean) => {
+      loadingTimerRef.current = setTimeout(() => setIsFetching(true), 100);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          search,
+          take: String(PAGE_SIZE),
+          skip: String(skip),
+        });
+        const res = await fetch(`/api/admin/users?${params}`);
+        if (!res.ok) {
+          setError("Failed to fetch users");
+          return;
+        }
+        const data = await res.json();
+        const fetched: User[] = data.users || [];
+        setUsers((prev) => (append ? [...prev, ...fetched] : fetched));
+        setTotal(data.total ?? 0);
+        setHasLoaded(true);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setError("Error fetching users");
+      } finally {
+        if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
+        setIsFetching(false);
       }
-    } catch (err) {
-      console.error("Error fetching users:", err);
-      setError("Error fetching users");
-    } finally {
-      setIsLoading(false);
+    },
+    [],
+  );
+
+  // Fetch on mount
+  useEffect(() => {
+    if (!hasLoaded) {
+      fetchUsers("", 0, false);
     }
-  };
+  }, [hasLoaded, fetchUsers]);
+
+  // Debounced search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchUsers(searchQuery, 0, false);
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    }, 1000);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, fetchUsers]);
+
+  const loadMore = useCallback(() => {
+    if (isFetching || users.length >= total) return;
+    fetchUsers(searchQuery, users.length, true);
+  }, [isFetching, users.length, total, searchQuery, fetchUsers]);
+
+  // Infinite scroll
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+      loadMore();
+    }
+  }, [loadMore]);
 
   const handleDeleteUser = async (userId: string) => {
     setIsDeleting(true);
@@ -51,7 +99,8 @@ export default function UserManagement() {
       });
 
       if (response.ok) {
-        setUsers(users.filter((u) => u.id !== userId));
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        setTotal((prev) => prev - 1);
         setDeleteUser(null);
         setError(null);
       } else {
@@ -66,133 +115,93 @@ export default function UserManagement() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-lg">Loading users...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      {/* Search */}
-      <div className="p-4">
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
-        />
+    <div className="flex flex-col h-full">
+      {/* Search Box */}
+      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="mx-auto w-full max-w-3xl">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
+          />
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-900 dark:text-zinc-200">{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
-            >
-              ×
-            </button>
+        <div className="px-4 pt-4">
+          <div className="mx-auto w-full max-w-3xl rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                {error}
+              </p>
+              <button
+                onClick={() => setError(null)}
+                className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
+              >
+                ×
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Users Table */}
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-        <table className="w-full border-collapse bg-white dark:bg-zinc-950">
-          <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                Name
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                Email
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                Admin
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-4 py-3 text-center text-zinc-500">
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-t border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+      {/* User List */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto"
+      >
+        <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
+          {users.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-black dark:text-zinc-50">
+                  {user.name || "No name"}
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {user.email || "No email"}
+                  {user.isAdmin ? " • Admin" : ""}
+                </p>
+              </div>
+              <div className="shrink-0">
+                <button
+                  onClick={() => {
+                    setDeleteUser(user);
+                    setDeleteError(null);
+                  }}
+                  className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
                 >
-                  <td className="px-4 py-3 text-black dark:text-zinc-50">
-                    {user.name || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-black dark:text-zinc-50">
-                    {user.email || "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${
-                        user.isAdmin
-                          ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
-                          : "bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400"
-                      }`}
-                    >
-                      {user.isAdmin ? "Yes" : "No"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {deleteUser?.id === user.id ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeleteUser(null);
-                            setDeleteError(null);
-                          }}
-                          className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setDeleteUser(user);
-                          setDeleteError(null);
-                        }}
-                        className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Loading indicator */}
+          {isFetching && (
+            <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
+              Loading...
+            </div>
+          )}
+
+          {/* No results */}
+          {!isFetching && hasLoaded && users.length === 0 && (
+            <div className="px-4 py-6 text-center">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {searchQuery
+                  ? `No users found for "${searchQuery}"`
+                  : "No users found"}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Delete User Modal */}

@@ -1,12 +1,10 @@
 "use client";
 
-import { Food } from "@prisma/client";
 import FoodTable from "./FoodTable";
 
 interface MyFoodsSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  initialFoods: Food[];
   userSettings: {
     calorieUnit: string;
     macroUnit: string;
@@ -18,7 +16,6 @@ interface MyFoodsSidebarProps {
 export default function MyFoodsSidebar({
   isOpen,
   onClose,
-  initialFoods,
   userSettings,
 }: MyFoodsSidebarProps) {
   return (
@@ -40,9 +37,8 @@ export default function MyFoodsSidebar({
         <div className="w-12" />
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-hidden">
         <FoodTable
-          initialFoods={initialFoods}
           userSettings={userSettings}
           apiBasePath="/api/foods"
           showCreatedBy={false}

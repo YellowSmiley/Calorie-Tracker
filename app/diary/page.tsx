@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DiaryClient from "./DiaryClient";
-import type { FoodItem, Meal } from "./types";
+import type { Meal } from "./types";
 
 const initialMeals: Meal[] = [
   { name: "Breakfast", items: [] },
@@ -20,33 +20,6 @@ const getDateRange = (dateString: string) => {
   end.setHours(23, 59, 59, 999);
   return { start, end };
 };
-
-const mapFoodToItem = (food: {
-  id: string;
-  name: string;
-  measurement: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  defaultServingAmount?: number | null;
-  defaultServingDescription?: string | null;
-}): FoodItem => ({
-  id: food.id,
-  name: food.name,
-  measurement: food.measurement,
-  calories: food.calories,
-  baseCalories: food.calories,
-  serving: 1,
-  protein: food.protein,
-  carbs: food.carbs,
-  fat: food.fat,
-  baseProtein: food.protein,
-  baseCarbs: food.carbs,
-  baseFat: food.fat,
-  defaultServingAmount: food.defaultServingAmount,
-  defaultServingDescription: food.defaultServingDescription,
-});
 
 export default async function DiaryPage({
   searchParams,
@@ -90,10 +63,6 @@ export default async function DiaryPage({
     carbs: user?.carbGoal ?? 410,
     fat: user?.fatGoal ?? 83,
   };
-
-  const foods = await prisma.food.findMany({
-    orderBy: { name: "asc" },
-  });
 
   const { start, end } = getDateRange(activeDate);
   const entries = (await prisma.mealEntry.findMany({
@@ -151,7 +120,6 @@ export default async function DiaryPage({
   return (
     <DiaryClient
       initialMeals={meals.length ? meals : initialMeals}
-      initialFoods={foods.map(mapFoodToItem)}
       activeDate={activeDate}
       userSettings={userSettings}
       userGoals={userGoals}
