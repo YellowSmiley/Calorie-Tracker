@@ -20,7 +20,8 @@ const config: Config = {
             },
         }],
     },
-    testPathIgnorePatterns: ["e2e/"],
+    testPathIgnorePatterns: ["e2e/", ".next/"],
+    modulePathIgnorePatterns: ["<rootDir>/.next/"],
 };
 
 export default config;

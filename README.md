@@ -237,16 +237,81 @@ npx prisma studio        # Open Prisma Studio (database GUI)
 npx prisma migrate dev   # Run database migrations
 ```
 
-## Deployment (Cloudflare Tunnel)
+## Deployment
 
-The app can be hosted locally and exposed to the internet via [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) — no port forwarding or static IP required.
+### Docker Compose (recommended)
 
-### Prerequisites
+The app ships with a multi-stage Dockerfile and a Compose file that runs the app alongside PostgreSQL.
+
+#### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2+
+
+#### 1. Configure environment
+
+Copy and edit the example env file:
+
+```bash
+cp .env.example .env
+```
+
+Set **at minimum**:
+
+| Variable                                | Purpose                                                   |
+| --------------------------------------- | --------------------------------------------------------- |
+| `POSTGRES_PASSWORD`                     | Password for the PostgreSQL container                     |
+| `AUTH_SECRET`                           | Random secret — `openssl rand -base64 32`                 |
+| `AUTH_URL`                              | Public URL (e.g. `https://calorietracker.yourdomain.com`) |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials                                  |
+| `SMTP_*`                                | SMTP server for email verification & password reset       |
+
+#### 2. Build and start
+
+```bash
+docker compose up -d --build
+```
+
+This will:
+
+1. Build the Next.js app in a multi-stage Docker image (node:22-alpine)
+2. Start PostgreSQL 17 with a persistent `pgdata` volume
+3. Wait for the database health check to pass
+4. Run `prisma migrate deploy` automatically on startup
+5. Start the production server on port **3000**
+
+#### 3. Seed the database (optional, first run only)
+
+```bash
+docker compose exec app npx prisma db seed
+```
+
+#### 4. Verify
+
+```bash
+docker compose ps      # Both services should be "running"
+docker compose logs app # Check for "Migrations complete." + "Ready"
+```
+
+#### Useful commands
+
+```bash
+docker compose down              # Stop services (data preserved)
+docker compose down -v           # Stop and delete database volume
+docker compose up -d --build     # Rebuild after code changes
+docker compose logs -f app       # Tail app logs
+docker compose exec app sh       # Shell into the app container
+```
+
+### Cloudflare Tunnel
+
+The app can be exposed to the internet via [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) — no port forwarding or static IP required.
+
+#### Prerequisites
 
 - A domain managed by Cloudflare (e.g. `masmith.uk`)
 - `cloudflared` installed: `winget install Cloudflare.cloudflared`
 
-### One-time setup
+#### One-time setup
 
 ```bash
 # Authenticate with Cloudflare (opens browser)
@@ -270,7 +335,19 @@ Update Google OAuth credentials in [Google Cloud Console](https://console.cloud.
 - **Authorized JavaScript origins:** `https://calorietracker.yourdomain.com`
 - **Authorized redirect URIs:** `https://calorietracker.yourdomain.com/api/auth/callback/google`
 
-### Running in production
+#### Running with Docker + Tunnel
+
+```bash
+# Terminal 1: Start the Docker stack
+docker compose up -d --build
+
+# Terminal 2: Start the Cloudflare tunnel
+cloudflared tunnel run --url http://localhost:3000 calorietracker
+```
+
+The site will be live at `https://calorietracker.yourdomain.com`.
+
+#### Running without Docker
 
 ```bash
 # Terminal 1: Build and start the production server
@@ -280,8 +357,6 @@ npm start
 # Terminal 2: Start the Cloudflare tunnel
 cloudflared tunnel run --url http://localhost:3000 calorietracker
 ```
-
-The site will be live at `https://calorietracker.yourdomain.com`.
 
 ### LAN access (without Cloudflare)
 
@@ -298,6 +373,31 @@ New-NetFirewallRule -DisplayName "Next.js Dev" -Direction Inbound -Port 3000 -Pr
 ```
 
 > **Note:** Google OAuth won't work over plain HTTP from non-localhost origins. Use Cloudflare Tunnel for full functionality.
+
+## Security
+
+### Authentication & Authorization
+
+- **Password hashing** — bcrypt for salting
+- **JWT session strategy** — short-lived tokens; admin role re-verified from the database on every JWT refresh
+- **Google OAuth** — PKCE flow via NextAuth v5
+- **Email verification** — required before login; hashed tokens stored in database
+- **Password reset** — time-limited tokens, hashed, atomic token consumption
+- **Account lockout** — failed logins, block (per email)
+- **No user enumeration** — login, forgot-password, and registration endpoints all return generic responses regardless of whether the account exists
+- **Rate Limiting** - stopping multiple attempts
+- **Input Validation** - throwing errors on bad data
+- **HTTP Security Headers** - ensuring security headers are set
+
+### Additional Measures
+
+- **CSRF protection** — origin/referer checking on state-changing requests in `proxy.ts`
+- **Ownership checks** — all meal and food mutations verify the requesting user owns the resource
+- **Last-admin protection** — cannot delete the last admin user
+- **Admin re-verification** — `isAdmin` is fetched from the database on every JWT callback, not cached from a stale token
+- **Query safety cap** — dashboard queries limited to 10 000 rows
+- **Production logging** — `console.error` calls are guarded behind `NODE_ENV === "development"`; server-side uses structured `logError()` that omits stack traces in production
+- **Docker runs as non-root** — the container executes as `nextjs` (uid 1001)
 
 ## License & Copyright
 
