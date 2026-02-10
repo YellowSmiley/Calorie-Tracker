@@ -30,6 +30,10 @@ jest.mock("crypto", () => ({
     }),
 }));
 
+jest.mock("@/lib/rateLimit", () => ({
+    checkRegisterRateLimit: jest.fn().mockResolvedValue(null),
+}));
+
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
@@ -97,7 +101,7 @@ describe("POST /api/auth/register", () => {
     });
 
     describe("duplicate check", () => {
-        it("returns 409 when email already exists", async () => {
+        it("returns 201 with generic message when email already exists (no enumeration)", async () => {
             (prisma.user.findUnique as jest.Mock).mockResolvedValue({
                 id: "existing",
             });
@@ -107,8 +111,10 @@ describe("POST /api/auth/register", () => {
             );
             const data = await res.json();
 
-            expect(res.status).toBe(409);
-            expect(data.error).toBe("An account with this email already exists");
+            expect(res.status).toBe(201);
+            expect(data.success).toBe(true);
+            // Should NOT call user.create for existing user
+            expect(prisma.user.create).not.toHaveBeenCalled();
         });
 
         it("normalizes email to lowercase for duplicate check", async () => {
@@ -196,7 +202,7 @@ describe("POST /api/auth/register", () => {
 
             expect(res.status).toBe(201);
             expect(data.success).toBe(true);
-            expect(data.message).toContain("check your email");
+            expect(data.message).toContain("verification link");
         });
     });
 

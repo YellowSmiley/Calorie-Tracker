@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
+import { checkRegisterRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -8,7 +9,19 @@ const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
 const TOKEN_EXPIRY_HOURS = 24;
 
+const SUCCESS_MESSAGE = "If that email is available, you will receive a verification link shortly.";
+
+function successResponse() {
+    return NextResponse.json(
+        { success: true, message: SUCCESS_MESSAGE },
+        { status: 201 },
+    );
+}
+
 export async function POST(request: Request) {
+    const rateLimited = await checkRegisterRateLimit(request);
+    if (rateLimited) return rateLimited;
+
     try {
         const { name, email, password } = await request.json();
 
@@ -40,10 +53,8 @@ export async function POST(request: Request) {
         });
 
         if (existingUser) {
-            return NextResponse.json(
-                { error: "An account with this email already exists" },
-                { status: 409 }
-            );
+            // Don't reveal that the account exists — return same response as success
+            return successResponse();
         }
 
         const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
@@ -71,10 +82,7 @@ export async function POST(request: Request) {
         // Send verification email
         await sendVerificationEmail(normalizedEmail, token);
 
-        return NextResponse.json(
-            { success: true, message: "Please check your email to verify your account." },
-            { status: 201 }
-        );
+        return successResponse();
     } catch {
         return NextResponse.json(
             { error: "Something went wrong. Please try again." },

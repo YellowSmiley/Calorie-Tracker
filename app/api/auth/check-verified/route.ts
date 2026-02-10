@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkAuthRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
+    const rateLimited = await checkAuthRateLimit(request);
+    if (rateLimited) return rateLimited;
+
     try {
         const { email } = await request.json();
 
