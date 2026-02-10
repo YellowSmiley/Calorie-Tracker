@@ -63,7 +63,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if user is authenticated via cookie (JWT or database session)
+  // Fast-path cookie check for page redirects only.
+  // This does NOT validate cookie contents — all API routes independently
+  // call auth() which cryptographically verifies the JWT/session.
   const sessionToken =
     request.cookies.get("authjs.session-token") ||
     request.cookies.get("__Secure-authjs.session-token") ||

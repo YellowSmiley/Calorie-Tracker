@@ -15,7 +15,7 @@ export async function PATCH(
     const body = await request.json();
     const { serving } = body ?? {};
 
-    if (typeof serving !== "number" || serving <= 0) {
+    if (typeof serving !== "number" || serving <= 0 || serving > 1000) {
         return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 

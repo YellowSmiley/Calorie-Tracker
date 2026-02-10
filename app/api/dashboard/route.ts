@@ -15,7 +15,14 @@ export async function GET(request: NextRequest) {
         const range = searchParams.get("range") || "day";
         const dateString = searchParams.get("date") || new Date().toISOString().split("T")[0];
 
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+        }
+
         const baseDate = new Date(`${dateString}T00:00:00`);
+        if (isNaN(baseDate.getTime())) {
+            return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+        }
         let start: Date;
         let end: Date;
 

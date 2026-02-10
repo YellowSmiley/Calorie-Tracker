@@ -2,10 +2,18 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-const mealOrder = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
+const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
+const MAX_SERVING = 1000;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const getDateRange = (dateString?: string | null) => {
+    if (dateString && !DATE_REGEX.test(dateString)) {
+        throw new Error("Invalid date format");
+    }
     const baseDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
+    if (isNaN(baseDate.getTime())) {
+        throw new Error("Invalid date");
+    }
     const start = new Date(baseDate);
     start.setHours(0, 0, 0, 0);
     const end = new Date(baseDate);
@@ -21,7 +29,12 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
-    const { start, end } = getDateRange(date);
+    let start: Date, end: Date;
+    try {
+        ({ start, end } = getDateRange(date));
+    } catch {
+        return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
 
     const entries = (await prisma.mealEntry.findMany({
         where: {
@@ -55,7 +68,7 @@ export async function GET(request: Request) {
         };
     }>;
 
-    const meals = mealOrder.map((type) => ({
+    const meals = VALID_MEAL_TYPES.map((type) => ({
         name: type[0] + type.slice(1).toLowerCase(),
         items: entries
             .filter((entry) => entry.mealType === type)
@@ -93,6 +106,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
+    if (!VALID_MEAL_TYPES.includes(mealType)) {
+        return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+    }
+
     const food = await prisma.food.findUnique({
         where: { id: foodId },
     });
@@ -101,8 +118,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Food not found" }, { status: 404 });
     }
 
-    const servingValue = typeof serving === "number" && serving > 0 ? serving : 1;
-    const mealDate = date ? new Date(`${date}T00:00:00`) : new Date();
+    const servingValue = typeof serving === "number" && serving > 0 && serving <= MAX_SERVING ? serving : 1;
+
+    let mealDate: Date;
+    try {
+        if (date) {
+            if (!DATE_REGEX.test(date)) throw new Error("Invalid date format");
+            mealDate = new Date(`${date}T00:00:00`);
+            if (isNaN(mealDate.getTime())) throw new Error("Invalid date");
+        } else {
+            mealDate = new Date();
+        }
+    } catch {
+        return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
 
     const entry = await prisma.mealEntry.create({
         data: {

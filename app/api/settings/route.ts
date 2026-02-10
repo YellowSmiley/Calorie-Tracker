@@ -65,21 +65,43 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        // Validate numeric values
+        // Validate numeric values with upper bounds
+        const MAX_CALORIE_GOAL = 99999;
+        const MAX_MACRO_GOAL = 9999;
+
         if (
             isNaN(calorieGoal) ||
             isNaN(proteinGoal) ||
             isNaN(carbGoal) ||
             isNaN(fatGoal) ||
-            calorieGoal < 0 ||
-            proteinGoal < 0 ||
-            carbGoal < 0 ||
-            fatGoal < 0
+            calorieGoal < 0 || calorieGoal > MAX_CALORIE_GOAL ||
+            proteinGoal < 0 || proteinGoal > MAX_MACRO_GOAL ||
+            carbGoal < 0 || carbGoal > MAX_MACRO_GOAL ||
+            fatGoal < 0 || fatGoal > MAX_MACRO_GOAL
         ) {
             return NextResponse.json(
-                { error: "Goal values must be positive numbers" },
+                { error: "Goal values must be between 0 and the maximum allowed" },
                 { status: 400 }
             );
+        }
+
+        // Validate unit enum values
+        const VALID_CALORIE_UNITS = ["kcal", "kJ"];
+        const VALID_MACRO_UNITS = ["g", "mg", "oz"];
+        const VALID_WEIGHT_UNITS = ["g", "kg", "oz", "lbs"];
+        const VALID_VOLUME_UNITS = ["ml", "cup", "tbsp", "tsp", "L"];
+
+        if (calorieUnit && !VALID_CALORIE_UNITS.includes(calorieUnit)) {
+            return NextResponse.json({ error: "Invalid calorie unit" }, { status: 400 });
+        }
+        if (macroUnit && !VALID_MACRO_UNITS.includes(macroUnit)) {
+            return NextResponse.json({ error: "Invalid macro unit" }, { status: 400 });
+        }
+        if (weightUnit && !VALID_WEIGHT_UNITS.includes(weightUnit)) {
+            return NextResponse.json({ error: "Invalid weight unit" }, { status: 400 });
+        }
+        if (volumeUnit && !VALID_VOLUME_UNITS.includes(volumeUnit)) {
+            return NextResponse.json({ error: "Invalid volume unit" }, { status: 400 });
         }
 
         const updatedUser = await prisma.user.update({
