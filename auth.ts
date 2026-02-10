@@ -18,6 +18,13 @@ const DEFAULT_VOLUME_UNIT = "ml";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
     trustHost: true,
+    logger: {
+        error: (error) => {
+            // Suppress expected CredentialsSignin errors (wrong password, rate limited, etc.)
+            if (error?.name === "CredentialsSignin") return;
+            console.error(error);
+        },
+    },
     providers: [
         Google({
             clientId: process.env.AUTH_GOOGLE_ID ?? "",

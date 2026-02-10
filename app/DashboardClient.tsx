@@ -73,7 +73,8 @@ export default function DashboardClient({
         setTotals(data.totals);
       }
     } catch (error) {
-      console.error("Error fetching totals:", error);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error fetching totals:", error);
     } finally {
       setIsLoading(false);
     }

@@ -47,7 +47,8 @@ export default function UserManagement() {
         setTotal(data.total ?? 0);
         setHasLoaded(true);
       } catch (err) {
-        console.error("Error fetching users:", err);
+        if (process.env.NODE_ENV === "development")
+          console.error("Error fetching users:", err);
         setError("Error fetching users");
       } finally {
         if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
@@ -108,7 +109,8 @@ export default function UserManagement() {
         setDeleteError(data.error || "Failed to delete user");
       }
     } catch (err) {
-      console.error("Error deleting user:", err);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error deleting user:", err);
       setDeleteError("Error deleting user");
     } finally {
       setIsDeleting(false);

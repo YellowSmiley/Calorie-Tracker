@@ -72,7 +72,8 @@ export default function FoodTable({
         setTotal(data.total ?? 0);
         setHasLoaded(true);
       } catch (err) {
-        console.error("Error fetching foods:", err);
+        if (process.env.NODE_ENV === "development")
+          console.error("Error fetching foods:", err);
         setError("Error fetching foods");
       } finally {
         if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
@@ -172,7 +173,8 @@ export default function FoodTable({
         }
       }
     } catch (err) {
-      console.error("Error saving food:", err);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error saving food:", err);
       setError("Error saving food");
     } finally {
       setIsLoadingCustom(false);
@@ -210,7 +212,8 @@ export default function FoodTable({
         setError("Failed to delete food");
       }
     } catch (err) {
-      console.error("Error deleting food:", err);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error deleting food:", err);
       setError("Error deleting food");
     }
   };

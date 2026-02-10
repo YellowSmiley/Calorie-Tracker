@@ -11,8 +11,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
 
-  const isLoading = isGoogleLoading || isFormLoading;
+  const isLoading = isGoogleLoading || isFormLoading || isResetLoading;
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -26,6 +28,7 @@ export default function LoginPage() {
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setResetSent(false);
     setIsFormLoading(true);
     try {
       const result = await signIn("credentials", {
@@ -34,25 +37,38 @@ export default function LoginPage() {
         redirect: false,
       });
       if (!result?.ok) {
-        // Check if this is an unverified email
-        const checkRes = await fetch("/api/auth/check-verified", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const checkData = await checkRes.json();
-        if (checkData.unverified) {
-          setError(
-            "Your email has not been verified. Please check your inbox for the verification link.",
-          );
-        } else {
-          setError("Invalid email or password");
-        }
+        setError(
+          "Failed to login. Please check your credentials and try again.",
+        );
       } else {
         window.location.href = "/";
       }
     } finally {
       setIsFormLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setError("");
+    setResetSent(false);
+
+    if (!email) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    setIsResetLoading(true);
+    try {
+      await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setResetSent(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsResetLoading(false);
     }
   };
 
@@ -123,6 +139,15 @@ export default function LoginPage() {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             )}
 
+            {resetSent && (
+              <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 p-3">
+                <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                  If an account exists with that email, a password reset link
+                  has been sent.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSignIn} className="space-y-3">
               <div className="grid gap-2 text-left">
                 <label
@@ -144,12 +169,22 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2 text-left">
-                <label
-                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label
+                    className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={isLoading}
+                    className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 underline underline-offset-2 disabled:opacity-50"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <input
                   id="password"
                   data-testid="password"

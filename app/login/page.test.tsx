@@ -27,7 +27,6 @@ global.fetch = mockFetch;
 describe("LoginPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetch.mockReset();
   });
 
   describe("Google sign-in", () => {
@@ -103,7 +102,7 @@ describe("LoginPage", () => {
       });
     });
 
-    it("does not show error and does not call check-verified on successful sign-in", async () => {
+    it("does not show error on successful sign-in", async () => {
       (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: true });
 
       render(<LoginPage />);
@@ -117,51 +116,12 @@ describe("LoginPage", () => {
       fireEvent.click(screen.getByTestId("sign-in-button"));
 
       await waitFor(() => {
-        expect(mockFetch).not.toHaveBeenCalled();
-      });
-      expect(
-        screen.queryByText("Invalid email or password"),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByText(/email has not been verified/i),
-      ).not.toBeInTheDocument();
-    });
-
-    it("shows unverified error when check-verified returns unverified", async () => {
-      (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
-      mockFetch.mockResolvedValue({
-        json: () => Promise.resolve({ unverified: true }),
-      });
-
-      render(<LoginPage />);
-
-      fireEvent.change(screen.getByLabelText(/email/i), {
-        target: { value: "user@test.com" },
-      });
-      fireEvent.change(screen.getByLabelText(/password/i), {
-        target: { value: "password123" },
-      });
-      fireEvent.click(screen.getByTestId("sign-in-button"));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(/email has not been verified/i),
-        ).toBeInTheDocument();
-      });
-
-      // Verify the check-verified endpoint was called with correct email
-      expect(mockFetch).toHaveBeenCalledWith("/api/auth/check-verified", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "user@test.com" }),
+        expect(screen.queryByText(/failed to login/i)).not.toBeInTheDocument();
       });
     });
 
-    it("shows generic error when credentials are invalid", async () => {
+    it("shows error on failed sign-in", async () => {
       (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
-      mockFetch.mockResolvedValue({
-        json: () => Promise.resolve({ unverified: false }),
-      });
 
       render(<LoginPage />);
 
@@ -174,18 +134,13 @@ describe("LoginPage", () => {
       fireEvent.click(screen.getByTestId("sign-in-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Invalid email or password"),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/failed to login/i)).toBeInTheDocument();
       });
     });
 
     it("clears previous error on new sign-in attempt", async () => {
       // First attempt fails
       (nextAuth.signIn as jest.Mock).mockResolvedValue({ ok: false });
-      mockFetch.mockResolvedValue({
-        json: () => Promise.resolve({ unverified: false }),
-      });
 
       render(<LoginPage />);
 
@@ -198,21 +153,15 @@ describe("LoginPage", () => {
       fireEvent.click(screen.getByTestId("sign-in-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Invalid email or password"),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/failed to login/i)).toBeInTheDocument();
       });
-
-      // Second attempt — error should be cleared while loading
       (nextAuth.signIn as jest.Mock).mockImplementation(
         () => new Promise(() => {}),
       );
       fireEvent.click(screen.getByTestId("sign-in-button"));
 
       await waitFor(() => {
-        expect(
-          screen.queryByText("Invalid email or password"),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/failed to login/i)).not.toBeInTheDocument();
       });
     });
   });

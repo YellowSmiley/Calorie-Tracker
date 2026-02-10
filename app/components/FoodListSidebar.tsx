@@ -74,7 +74,8 @@ export default function FoodListSidebar({
         });
         const res = await fetch(`/api/foods?${params}`);
         if (!res.ok) {
-          console.error("Failed to fetch foods");
+          if (process.env.NODE_ENV === "development")
+            console.error("Failed to fetch foods");
           return;
         }
         const data = await res.json();
@@ -83,7 +84,8 @@ export default function FoodListSidebar({
         setTotal(data.total ?? 0);
         setHasLoaded(true);
       } catch (err) {
-        console.error("Error fetching foods:", err);
+        if (process.env.NODE_ENV === "development")
+          console.error("Error fetching foods:", err);
       } finally {
         if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
         setIsFetching(false);

@@ -57,7 +57,8 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         setSettings(data);
       }
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error fetching settings:", error);
       setMessage({ type: "error", text: "Failed to load settings" });
     } finally {
       setIsLoading(false);
@@ -88,7 +89,8 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         });
       }
     } catch (error) {
-      console.error("Error saving settings:", error);
+      if (process.env.NODE_ENV === "development")
+        console.error("Error saving settings:", error);
       setMessage({ type: "error", text: "Failed to save settings" });
     } finally {
       setIsSaving(false);

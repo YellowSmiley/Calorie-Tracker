@@ -35,3 +35,27 @@ export async function sendVerificationEmail(email: string, token: string) {
         `,
     });
 }
+
+export async function sendPasswordResetEmail(email: string, token: string) {
+    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+    const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+
+    await transporter.sendMail({
+        from: FROM_ADDRESS,
+        to: email,
+        subject: "Reset your password — Calorie Tracker",
+        text: `You requested a password reset for your Calorie Tracker account.\n\nReset your password by visiting this link:\n${resetUrl}\n\nThis link expires in 1 hour.\n\nIf you didn't request this, you can safely ignore this email.`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+                <h2 style="margin-bottom: 16px;">Reset your password</h2>
+                <p>You requested a password reset for your Calorie Tracker account. Click the button below to choose a new password:</p>
+                <a href="${resetUrl}"
+                   style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 16px 0;">
+                    Reset Password
+                </a>
+                <p style="color: #666; font-size: 14px;">This link expires in 1 hour.</p>
+                <p style="color: #666; font-size: 14px;">If you didn&rsquo;t request this, you can safely ignore this email.</p>
+            </div>
+        `,
+    });
+}

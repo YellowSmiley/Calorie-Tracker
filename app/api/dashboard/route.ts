@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
             include: {
                 food: true,
             },
+            take: 10000,
         });
 
         const totals = entries.reduce(
