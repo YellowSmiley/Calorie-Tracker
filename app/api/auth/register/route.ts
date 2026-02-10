@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 import { checkRegisterRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
+import crypto, { createHash } from "crypto";
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -69,12 +69,13 @@ export async function POST(request: Request) {
 
         // Generate verification token
         const token = crypto.randomBytes(32).toString("hex");
+        const tokenHash = createHash("sha256").update(token).digest("hex");
         const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
         await prisma.verificationToken.create({
             data: {
                 identifier: normalizedEmail,
-                token,
+                token: tokenHash,
                 expires,
             },
         });

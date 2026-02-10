@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { logError } from "@/lib/logger";
 
 export async function PUT(
     request: NextRequest,
@@ -42,7 +43,7 @@ export async function PUT(
             createdByName: creator?.name || "Unknown",
         });
     } catch (error) {
-        console.error("Error updating food:", error);
+        logError("admin/foods/PUT", error);
         return NextResponse.json(
             { error: "Failed to update food" },
             { status: 500 }
@@ -70,7 +71,7 @@ export async function DELETE(
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error deleting food:", error);
+        logError("admin/foods/DELETE", error);
         return NextResponse.json(
             { error: "Failed to delete food" },
             { status: 500 }

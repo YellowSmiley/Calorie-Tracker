@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { logError } from "@/lib/logger";
 
 export async function DELETE(
     _request: Request,
@@ -23,6 +24,21 @@ export async function DELETE(
             );
         }
 
+        // Prevent deleting the last admin
+        const targetUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isAdmin: true },
+        });
+        if (targetUser?.isAdmin) {
+            const adminCount = await prisma.user.count({ where: { isAdmin: true } });
+            if (adminCount <= 1) {
+                return NextResponse.json(
+                    { error: "Cannot delete the last admin" },
+                    { status: 400 }
+                );
+            }
+        }
+
         // Delete user and all their data (cascade handles it)
         await prisma.user.delete({
             where: { id: userId },
@@ -30,7 +46,7 @@ export async function DELETE(
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error deleting user:", error);
+        logError("admin/users/DELETE", error);
         return NextResponse.json(
             { error: "Failed to delete user" },
             { status: 500 }

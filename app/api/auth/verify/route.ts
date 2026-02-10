@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createHash } from "crypto";
 
 export async function GET(request: Request) {
     try {
@@ -15,13 +16,14 @@ export async function GET(request: Request) {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
+        const tokenHash = createHash("sha256").update(token).digest("hex");
 
-        // Look up the verification token
+        // Look up the verification token by hash
         const record = await prisma.verificationToken.findUnique({
             where: {
                 identifier_token: {
                     identifier: normalizedEmail,
-                    token,
+                    token: tokenHash,
                 },
             },
         });
@@ -39,7 +41,7 @@ export async function GET(request: Request) {
                 where: {
                     identifier_token: {
                         identifier: normalizedEmail,
-                        token,
+                        token: tokenHash,
                     },
                 },
             });
@@ -59,7 +61,7 @@ export async function GET(request: Request) {
                 where: {
                     identifier_token: {
                         identifier: normalizedEmail,
-                        token,
+                        token: tokenHash,
                     },
                 },
             }),

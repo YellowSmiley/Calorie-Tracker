@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { logError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
     const session = await auth();
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ users, total, take, skip });
     } catch (error) {
-        console.error("Error fetching users:", error);
+        logError("admin/users/GET", error);
         return NextResponse.json(
             { error: "Failed to fetch users" },
             { status: 500 }

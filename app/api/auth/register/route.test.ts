@@ -28,6 +28,11 @@ jest.mock("crypto", () => ({
     randomBytes: jest.fn().mockReturnValue({
         toString: () => "mock_token_hex",
     }),
+    createHash: jest.fn().mockReturnValue({
+        update: jest.fn().mockReturnValue({
+            digest: jest.fn().mockReturnValue("mock_token_hashed"),
+        }),
+    }),
 }));
 
 jest.mock("@/lib/rateLimit", () => ({
@@ -184,7 +189,7 @@ describe("POST /api/auth/register", () => {
             expect(prisma.verificationToken.create).toHaveBeenCalledWith({
                 data: expect.objectContaining({
                     identifier: "john@test.com",
-                    token: "mock_token_hex",
+                    token: "mock_token_hashed",
                 }),
             });
 

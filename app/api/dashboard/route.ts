@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { logError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
     const session = await auth();
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ totals });
     } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        logError("dashboard/GET", error);
         return NextResponse.json(
             { error: "Failed to fetch dashboard data" },
             { status: 500 },

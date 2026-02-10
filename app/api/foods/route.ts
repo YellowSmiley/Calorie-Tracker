@@ -44,8 +44,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
 
-    if (!name || typeof calories !== "number") {
-        return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    if (!name || typeof name !== "string" || name.trim().length === 0 || name.length > 200) {
+        return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
+    }
+    if (typeof calories !== "number" || calories < 0 || calories > 99999) {
+        return NextResponse.json({ error: "Invalid calorie value" }, { status: 400 });
+    }
+    if (measurement && (typeof measurement !== "string" || measurement.length > 100)) {
+        return NextResponse.json({ error: "Invalid measurement" }, { status: 400 });
     }
 
     const food = await prisma.food.create({
@@ -74,8 +80,17 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
 
-    if (!id || !name || typeof calories !== "number") {
-        return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    if (!id) {
+        return NextResponse.json({ error: "Food ID is required" }, { status: 400 });
+    }
+    if (!name || typeof name !== "string" || name.trim().length === 0 || name.length > 200) {
+        return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
+    }
+    if (typeof calories !== "number" || calories < 0 || calories > 99999) {
+        return NextResponse.json({ error: "Invalid calorie value" }, { status: 400 });
+    }
+    if (measurement && (typeof measurement !== "string" || measurement.length > 100)) {
+        return NextResponse.json({ error: "Invalid measurement" }, { status: 400 });
     }
 
     // Verify the food belongs to the current user

@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { checkLoginRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
 
 const DEFAULT_CALORIE_GOAL = 3000;
@@ -33,6 +34,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const password = String(credentials?.password ?? "");
 
                 if (!email || !password) {
+                    return null;
+                }
+
+                // Rate limit login attempts per email
+                const allowed = await checkLoginRateLimit(email);
+                if (!allowed) {
                     return null;
                 }
 

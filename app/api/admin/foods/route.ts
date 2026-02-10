@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { logError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
     const session = await auth();
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ foods: foodsWithCreator, total, take, skip });
     } catch (error) {
-        console.error("Error fetching foods:", error);
+        logError("admin/foods/GET", error);
         return NextResponse.json(
             { error: "Failed to fetch foods" },
             { status: 500 }
@@ -71,8 +72,17 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body;
 
-        if (!name || !measurement || calories === undefined || protein === undefined || carbs === undefined || fat === undefined) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        if (!name || typeof name !== "string" || name.trim().length === 0 || name.length > 200) {
+            return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
+        }
+        if (!measurement || typeof measurement !== "string" || measurement.length > 100) {
+            return NextResponse.json({ error: "Invalid measurement" }, { status: 400 });
+        }
+        if (typeof calories !== "number" || calories < 0 || calories > 99999) {
+            return NextResponse.json({ error: "Invalid calorie value" }, { status: 400 });
+        }
+        if (typeof protein !== "number" || protein < 0 || typeof carbs !== "number" || carbs < 0 || typeof fat !== "number" || fat < 0) {
+            return NextResponse.json({ error: "Invalid macro values" }, { status: 400 });
         }
 
         const newFood = await prisma.food.create({
@@ -91,7 +101,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(newFood);
     } catch (error) {
-        console.error("Error creating food:", error);
+        logError("admin/foods/POST", error);
         return NextResponse.json(
             { error: "Failed to create food" },
             { status: 500 }
