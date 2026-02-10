@@ -241,9 +241,8 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                     }
                     className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
-                    <option value="cal">cal</option>
                     <option value="kcal">kcal</option>
-                    <option value="Cal">Cal</option>
+                    <option value="kJ">kJ</option>
                   </select>
                 </div>
 
@@ -260,9 +259,9 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                     onChange={(e) => handleChange("macroUnit", e.target.value)}
                     className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
-                    <option value="g">grams (g)</option>
-                    <option value="oz">ounces (oz)</option>
-                    <option value="mg">milligrams (mg)</option>
+                    <option value="g">Grams (g)</option>
+                    <option value="oz">Ounces (oz)</option>
+                    <option value="mg">Milligrams (mg)</option>
                   </select>
                 </div>
               </div>
@@ -288,10 +287,10 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                     onChange={(e) => handleChange("weightUnit", e.target.value)}
                     className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
-                    <option value="g">grams (g)</option>
-                    <option value="oz">ounces (oz)</option>
-                    <option value="kg">kilograms (kg)</option>
-                    <option value="lbs">pounds (lbs)</option>
+                    <option value="g">Grams (g)</option>
+                    <option value="oz">Ounces (oz)</option>
+                    <option value="kg">Kilograms (kg)</option>
+                    <option value="lbs">Pounds (lbs)</option>
                   </select>
                 </div>
 
@@ -308,11 +307,11 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                     onChange={(e) => handleChange("volumeUnit", e.target.value)}
                     className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                   >
-                    <option value="ml">milliliters (ml)</option>
-                    <option value="cup">cups</option>
-                    <option value="tbsp">tablespoons (tbsp)</option>
-                    <option value="tsp">teaspoons (tsp)</option>
-                    <option value="L">liters (L)</option>
+                    <option value="ml">Millilitres (ml)</option>
+                    <option value="cup">Cups</option>
+                    <option value="tbsp">Tablespoons (tbsp)</option>
+                    <option value="tsp">Teaspoons (tsp)</option>
+                    <option value="L">Litres (L)</option>
                   </select>
                 </div>
               </div>

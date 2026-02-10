@@ -15,9 +15,8 @@ export function convertCaloriesForDisplay(
         return 0;
     }
     switch (targetUnit) {
-        case "cal":
-            return kcalValue * 1000;
-        case "Cal": // Same as kcal
+        case "kJ":
+            return kcalValue * 4.184;
         case "kcal":
         default:
             return kcalValue;
@@ -32,9 +31,8 @@ export function convertCaloriesFromInput(
         return 0;
     }
     switch (inputUnit) {
-        case "cal":
-            return inputValue / 1000;
-        case "Cal": // Same as kcal
+        case "kJ":
+            return inputValue / 4.184;
         case "kcal":
         default:
             return inputValue;

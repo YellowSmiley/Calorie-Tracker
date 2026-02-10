@@ -29,12 +29,8 @@ describe("convertCaloriesForDisplay", () => {
         expect(convertCaloriesForDisplay(250, "kcal")).toBe(250);
     });
 
-    it("returns same value for Cal (same as kcal)", () => {
-        expect(convertCaloriesForDisplay(250, "Cal")).toBe(250);
-    });
-
-    it("converts kcal to cal (x1000)", () => {
-        expect(convertCaloriesForDisplay(2, "cal")).toBe(2000);
+    it("converts kcal to kJ (x4.184)", () => {
+        expect(convertCaloriesForDisplay(100, "kJ")).toBeCloseTo(418.4, 1);
     });
 
     it("returns same value for unknown unit (default case)", () => {
@@ -59,19 +55,15 @@ describe("convertCaloriesFromInput", () => {
         expect(convertCaloriesFromInput(250, "kcal")).toBe(250);
     });
 
-    it("returns same value for Cal", () => {
-        expect(convertCaloriesFromInput(250, "Cal")).toBe(250);
-    });
-
-    it("converts cal to kcal (/1000)", () => {
-        expect(convertCaloriesFromInput(2000, "cal")).toBe(2);
+    it("converts kJ to kcal (/4.184)", () => {
+        expect(convertCaloriesFromInput(418.4, "kJ")).toBeCloseTo(100, 1);
     });
 
     it("round-trips correctly: display then input returns original", () => {
         const original = 350;
-        const displayed = convertCaloriesForDisplay(original, "cal");
-        const backToKcal = convertCaloriesFromInput(displayed, "cal");
-        expect(backToKcal).toBe(original);
+        const displayed = convertCaloriesForDisplay(original, "kJ");
+        const backToKcal = convertCaloriesFromInput(displayed, "kJ");
+        expect(backToKcal).toBeCloseTo(original, 5);
     });
 });
 
@@ -137,10 +129,10 @@ describe("formatCalories", () => {
         ).toBe("251 kcal");
     });
 
-    it("formats cal values (multiplied by 1000)", () => {
+    it("formats kJ values (multiplied by 4.184)", () => {
         expect(
-            formatCalories(2.5, { calorieUnit: "cal", macroUnit: "g" }),
-        ).toBe("2500 cal");
+            formatCalories(100, { calorieUnit: "kJ", macroUnit: "g" }),
+        ).toBe("418 kJ");
     });
 
     it("rounds to nearest integer", () => {
