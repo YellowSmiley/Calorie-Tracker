@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { name, measurement, calories, protein, carbs, fat } = body;
+        const { name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body;
 
         if (!name || !measurement || calories === undefined || protein === undefined || carbs === undefined || fat === undefined) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -64,6 +64,8 @@ export async function POST(request: NextRequest) {
                 carbs,
                 fat,
                 createdBy: session.user.id,
+                defaultServingAmount: typeof defaultServingAmount === 'number' && defaultServingAmount > 0 ? defaultServingAmount : null,
+                defaultServingDescription: typeof defaultServingDescription === 'string' && defaultServingDescription.trim() ? defaultServingDescription.trim().slice(0, 50) : null,
             },
         });
 

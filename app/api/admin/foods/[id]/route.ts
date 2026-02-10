@@ -25,6 +25,8 @@ export async function PUT(
                 protein: body.protein,
                 carbs: body.carbs,
                 fat: body.fat,
+                defaultServingAmount: typeof body.defaultServingAmount === 'number' && body.defaultServingAmount > 0 ? body.defaultServingAmount : null,
+                defaultServingDescription: typeof body.defaultServingDescription === 'string' && body.defaultServingDescription.trim() ? body.defaultServingDescription.trim().slice(0, 50) : null,
             },
         });
 

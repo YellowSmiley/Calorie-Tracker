@@ -167,7 +167,7 @@ A full-stack Next.js application for tracking daily food intake and macronutrien
 ├── types/
 │   └── next-auth.d.ts            # Extended NextAuth types
 ├── auth.ts                       # NextAuth v5 configuration
-├── middleware.ts                  # Route protection middleware
+├── proxy.ts                      # Route protection proxy (auth guard)
 ├── prisma.config.ts              # Prisma configuration
 ├── jest.config.ts                # Jest configuration
 ├── jest.setup.ts                 # Jest setup (testing-library/jest-dom)
@@ -236,6 +236,68 @@ npm run seed             # Seed database with default foods
 npx prisma studio        # Open Prisma Studio (database GUI)
 npx prisma migrate dev   # Run database migrations
 ```
+
+## Deployment (Cloudflare Tunnel)
+
+The app can be hosted locally and exposed to the internet via [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) — no port forwarding or static IP required.
+
+### Prerequisites
+
+- A domain managed by Cloudflare (e.g. `masmith.uk`)
+- `cloudflared` installed: `winget install Cloudflare.cloudflared`
+
+### One-time setup
+
+```bash
+# Authenticate with Cloudflare (opens browser)
+cloudflared tunnel login
+
+# Create a named tunnel
+cloudflared tunnel create calorietracker
+
+# Route your subdomain to the tunnel
+cloudflared tunnel route dns calorietracker calorietracker.yourdomain.com
+```
+
+Update `.env`:
+
+```env
+AUTH_URL="https://calorietracker.yourdomain.com"
+```
+
+Update Google OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+
+- **Authorized JavaScript origins:** `https://calorietracker.yourdomain.com`
+- **Authorized redirect URIs:** `https://calorietracker.yourdomain.com/api/auth/callback/google`
+
+### Running in production
+
+```bash
+# Terminal 1: Build and start the production server
+npm run build
+npm start
+
+# Terminal 2: Start the Cloudflare tunnel
+cloudflared tunnel run --url http://localhost:3000 calorietracker
+```
+
+The site will be live at `https://calorietracker.yourdomain.com`.
+
+### LAN access (without Cloudflare)
+
+To access from other devices on your local network without a tunnel:
+
+```bash
+npx next dev --hostname 0.0.0.0
+```
+
+Then visit `http://<your-local-ip>:3000` from other devices. You may need to allow port 3000 through Windows Firewall:
+
+```powershell
+New-NetFirewallRule -DisplayName "Next.js Dev" -Direction Inbound -Port 3000 -Protocol TCP -Action Allow
+```
+
+> **Note:** Google OAuth won't work over plain HTTP from non-localhost origins. Use Cloudflare Tunnel for full functionality.
 
 ## License & Copyright
 

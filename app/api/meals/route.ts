@@ -50,6 +50,8 @@ export async function GET(request: Request) {
             protein: number;
             carbs: number;
             fat: number;
+            defaultServingAmount: number | null;
+            defaultServingDescription: string | null;
         };
     }>;
 
@@ -70,6 +72,8 @@ export async function GET(request: Request) {
                 baseProtein: entry.food.protein,
                 baseCarbs: entry.food.carbs,
                 baseFat: entry.food.fat,
+                defaultServingAmount: entry.food.defaultServingAmount,
+                defaultServingDescription: entry.food.defaultServingDescription,
             })),
     }));
 
@@ -131,6 +135,8 @@ export async function POST(request: Request) {
             baseProtein: entry.food.protein,
             baseCarbs: entry.food.carbs,
             baseFat: entry.food.fat,
+            defaultServingAmount: entry.food.defaultServingAmount,
+            defaultServingDescription: entry.food.defaultServingDescription,
         },
     });
 }

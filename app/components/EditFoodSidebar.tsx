@@ -2,13 +2,17 @@
 
 import { useMemo } from "react";
 import type { FoodItem } from "../diary/types";
-import { formatCalories, formatMacro } from "@/lib/unitConversions";
+import {
+  formatCalories,
+  formatMacro,
+  parseMeasurement,
+} from "@/lib/unitConversions";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
   food: FoodItem | null;
-  servingValue: string;
-  onServingChange: (value: string) => void;
+  amountValue: string;
+  onAmountChange: (value: string) => void;
   onClose: () => void;
   onSubmit: (serving: number) => void;
   userSettings: {
@@ -21,28 +25,35 @@ interface EditFoodSidebarProps {
 export default function EditFoodSidebar({
   isOpen,
   food,
-  servingValue,
-  onServingChange,
+  amountValue,
+  onAmountChange,
   onClose,
   onSubmit,
   userSettings,
   isLoading = false,
 }: EditFoodSidebarProps) {
+  const parsed = useMemo(
+    () => parseMeasurement(food?.measurement || "1 serving"),
+    [food?.measurement],
+  );
+
   const calculatedNutrition = useMemo(() => {
     if (!food) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    const serving = parseFloat(servingValue) || 0;
+    const amount = parseFloat(amountValue) || 0;
+    const serving = amount / parsed.amount;
     return {
       calories: Number((food.baseCalories * serving).toFixed(1)),
       protein: Number((food.baseProtein * serving).toFixed(1)),
       carbs: Number((food.baseCarbs * serving).toFixed(1)),
       fat: Number((food.baseFat * serving).toFixed(1)),
     };
-  }, [food, servingValue]);
+  }, [food, amountValue, parsed.amount]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const serving = parseFloat(servingValue);
-    onSubmit(Number.isNaN(serving) ? 0 : serving);
+    const amount = parseFloat(amountValue);
+    const serving = (Number.isNaN(amount) ? 0 : amount) / parsed.amount;
+    onSubmit(serving);
   };
 
   return (
@@ -121,24 +132,29 @@ export default function EditFoodSidebar({
               </div>
             </div>
 
-            {/* Serving Adjuster */}
+            {/* Amount Input */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
-                Number of Servings
+                {parsed.inputLabel}
               </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                value={servingValue}
-                onChange={(e) => onServingChange(e.target.value)}
-                className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
-                placeholder="1.0"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={amountValue}
+                  onChange={(e) => onAmountChange(e.target.value)}
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center pr-14"
+                  placeholder={String(parsed.amount)}
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500 dark:text-zinc-400">
+                  {parsed.inputUnit}
+                </span>
+              </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center mt-2">
-                {servingValue
-                  ? `${servingValue} × ${food?.measurement || ""}`
-                  : "Enter servings"}
+                {amountValue
+                  ? `${amountValue}${parsed.inputUnit}${parsed.description ? ` ${parsed.description}` : ""} (base: ${food?.measurement || ""})`
+                  : `Enter amount in ${parsed.inputUnit}`}
               </p>
             </div>
 

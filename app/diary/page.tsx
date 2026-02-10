@@ -29,6 +29,8 @@ const mapFoodToItem = (food: {
   protein: number;
   carbs: number;
   fat: number;
+  defaultServingAmount?: number | null;
+  defaultServingDescription?: string | null;
 }): FoodItem => ({
   id: food.id,
   name: food.name,
@@ -42,6 +44,8 @@ const mapFoodToItem = (food: {
   baseProtein: food.protein,
   baseCarbs: food.carbs,
   baseFat: food.fat,
+  defaultServingAmount: food.defaultServingAmount,
+  defaultServingDescription: food.defaultServingDescription,
 });
 
 export default async function DiaryPage({
@@ -117,6 +121,8 @@ export default async function DiaryPage({
       protein: number;
       carbs: number;
       fat: number;
+      defaultServingAmount: number | null;
+      defaultServingDescription: string | null;
     };
   }>;
 
@@ -137,6 +143,8 @@ export default async function DiaryPage({
         baseProtein: entry.food.protein,
         baseCarbs: entry.food.carbs,
         baseFat: entry.food.fat,
+        defaultServingAmount: entry.food.defaultServingAmount,
+        defaultServingDescription: entry.food.defaultServingDescription,
       })),
   }));
 

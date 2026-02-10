@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { FoodItem } from "../diary/types";
-import { formatCalories } from "@/lib/unitConversions";
+import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectFood: (food: FoodItem) => void;
+  onSelectFood: (food: FoodItem, quantity: number) => void;
   onOpenCreateForm: () => void;
   foods: FoodItem[];
   isLoading?: boolean;
@@ -27,6 +27,7 @@ export default function FoodListSidebar({
   userSettings,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [quantities, setQuantities] = useState<Record<string, string>>({});
 
   const filteredFoods = foods.filter(
     (food) =>
@@ -34,14 +35,45 @@ export default function FoodListSidebar({
       food.measurement.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const getQty = (foodId: string): number => {
+    const raw = quantities[foodId];
+    if (raw === undefined || raw === "") return 0;
+    const n = parseInt(raw);
+    return isNaN(n) || n < 1 ? 0 : n;
+  };
+
   const handleClose = () => {
     setSearchQuery("");
+    setQuantities({});
     onClose();
   };
 
   const handleSelectFood = (food: FoodItem) => {
-    onSelectFood(food);
+    const qty = getQty(food.id) || 1;
+    onSelectFood(food, qty);
     setSearchQuery("");
+    setQuantities({});
+  };
+
+  const getServingDisplay = (food: FoodItem) => {
+    const parsed = parseMeasurement(food.measurement);
+    const unit = parsed.inputUnit;
+
+    if (food.defaultServingAmount) {
+      const servingRatio = food.defaultServingAmount / parsed.amount;
+      const servingCals = Math.round(food.baseCalories * servingRatio);
+      const desc = food.defaultServingDescription
+        ? ` · ${food.defaultServingDescription}`
+        : "";
+      return {
+        line: `${food.defaultServingAmount}${unit}${desc}`,
+        calories: servingCals,
+      };
+    }
+    return {
+      line: `${parsed.amount}${unit}${parsed.description ? ` ${parsed.description}` : ""}`,
+      calories: food.baseCalories,
+    };
   };
 
   return (
@@ -66,7 +98,7 @@ export default function FoodListSidebar({
 
       {/* Search Box */}
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto w-full max-w-6xl">
+        <div className="mx-auto w-full max-w-3xl">
           <input
             type="text"
             placeholder="Search foods..."
@@ -86,22 +118,49 @@ export default function FoodListSidebar({
             </div>
           </div>
         )}
-        <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
           {filteredFoods.map((food) => (
-            <button
-              key={food.id}
-              onClick={() => handleSelectFood(food)}
-              disabled={isLoading}
-              className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <p className="font-medium text-black dark:text-zinc-50">
-                {food.name}
-              </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {food.measurement} •{" "}
-                {formatCalories(food.calories, userSettings)}
-              </p>
-            </button>
+            <div key={food.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-black dark:text-zinc-50">
+                  {food.name}
+                </p>
+                {(() => {
+                  const serving = getServingDisplay(food);
+                  return (
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {serving.line} •{" "}
+                      {formatCalories(serving.calories, userSettings)}
+                    </p>
+                  );
+                })()}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <label className="text-xs text-zinc-400 dark:text-zinc-500">
+                  Qty
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={quantities[food.id] ?? "1"}
+                  onChange={(e) =>
+                    setQuantities((prev) => ({
+                      ...prev,
+                      [food.id]: e.target.value,
+                    }))
+                  }
+                  className="w-14 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1 text-center text-sm bg-transparent text-black dark:text-zinc-50"
+                />
+                <button
+                  onClick={() => handleSelectFood(food)}
+                  disabled={isLoading || !getQty(food.id)}
+                  className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-1 text-sm font-medium text-black dark:text-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

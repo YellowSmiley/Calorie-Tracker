@@ -5,6 +5,7 @@ import {
     convertMacroFromInput,
     formatCalories,
     formatMacro,
+    parseMeasurement,
 } from "./unitConversions";
 
 describe("convertCaloriesForDisplay", () => {
@@ -178,5 +179,79 @@ describe("formatMacro", () => {
         expect(
             formatMacro(null, { calorieUnit: "kcal", macroUnit: "g" }),
         ).toBe("0g");
+    });
+});
+
+describe("parseMeasurement", () => {
+    it("parses weight in grams (100g)", () => {
+        const result = parseMeasurement("100g");
+        expect(result.amount).toBe(100);
+        expect(result.unit).toBe("g");
+        expect(result.isWeight).toBe(true);
+        expect(result.isVolume).toBe(false);
+        expect(result.inputLabel).toBe("Weight (g)");
+        expect(result.inputUnit).toBe("g");
+    });
+
+    it("parses weight with space (100 g)", () => {
+        const result = parseMeasurement("100 g");
+        expect(result.amount).toBe(100);
+        expect(result.unit).toBe("g");
+        expect(result.isWeight).toBe(true);
+    });
+
+    it("parses volume in ml (250ml)", () => {
+        const result = parseMeasurement("250ml");
+        expect(result.amount).toBe(250);
+        expect(result.unit).toBe("ml");
+        expect(result.isVolume).toBe(true);
+        expect(result.isWeight).toBe(false);
+        expect(result.inputLabel).toBe("Volume (ml)");
+    });
+
+    it("parses cup with description (1 cup cooked)", () => {
+        const result = parseMeasurement("1 cup cooked");
+        expect(result.amount).toBe(1);
+        expect(result.unit).toBe("cup");
+        expect(result.description).toBe("cooked");
+        expect(result.isVolume).toBe(true);
+        expect(result.inputLabel).toBe("Volume (cup)");
+    });
+
+    it("parses non-standard units (1 large)", () => {
+        const result = parseMeasurement("1 large");
+        expect(result.amount).toBe(1);
+        expect(result.unit).toBe("large");
+        expect(result.isWeight).toBe(false);
+        expect(result.isVolume).toBe(false);
+        expect(result.inputLabel).toBe("Amount (large)");
+    });
+
+    it("parses decimal amounts (1.5 tbsp)", () => {
+        const result = parseMeasurement("1.5 tbsp");
+        expect(result.amount).toBe(1.5);
+        expect(result.unit).toBe("tbsp");
+        expect(result.isVolume).toBe(true);
+    });
+
+    it("parses oz weight (4 oz)", () => {
+        const result = parseMeasurement("4 oz");
+        expect(result.amount).toBe(4);
+        expect(result.unit).toBe("oz");
+        expect(result.isWeight).toBe(true);
+    });
+
+    it("falls back to serving for unparseable input", () => {
+        const result = parseMeasurement("per serving");
+        expect(result.amount).toBe(1);
+        expect(result.unit).toBe("serving");
+        expect(result.inputLabel).toBe("Servings");
+    });
+
+    it("handles kg weight (1 kg)", () => {
+        const result = parseMeasurement("1 kg");
+        expect(result.amount).toBe(1);
+        expect(result.unit).toBe("kg");
+        expect(result.isWeight).toBe(true);
     });
 });

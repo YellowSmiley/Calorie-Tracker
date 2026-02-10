@@ -13,6 +13,8 @@ interface Food {
   fat: number;
   createdBy?: string | null;
   createdByName?: string | null;
+  defaultServingAmount?: number | null;
+  defaultServingDescription?: string | null;
 }
 
 interface FoodTableProps {
@@ -50,6 +52,8 @@ export default function FoodTable({
     protein: number;
     carbs: number;
     fat: number;
+    defaultServingAmount?: number | null;
+    defaultServingDescription?: string | null;
   }) => {
     setIsLoadingCustom(true);
     setError(null);
@@ -204,6 +208,9 @@ export default function FoodTable({
               <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                 Fat (g)
               </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
+                Default Serving
+              </th>
               {showCreatedBy && (
                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50 whitespace-nowrap">
                   Created By
@@ -218,7 +225,7 @@ export default function FoodTable({
             {filteredFoods.length === 0 ? (
               <tr>
                 <td
-                  colSpan={showCreatedBy ? 8 : 7}
+                  colSpan={showCreatedBy ? 9 : 8}
                   className="px-4 py-3 text-center text-zinc-500"
                 >
                   {foods.length === 0 ? emptyMessage : "No foods found"}
@@ -248,6 +255,11 @@ export default function FoodTable({
                   </td>
                   <td className="px-4 py-3 text-black dark:text-zinc-50">
                     {food.fat}
+                  </td>
+                  <td className="px-4 py-3 text-black dark:text-zinc-50 text-sm">
+                    {food.defaultServingDescription
+                      ? `${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount}${food.measurement.replace(/^[\d.]+/, "")})` : ""}`
+                      : "—"}
                   </td>
                   {showCreatedBy && (
                     <td className="px-4 py-3 text-black dark:text-zinc-50 text-sm">

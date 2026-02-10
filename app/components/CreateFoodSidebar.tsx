@@ -14,6 +14,8 @@ interface Food {
   protein: number;
   carbs: number;
   fat: number;
+  defaultServingAmount?: number | null;
+  defaultServingDescription?: string | null;
 }
 
 interface CreateFoodSidebarProps {
@@ -26,6 +28,8 @@ interface CreateFoodSidebarProps {
     protein: number;
     carbs: number;
     fat: number;
+    defaultServingAmount?: number | null;
+    defaultServingDescription?: string | null;
   }) => void;
   userSettings: {
     calorieUnit: string;
@@ -53,6 +57,8 @@ export default function CreateFoodSidebar({
     protein: "",
     carbs: "",
     fat: "",
+    defaultServingAmount: "",
+    defaultServingDescription: "",
   });
 
   const hasInitialized = useRef<string | null>(null);
@@ -82,6 +88,11 @@ export default function CreateFoodSidebar({
           protein: String(editingFood.protein),
           carbs: String(editingFood.carbs),
           fat: String(editingFood.fat),
+          defaultServingAmount: editingFood.defaultServingAmount
+            ? String(editingFood.defaultServingAmount)
+            : "",
+          defaultServingDescription:
+            editingFood.defaultServingDescription ?? "",
         });
       }
     } else if (!editingFood && isOpen) {
@@ -98,6 +109,8 @@ export default function CreateFoodSidebar({
           protein: "",
           carbs: "",
           fat: "",
+          defaultServingAmount: "",
+          defaultServingDescription: "",
         });
       }
     } else if (!isOpen) {
@@ -115,6 +128,7 @@ export default function CreateFoodSidebar({
     const measurement = `${formData.measurementValue}${unit}`;
 
     // Convert from user's input units to database storage units (kcal, grams)
+    const servingAmount = parseFloat(formData.defaultServingAmount);
     onSubmit({
       name: formData.name,
       measurement: measurement,
@@ -134,6 +148,9 @@ export default function CreateFoodSidebar({
         parseFloat(formData.fat) || 0,
         userSettings.macroUnit,
       ),
+      defaultServingAmount: servingAmount > 0 ? servingAmount : null,
+      defaultServingDescription:
+        formData.defaultServingDescription.trim() || null,
     });
   };
 
@@ -146,6 +163,8 @@ export default function CreateFoodSidebar({
       protein: "",
       carbs: "",
       fat: "",
+      defaultServingAmount: "",
+      defaultServingDescription: "",
     });
     onClose();
   };
@@ -212,13 +231,13 @@ export default function CreateFoodSidebar({
                     value="weight"
                     className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
                   >
-                    Weight
+                    Weight ({userSettings.weightUnit})
                   </option>
                   <option
                     value="volume"
                     className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
                   >
-                    Volume
+                    Volume ({userSettings.volumeUnit})
                   </option>
                 </select>
               </div>
@@ -312,6 +331,55 @@ export default function CreateFoodSidebar({
                   placeholder="0"
                   required
                 />
+              </div>
+            </div>
+
+            {/* Default Serving Section */}
+            <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+              <h3 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
+                Default Serving (optional)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                    Serving Amount (
+                    {formData.measurementType === "weight"
+                      ? userSettings.weightUnit
+                      : userSettings.volumeUnit}
+                    )
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.defaultServingAmount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        defaultServingAmount: e.target.value,
+                      })
+                    }
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                    placeholder="e.g. 70"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                    Serving Description
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={50}
+                    value={formData.defaultServingDescription}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        defaultServingDescription: e.target.value,
+                      })
+                    }
+                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                    placeholder="e.g. 1 medium egg"
+                  />
+                </div>
               </div>
             </div>
           </div>

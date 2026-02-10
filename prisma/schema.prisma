@@ -85,6 +85,8 @@ model Food {
   protein     Float
   carbs       Float
   fat         Float
+  defaultServingAmount      Float?
+  defaultServingDescription String?   @db.VarChar(50)
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

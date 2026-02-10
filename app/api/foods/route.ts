@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, measurement, calories, protein, carbs, fat } = body ?? {};
+    const { name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
 
     if (!name || typeof calories !== "number") {
         return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -36,6 +36,8 @@ export async function POST(request: Request) {
             protein: typeof protein === "number" ? protein : 0,
             carbs: typeof carbs === "number" ? carbs : 0,
             fat: typeof fat === "number" ? fat : 0,
+            defaultServingAmount: typeof defaultServingAmount === "number" && defaultServingAmount > 0 ? defaultServingAmount : null,
+            defaultServingDescription: typeof defaultServingDescription === "string" && defaultServingDescription.trim() ? defaultServingDescription.trim().slice(0, 50) : null,
             createdBy: session.user.id,
         },
     });
@@ -50,7 +52,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, measurement, calories, protein, carbs, fat } = body ?? {};
+    const { id, name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
 
     if (!id || !name || typeof calories !== "number") {
         return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -79,6 +81,8 @@ export async function PUT(request: Request) {
             protein: typeof protein === "number" ? protein : 0,
             carbs: typeof carbs === "number" ? carbs : 0,
             fat: typeof fat === "number" ? fat : 0,
+            defaultServingAmount: typeof defaultServingAmount === "number" && defaultServingAmount > 0 ? defaultServingAmount : null,
+            defaultServingDescription: typeof defaultServingDescription === "string" && defaultServingDescription.trim() ? defaultServingDescription.trim().slice(0, 50) : null,
         },
     });
 

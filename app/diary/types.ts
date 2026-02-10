@@ -11,6 +11,8 @@ export interface FoodItem {
     baseProtein: number;
     baseCarbs: number;
     baseFat: number;
+    defaultServingAmount?: number | null;
+    defaultServingDescription?: string | null;
 }
 
 export interface Meal {

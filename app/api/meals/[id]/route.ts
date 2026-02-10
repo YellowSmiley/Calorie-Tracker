@@ -54,6 +54,8 @@ export async function PATCH(
             baseProtein: updated.food.protein,
             baseCarbs: updated.food.carbs,
             baseFat: updated.food.fat,
+            defaultServingAmount: updated.food.defaultServingAmount,
+            defaultServingDescription: updated.food.defaultServingDescription,
         },
     });
 }
