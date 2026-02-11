@@ -14,6 +14,10 @@ interface Food {
   protein: number;
   carbs: number;
   fat: number;
+  saturates: number;
+  sugars: number;
+  fibre: number;
+  salt: number;
   defaultServingAmount?: number | null;
   defaultServingDescription?: string | null;
 }
@@ -28,6 +32,10 @@ interface CreateFoodSidebarProps {
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
     defaultServingAmount?: number | null;
     defaultServingDescription?: string | null;
   }) => void;
@@ -57,6 +65,10 @@ export default function CreateFoodSidebar({
     protein: "",
     carbs: "",
     fat: "",
+    saturates: "",
+    sugars: "",
+    fibre: "",
+    salt: "",
     defaultServingAmount: "",
     defaultServingDescription: "",
   });
@@ -88,6 +100,10 @@ export default function CreateFoodSidebar({
           protein: String(editingFood.protein),
           carbs: String(editingFood.carbs),
           fat: String(editingFood.fat),
+          saturates: String(editingFood.saturates),
+          sugars: String(editingFood.sugars),
+          fibre: String(editingFood.fibre),
+          salt: String(editingFood.salt),
           defaultServingAmount: editingFood.defaultServingAmount
             ? String(editingFood.defaultServingAmount)
             : "",
@@ -109,6 +125,10 @@ export default function CreateFoodSidebar({
           protein: "",
           carbs: "",
           fat: "",
+          saturates: "",
+          sugars: "",
+          fibre: "",
+          salt: "",
           defaultServingAmount: "",
           defaultServingDescription: "",
         });
@@ -148,6 +168,22 @@ export default function CreateFoodSidebar({
         parseFloat(formData.fat) || 0,
         userSettings.macroUnit,
       ),
+      saturates: convertMacroFromInput(
+        parseFloat(formData.saturates) || 0,
+        userSettings.macroUnit,
+      ),
+      sugars: convertMacroFromInput(
+        parseFloat(formData.sugars) || 0,
+        userSettings.macroUnit,
+      ),
+      fibre: convertMacroFromInput(
+        parseFloat(formData.fibre) || 0,
+        userSettings.macroUnit,
+      ),
+      salt: convertMacroFromInput(
+        parseFloat(formData.salt) || 0,
+        userSettings.macroUnit,
+      ),
       defaultServingAmount: servingAmount > 0 ? servingAmount : null,
       defaultServingDescription:
         formData.defaultServingDescription.trim() || null,
@@ -163,6 +199,10 @@ export default function CreateFoodSidebar({
       protein: "",
       carbs: "",
       fat: "",
+      saturates: "",
+      sugars: "",
+      fibre: "",
+      salt: "",
       defaultServingAmount: "",
       defaultServingDescription: "",
     });
@@ -330,6 +370,70 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Saturates ({userSettings.macroUnit})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.saturates}
+                  onChange={(e) =>
+                    setFormData({ ...formData, saturates: e.target.value })
+                  }
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Sugars ({userSettings.macroUnit})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.sugars}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sugars: e.target.value })
+                  }
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Fibre ({userSettings.macroUnit})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.fibre}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fibre: e.target.value })
+                  }
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
+                  Salt ({userSettings.macroUnit})
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.salt}
+                  onChange={(e) =>
+                    setFormData({ ...formData, salt: e.target.value })
+                  }
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                  placeholder="0"
                 />
               </div>
             </div>

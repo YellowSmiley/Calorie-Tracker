@@ -6,6 +6,7 @@ import {
   formatCalories,
   formatMacro,
   parseMeasurement,
+  formatSalt,
 } from "@/lib/unitConversions";
 
 interface EditFoodSidebarProps {
@@ -62,6 +63,10 @@ export default function EditFoodSidebar({
       protein: Number((food.baseProtein * serving).toFixed(1)),
       carbs: Number((food.baseCarbs * serving).toFixed(1)),
       fat: Number((food.baseFat * serving).toFixed(1)),
+      saturates: Number((food.baseSaturates * serving).toFixed(1)),
+      sugars: Number((food.baseSugars * serving).toFixed(1)),
+      fibre: Number((food.baseFibre * serving).toFixed(1)),
+      salt: Number((food.baseSalt * serving).toFixed(2)),
     };
   }, [food, totalAmount, parsed.amount]);
 
@@ -146,6 +151,38 @@ export default function EditFoodSidebar({
                     {formatMacro(food?.baseFat || 0, userSettings)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Saturates
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseSaturates || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Sugars
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseSugars || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Fibre
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatMacro(food?.baseFibre || 0, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Salt
+                  </p>
+                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    {formatSalt(food?.baseSalt || 0, userSettings)}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -224,6 +261,38 @@ export default function EditFoodSidebar({
                   </p>
                   <p className="text-xl font-bold text-black dark:text-zinc-50">
                     {formatMacro(calculatedNutrition.fat, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Saturates
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.saturates, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Sugars
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.sugars, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Fibre
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatMacro(calculatedNutrition.fibre, userSettings)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Salt
+                  </p>
+                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                    {formatSalt(calculatedNutrition.salt, userSettings)}
                   </p>
                 </div>
               </div>

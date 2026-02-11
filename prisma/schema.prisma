@@ -33,6 +33,10 @@ model User {
   proteinGoal   Float?     @default(150)
   carbGoal      Float?     @default(410)
   fatGoal       Float?     @default(83)
+  saturatesGoal Float    @default(20)
+  sugarsGoal    Float    @default(90)
+  fibreGoal     Float    @default(30)
+  saltGoal      Float    @default(6)
   
   // Measurement preferences
   calorieUnit   String?    @default("kcal")
@@ -85,6 +89,10 @@ model Food {
   protein     Float
   carbs       Float
   fat         Float
+  saturates  Float    @default(0)
+  sugars     Float    @default(0)
+  fibre      Float    @default(0)
+  salt       Float    @default(0)
   defaultServingAmount      Float?
   defaultServingDescription String?   @db.VarChar(50)
   createdBy   String?
@@ -106,6 +114,10 @@ model MealEntry {
   protein   Float
   carbs     Float
   fat       Float
+  saturates  Float    @default(0)
+  sugars     Float    @default(0)
+  fibre      Float    @default(0)
+  salt       Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -47,6 +47,10 @@ export default async function DiaryPage({
       proteinGoal: true,
       carbGoal: true,
       fatGoal: true,
+      saturatesGoal: true,
+      sugarsGoal: true,
+      fibreGoal: true,
+      saltGoal: true,
     },
   });
 
@@ -62,6 +66,10 @@ export default async function DiaryPage({
     protein: user?.proteinGoal ?? 150,
     carbs: user?.carbGoal ?? 410,
     fat: user?.fatGoal ?? 83,
+    saturates: user?.saturatesGoal ?? 20,
+    sugars: user?.sugarsGoal ?? 90,
+    fibre: user?.fibreGoal ?? 30,
+    salt: user?.saltGoal ?? 6,
   };
 
   const { start, end } = getDateRange(activeDate);
@@ -82,6 +90,10 @@ export default async function DiaryPage({
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
     serving: number;
     food: {
       name: string;
@@ -90,6 +102,10 @@ export default async function DiaryPage({
       protein: number;
       carbs: number;
       fat: number;
+      saturates: number;
+      sugars: number;
+      fibre: number;
+      salt: number;
       defaultServingAmount: number | null;
       defaultServingDescription: string | null;
     };
@@ -109,9 +125,17 @@ export default async function DiaryPage({
         protein: entry.protein,
         carbs: entry.carbs,
         fat: entry.fat,
+        saturates: entry.saturates,
+        sugars: entry.sugars,
+        fibre: entry.fibre,
+        salt: entry.salt,
         baseProtein: entry.food.protein,
         baseCarbs: entry.food.carbs,
         baseFat: entry.food.fat,
+        baseSaturates: entry.food.saturates,
+        baseSugars: entry.food.sugars,
+        baseFibre: entry.food.fibre,
+        baseSalt: entry.food.salt,
         defaultServingAmount: entry.food.defaultServingAmount,
         defaultServingDescription: entry.food.defaultServingDescription,
       })),

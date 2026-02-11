@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatCalories, formatMacro } from "@/lib/unitConversions";
+import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 
 type TimeRange = "day" | "week" | "month";
 
@@ -16,12 +16,20 @@ interface DashboardClientProps {
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
   };
   initialTotals: {
     calories: number;
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
   };
 }
 
@@ -212,7 +220,7 @@ export default function DashboardClient({
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handlePreviousDate}
-                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
                 >
                   <svg
                     className="w-5 h-5 text-black dark:text-zinc-50"
@@ -233,13 +241,13 @@ export default function DashboardClient({
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                  className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer scheme-light dark:scheme-dark"
                   style={{ minWidth: "160px" }}
                 />
 
                 <button
                   onClick={handleNextDate}
-                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
                 >
                   <svg
                     className="w-5 h-5 text-black dark:text-zinc-50"
@@ -418,6 +426,114 @@ export default function DashboardClient({
                     className="h-full bg-zinc-500 dark:bg-zinc-700 transition-all"
                     style={{
                       width: `${Math.min((totals.fat / (userGoals.fat * getGoalMultiplier())) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Saturates */}
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Saturates
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  {formatMacro(totals.saturates, userSettings)}
+                </p>
+                <div className="overflow-hidden">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                    of{" "}
+                    {formatMacro(
+                      userGoals.saturates * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </p>
+                </div>
+                <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-zinc-700 dark:bg-zinc-500 transition-all"
+                    style={{
+                      width: `${Math.min((totals.saturates / (userGoals.saturates * getGoalMultiplier())) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Sugars */}
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Sugars
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  {formatMacro(totals.sugars, userSettings)}
+                </p>
+                <div className="overflow-hidden">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                    of{" "}
+                    {formatMacro(
+                      userGoals.sugars * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </p>
+                </div>
+                <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-zinc-700 dark:bg-zinc-500 transition-all"
+                    style={{
+                      width: `${Math.min((totals.sugars / (userGoals.sugars * getGoalMultiplier())) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Fibre */}
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Fibre
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  {formatMacro(totals.fibre, userSettings)}
+                </p>
+                <div className="overflow-hidden">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                    of{" "}
+                    {formatMacro(
+                      userGoals.fibre * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </p>
+                </div>
+                <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-zinc-700 dark:bg-zinc-500 transition-all"
+                    style={{
+                      width: `${Math.min((totals.fibre / (userGoals.fibre * getGoalMultiplier())) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Salt */}
+              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Salt
+                </p>
+                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                  {formatSalt(totals.salt, userSettings)}
+                </p>
+                <div className="overflow-hidden">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                    of{" "}
+                    {formatSalt(
+                      userGoals.salt * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </p>
+                </div>
+                <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-zinc-700 dark:bg-zinc-500 transition-all"
+                    style={{
+                      width: `${Math.min((totals.salt / (userGoals.salt * getGoalMultiplier())) * 100, 100)}%`,
                     }}
                   />
                 </div>

@@ -97,6 +97,18 @@ export function formatMacro(
     return `${formatted}${settings.macroUnit}`;
 }
 
+export function formatSalt(
+    gramsValue: number | null | undefined,
+    settings: UserSettings
+): string {
+    if (gramsValue === null || gramsValue === undefined) {
+        return "0g";
+    }
+    const converted = convertMacroForDisplay(gramsValue, settings.macroUnit);
+    const unit = settings.macroUnit || "g";
+    return `${Number(converted.toFixed(2))}${unit}`;
+}
+
 // Parse a measurement string like "100g", "1 cup cooked", "250ml" into { amount, unit, description }
 export interface ParsedMeasurement {
     amount: number;      // e.g. 100

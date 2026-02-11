@@ -42,15 +42,39 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
+    const {
+        name,
+        measurement,
+        calories,
+        protein,
+        carbs,
+        fat,
+        saturates,
+        sugars,
+        fibre,
+        salt,
+        defaultServingAmount,
+        defaultServingDescription,
+    } = body ?? {};
 
-    if (!name || typeof name !== "string" || name.trim().length === 0 || name.length > 200) {
+    if (
+        !name ||
+        typeof name !== "string" ||
+        name.trim().length === 0 ||
+        name.length > 200
+    ) {
         return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
     }
     if (typeof calories !== "number" || calories < 0 || calories > 99999) {
-        return NextResponse.json({ error: "Invalid calorie value" }, { status: 400 });
+        return NextResponse.json(
+            { error: "Invalid calorie value" },
+            { status: 400 },
+        );
     }
-    if (measurement && (typeof measurement !== "string" || measurement.length > 100)) {
+    if (
+        measurement &&
+        (typeof measurement !== "string" || measurement.length > 100)
+    ) {
         return NextResponse.json({ error: "Invalid measurement" }, { status: 400 });
     }
 
@@ -62,8 +86,19 @@ export async function POST(request: Request) {
             protein: typeof protein === "number" ? protein : 0,
             carbs: typeof carbs === "number" ? carbs : 0,
             fat: typeof fat === "number" ? fat : 0,
-            defaultServingAmount: typeof defaultServingAmount === "number" && defaultServingAmount > 0 ? defaultServingAmount : null,
-            defaultServingDescription: typeof defaultServingDescription === "string" && defaultServingDescription.trim() ? defaultServingDescription.trim().slice(0, 50) : null,
+            saturates: typeof saturates === "number" ? saturates : 0,
+            sugars: typeof sugars === "number" ? sugars : 0,
+            fibre: typeof fibre === "number" ? fibre : 0,
+            salt: typeof salt === "number" ? salt : 0,
+            defaultServingAmount:
+                typeof defaultServingAmount === "number" && defaultServingAmount > 0
+                    ? defaultServingAmount
+                    : null,
+            defaultServingDescription:
+                typeof defaultServingDescription === "string" &&
+                    defaultServingDescription.trim()
+                    ? defaultServingDescription.trim().slice(0, 50)
+                    : null,
             createdBy: session.user.id,
         },
     });
@@ -78,18 +113,43 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, measurement, calories, protein, carbs, fat, defaultServingAmount, defaultServingDescription } = body ?? {};
+    const {
+        id,
+        name,
+        measurement,
+        calories,
+        protein,
+        carbs,
+        fat,
+        saturates,
+        sugars,
+        fibre,
+        salt,
+        defaultServingAmount,
+        defaultServingDescription,
+    } = body ?? {};
 
     if (!id) {
         return NextResponse.json({ error: "Food ID is required" }, { status: 400 });
     }
-    if (!name || typeof name !== "string" || name.trim().length === 0 || name.length > 200) {
+    if (
+        !name ||
+        typeof name !== "string" ||
+        name.trim().length === 0 ||
+        name.length > 200
+    ) {
         return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
     }
     if (typeof calories !== "number" || calories < 0 || calories > 99999) {
-        return NextResponse.json({ error: "Invalid calorie value" }, { status: 400 });
+        return NextResponse.json(
+            { error: "Invalid calorie value" },
+            { status: 400 },
+        );
     }
-    if (measurement && (typeof measurement !== "string" || measurement.length > 100)) {
+    if (
+        measurement &&
+        (typeof measurement !== "string" || measurement.length > 100)
+    ) {
         return NextResponse.json({ error: "Invalid measurement" }, { status: 400 });
     }
 
@@ -116,8 +176,19 @@ export async function PUT(request: Request) {
             protein: typeof protein === "number" ? protein : 0,
             carbs: typeof carbs === "number" ? carbs : 0,
             fat: typeof fat === "number" ? fat : 0,
-            defaultServingAmount: typeof defaultServingAmount === "number" && defaultServingAmount > 0 ? defaultServingAmount : null,
-            defaultServingDescription: typeof defaultServingDescription === "string" && defaultServingDescription.trim() ? defaultServingDescription.trim().slice(0, 50) : null,
+            saturates: typeof saturates === "number" ? saturates : 0,
+            sugars: typeof sugars === "number" ? sugars : 0,
+            fibre: typeof fibre === "number" ? fibre : 0,
+            salt: typeof salt === "number" ? salt : 0,
+            defaultServingAmount:
+                typeof defaultServingAmount === "number" && defaultServingAmount > 0
+                    ? defaultServingAmount
+                    : null,
+            defaultServingDescription:
+                typeof defaultServingDescription === "string" &&
+                    defaultServingDescription.trim()
+                    ? defaultServingDescription.trim().slice(0, 50)
+                    : null,
         },
     });
 

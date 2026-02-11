@@ -1,7 +1,7 @@
 "use client";
 
 import type { FoodItem } from "@/app/diary/types";
-import { formatCalories, formatMacro } from "@/lib/unitConversions";
+import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 
 interface DeleteFoodModalProps {
   item: FoodItem | null;
@@ -100,6 +100,34 @@ export default function DeleteFoodModal({
                 <span className="text-zinc-600 dark:text-zinc-400">Fat:</span>
                 <span className="font-medium text-black dark:text-zinc-50">
                   {formatMacro(item.fat, userSettings)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-600 dark:text-zinc-400">
+                  Saturates:
+                </span>
+                <span className="font-medium text-black dark:text-zinc-50">
+                  {formatMacro(item.saturates, userSettings)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-600 dark:text-zinc-400">
+                  Sugars:
+                </span>
+                <span className="font-medium text-black dark:text-zinc-50">
+                  {formatMacro(item.sugars, userSettings)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-600 dark:text-zinc-400">Fibre:</span>
+                <span className="font-medium text-black dark:text-zinc-50">
+                  {formatMacro(item.fibre, userSettings)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-600 dark:text-zinc-400">Salt:</span>
+                <span className="font-medium text-black dark:text-zinc-50">
+                  {formatSalt(item.salt, userSettings)}
                 </span>
               </div>
             </div>

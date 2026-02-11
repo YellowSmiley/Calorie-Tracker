@@ -24,6 +24,10 @@ export interface DiaryClientProps {
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
   };
 }
 
@@ -103,6 +107,10 @@ export default function DiaryClient({
       protein: allItems.reduce((sum, item) => sum + item.protein, 0),
       carbs: allItems.reduce((sum, item) => sum + item.carbs, 0),
       fat: allItems.reduce((sum, item) => sum + item.fat, 0),
+      saturates: allItems.reduce((sum, item) => sum + item.saturates, 0),
+      sugars: allItems.reduce((sum, item) => sum + item.sugars, 0),
+      fibre: allItems.reduce((sum, item) => sum + item.fibre, 0),
+      salt: allItems.reduce((sum, item) => sum + item.salt, 0),
     };
   }, [meals]);
 
@@ -113,9 +121,12 @@ export default function DiaryClient({
       protein: items.reduce((sum, item) => sum + item.protein, 0),
       carbs: items.reduce((sum, item) => sum + item.carbs, 0),
       fat: items.reduce((sum, item) => sum + item.fat, 0),
+      saturates: items.reduce((sum, item) => sum + item.saturates, 0),
+      sugars: items.reduce((sum, item) => sum + item.sugars, 0),
+      fibre: items.reduce((sum, item) => sum + item.fibre, 0),
+      salt: items.reduce((sum, item) => sum + item.salt, 0),
     };
   };
-
   const addFoodFromList = async (food: FoodItem, quantity: number = 1) => {
     if (selectedMealIndex === null) return;
 
@@ -173,6 +184,10 @@ export default function DiaryClient({
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
     defaultServingAmount?: number | null;
     defaultServingDescription?: string | null;
   }) => {
@@ -351,16 +366,6 @@ export default function DiaryClient({
     handleDateChange(newDate);
   };
 
-  const getFormattedDate = () => {
-    const date = new Date(currentDate);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <div className="min-h-full flex flex-col">
       {/* Header */}
@@ -378,7 +383,7 @@ export default function DiaryClient({
           <div className="flex items-center justify-center gap-4">
             <button
               onClick={handlePreviousDay}
-              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
               aria-label="Previous day"
             >
               <svg
@@ -400,13 +405,13 @@ export default function DiaryClient({
               type="date"
               value={currentDate}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer scheme-light dark:scheme-dark"
               style={{ minWidth: "160px" }}
             />
 
             <button
               onClick={handleNextDay}
-              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors flex-shrink-0"
+              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
               aria-label="Next day"
             >
               <svg

@@ -17,6 +17,10 @@ export default async function Home() {
       proteinGoal: true,
       carbGoal: true,
       fatGoal: true,
+      saturatesGoal: true,
+      sugarsGoal: true,
+      fibreGoal: true,
+      saltGoal: true,
       calorieUnit: true,
       macroUnit: true,
     },
@@ -32,6 +36,10 @@ export default async function Home() {
     protein: user?.proteinGoal ?? 150,
     carbs: user?.carbGoal ?? 410,
     fat: user?.fatGoal ?? 83,
+    saturates: user?.saturatesGoal ?? 20,
+    sugars: user?.sugarsGoal ?? 90,
+    fibre: user?.fibreGoal ?? 30,
+    salt: user?.saltGoal ?? 6,
   };
 
   // Fetch today's totals
@@ -61,9 +69,22 @@ export default async function Home() {
       acc.protein += entry.food.protein * serving;
       acc.carbs += entry.food.carbs * serving;
       acc.fat += entry.food.fat * serving;
+      acc.saturates += entry.food.saturates * serving;
+      acc.sugars += entry.food.sugars * serving;
+      acc.fibre += entry.food.fibre * serving;
+      acc.salt += entry.food.salt * serving;
       return acc;
     },
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      saturates: 0,
+      sugars: 0,
+      fibre: 0,
+      salt: 0,
+    },
   );
 
   return (

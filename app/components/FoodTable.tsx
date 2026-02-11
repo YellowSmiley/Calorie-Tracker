@@ -11,6 +11,10 @@ interface Food {
   protein: number;
   carbs: number;
   fat: number;
+  saturates: number;
+  sugars: number;
+  fibre: number;
+  salt: number;
   createdBy?: string | null;
   createdByName?: string | null;
   defaultServingAmount?: number | null;

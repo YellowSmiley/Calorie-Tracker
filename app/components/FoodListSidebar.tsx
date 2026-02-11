@@ -26,6 +26,10 @@ const mapFood = (food: {
   protein: number;
   carbs: number;
   fat: number;
+  saturates?: number;
+  sugars?: number;
+  fibre?: number;
+  salt?: number;
   defaultServingAmount?: number | null;
   defaultServingDescription?: string | null;
 }): FoodItem => ({
@@ -38,9 +42,17 @@ const mapFood = (food: {
   protein: food.protein,
   carbs: food.carbs,
   fat: food.fat,
+  saturates: food.saturates ?? 0,
+  sugars: food.sugars ?? 0,
+  fibre: food.fibre ?? 0,
+  salt: food.salt ?? 0,
   baseProtein: food.protein,
   baseCarbs: food.carbs,
   baseFat: food.fat,
+  baseSaturates: food.saturates ?? 0,
+  baseSugars: food.sugars ?? 0,
+  baseFibre: food.fibre ?? 0,
+  baseSalt: food.salt ?? 0,
   defaultServingAmount: food.defaultServingAmount,
   defaultServingDescription: food.defaultServingDescription,
 });
@@ -130,7 +142,8 @@ export default function FoodListSidebar({
 
   const getQty = (foodId: string): number => {
     const raw = quantities[foodId];
-    if (raw === undefined || raw === "") return 0;
+    if (raw === undefined) return 1;
+    if (raw === "") return 0;
     const n = parseInt(raw);
     return isNaN(n) || n < 1 ? 0 : n;
   };

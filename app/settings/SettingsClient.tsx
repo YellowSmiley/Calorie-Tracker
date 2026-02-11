@@ -10,6 +10,10 @@ interface SettingsData {
   proteinGoal: number;
   carbGoal: number;
   fatGoal: number;
+  saturatesGoal: number;
+  sugarsGoal: number;
+  fibreGoal: number;
+  saltGoal: number;
   calorieUnit: string;
   macroUnit: string;
   weightUnit: string;
@@ -32,6 +36,10 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     proteinGoal: 150,
     carbGoal: 410,
     fatGoal: 83,
+    saturatesGoal: 20,
+    sugarsGoal: 90,
+    fibreGoal: 30,
+    saltGoal: 6,
     calorieUnit: "kcal",
     macroUnit: "g",
     weightUnit: "g",
@@ -262,6 +270,89 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                       }
                       className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                       required
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="saturatesGoal"
+                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                    >
+                      Saturates (g)
+                    </label>
+                    <input
+                      id="saturatesGoal"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={settings.saturatesGoal}
+                      onChange={(e) =>
+                        handleChange(
+                          "saturatesGoal",
+                          parseFloat(e.target.value),
+                        )
+                      }
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="sugarsGoal"
+                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                    >
+                      Sugars (g)
+                    </label>
+                    <input
+                      id="sugarsGoal"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={settings.sugarsGoal}
+                      onChange={(e) =>
+                        handleChange("sugarsGoal", parseFloat(e.target.value))
+                      }
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="fibreGoal"
+                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                    >
+                      Fibre (g)
+                    </label>
+                    <input
+                      id="fibreGoal"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={settings.fibreGoal}
+                      onChange={(e) =>
+                        handleChange("fibreGoal", parseFloat(e.target.value))
+                      }
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="saltGoal"
+                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                    >
+                      Salt (g)
+                    </label>
+                    <input
+                      id="saltGoal"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={settings.saltGoal}
+                      onChange={(e) =>
+                        handleChange("saltGoal", parseFloat(e.target.value))
+                      }
+                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
                     />
                   </div>
                 </div>

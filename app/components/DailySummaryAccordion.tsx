@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatCalories, formatMacro } from "@/lib/unitConversions";
+import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 
 interface DailySummaryAccordionProps {
   totals: {
@@ -9,12 +9,20 @@ interface DailySummaryAccordionProps {
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
   };
   goals: {
     calories: number;
     protein: number;
     carbs: number;
     fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
   };
   userSettings: {
     calorieUnit: string;
@@ -136,6 +144,65 @@ export default function DailySummaryAccordion({
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
                   {formatMacro(goals.fat - totals.fat, userSettings)}
+                </td>
+              </tr>
+              <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
+                  Saturates
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(totals.saturates, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(goals.saturates, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(
+                    goals.saturates - totals.saturates,
+                    userSettings,
+                  )}
+                </td>
+              </tr>
+              <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
+                  Sugars
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(totals.sugars, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(goals.sugars, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(goals.sugars - totals.sugars, userSettings)}
+                </td>
+              </tr>
+              <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
+                  Fibre
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(totals.fibre, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(goals.fibre, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatMacro(goals.fibre - totals.fibre, userSettings)}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
+                  Salt
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatSalt(totals.salt, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatSalt(goals.salt, userSettings)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                  {formatSalt(goals.salt - totals.salt, userSettings)}
                 </td>
               </tr>
             </tbody>
