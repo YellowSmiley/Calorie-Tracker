@@ -219,7 +219,14 @@ export default function LoginPage() {
           </p>
 
           <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-500">
-            By signing in, you agree to our Terms of Service and Privacy Policy
+            By signing in, you agree to our{" "}
+            <Link href="/terms" className="underline hover:no-underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline hover:no-underline">
+              Privacy Policy
+            </Link>
           </p>
         </div>
 

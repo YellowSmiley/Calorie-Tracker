@@ -76,7 +76,9 @@ export function proxy(request: NextRequest) {
   const isRegisterPage = pathname === "/register";
   const isVerifyPage = pathname === "/verify";
   const isResetPasswordPage = pathname === "/reset-password";
-  const isPublicPage = isLoginPage || isRegisterPage || isVerifyPage || isResetPasswordPage;
+  const isPrivacyPage = pathname === "/privacy";
+  const isTermsPage = pathname === "/terms";
+  const isPublicPage = isLoginPage || isRegisterPage || isVerifyPage || isResetPasswordPage || isPrivacyPage || isTermsPage;
 
   if (!sessionToken && !isPublicPage) {
     return NextResponse.redirect(new URL("/login", request.url));

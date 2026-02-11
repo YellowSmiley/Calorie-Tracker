@@ -39,6 +39,9 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -99,6 +102,50 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
 
   const handleChange = (field: keyof SettingsData, value: string | number) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch("/api/account/export");
+      if (!response.ok) throw new Error("Export failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `calorie-tracker-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setMessage({ type: "success", text: "Data exported successfully!" });
+    } catch {
+      setMessage({ type: "error", text: "Failed to export data" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/account", { method: "DELETE" });
+      if (!response.ok) {
+        const data = await response.json();
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to delete account",
+        });
+        setShowDeleteConfirm(false);
+        return;
+      }
+      signOut({ callbackUrl: "/login" });
+    } catch {
+      setMessage({ type: "error", text: "Failed to delete account" });
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -331,6 +378,75 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
                 {message.text}
               </div>
             )}
+
+            {/* Data & Privacy Section */}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
+              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
+                Data &amp; Privacy
+              </h2>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleExportData}
+                  disabled={isExporting}
+                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50 disabled:opacity-50"
+                >
+                  {isExporting ? "Exporting..." : "Export My Data"}
+                </button>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 px-1">
+                  Download all your personal data in JSON format (meals, foods,
+                  settings).
+                </p>
+
+                {!showDeleteConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 px-6 py-3 font-medium transition-colors text-red-600 dark:text-red-400"
+                  >
+                    Delete My Account
+                  </button>
+                ) : (
+                  <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                      This will permanently delete your account and all
+                      associated data (meals, foods, settings). This action
+                      cannot be undone.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
+                        className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
+                      >
+                        {isDeleting ? "Deleting..." : "Yes, Delete Everything"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  <Link
+                    href="/privacy"
+                    className="underline hover:no-underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link href="/terms" className="underline hover:no-underline">
+                    Terms of Service
+                  </Link>
+                </div>
+              </div>
+            </div>
 
             {/* Actions Section */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6 mb-40">
