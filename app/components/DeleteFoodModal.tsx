@@ -2,6 +2,7 @@
 
 import type { FoodItem } from "@/app/diary/types";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import HelpButton from "./HelpButton";
 
 interface DeleteFoodModalProps {
   item: FoodItem | null;
@@ -36,9 +37,16 @@ export default function DeleteFoodModal({
       <div className="w-full max-w-md rounded-lg bg-white dark:bg-zinc-950 shadow-xl">
         {/* Header */}
         <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
-          <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-            Remove Food Item?
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              Remove Food Item?
+            </h2>
+            <HelpButton
+              title="Remove Food"
+              content="Click 'Remove' to delete this food item from your meal. This action will decrease your daily totals. You can always add the food back if you change your mind."
+              ariaLabel="Help: How to remove a food item"
+            />
+          </div>
         </div>
 
         {/* Content */}

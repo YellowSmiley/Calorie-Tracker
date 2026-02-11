@@ -5,6 +5,7 @@ import {
   convertCaloriesFromInput,
   convertMacroFromInput,
 } from "@/lib/unitConversions";
+import HelpButton from "./HelpButton";
 
 interface Food {
   id: string;
@@ -223,9 +224,16 @@ export default function CreateFoodSidebar({
         >
           Back
         </button>
-        <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          {editingFood ? "Edit Food" : "Create Food"}
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+            {editingFood ? "Edit Food" : "Create Food"}
+          </h2>
+          <HelpButton
+            title={editingFood ? "Edit Food" : "Create Food"}
+            content="Enter the food details including name, measurement unit, and nutrition information. Fill in all fields marked with * (required). Nutrition values should be per the measurement unit you specify (e.g., per 100g, per serving). You can optionally set a default serving size and description for easier logging."
+            ariaLabel="Help: How to create or edit a food"
+          />
+        </div>
         <div className="w-12" />
       </div>
 

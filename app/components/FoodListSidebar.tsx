@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItem } from "../diary/types";
 import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
+import HelpButton from "./HelpButton";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -199,9 +200,16 @@ export default function FoodListSidebar({
         >
           Back
         </button>
-        <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          Select Food
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+            Select Food
+          </h2>
+          <HelpButton
+            title="Select Food"
+            content="Search for a food to add to your meal. Use the search bar to find foods by name. You can also create custom foods if you don't find what you're looking for. Select a food and adjust the quantity before adding it to your meal."
+            ariaLabel="Help: How to select and add food"
+          />
+        </div>
         <div className="w-12" />
       </div>
 

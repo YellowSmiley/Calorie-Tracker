@@ -1,24 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "../components/MyFoodsSidebar";
-
-interface SettingsData {
-  calorieGoal: number;
-  proteinGoal: number;
-  carbGoal: number;
-  fatGoal: number;
-  saturatesGoal: number;
-  sugarsGoal: number;
-  fibreGoal: number;
-  saltGoal: number;
-  calorieUnit: string;
-  macroUnit: string;
-  weightUnit: string;
-  volumeUnit: string;
-}
+import NutritionGoalsSection from "./components/NutritionGoalsSection";
+import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
+import FoodMeasurementUnitsSection from "./components/FoodMeasurementUnitsSection";
+import DataPrivacySection from "./components/DataPrivacySection";
+import ActionsSection from "./components/ActionsSection";
+import { SettingsData } from "./types";
+import { signOut } from "next-auth/react";
 
 interface SettingsClientProps {
   userSettings: {
@@ -179,283 +170,20 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nutritional Goals Section */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-                Nutritional Goals
-              </h2>
+            <NutritionGoalsSection
+              settings={settings}
+              onChange={handleChange}
+            />
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="calorieGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Calories
-                    </label>
-                    <input
-                      id="calorieGoal"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={settings.calorieGoal}
-                      onChange={(e) =>
-                        handleChange("calorieGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                      required
-                    />
-                  </div>
+            <MeasurementUnitsSection
+              settings={settings}
+              onChange={handleChange}
+            />
 
-                  <div>
-                    <label
-                      htmlFor="proteinGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Protein (g)
-                    </label>
-                    <input
-                      id="proteinGoal"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={settings.proteinGoal}
-                      onChange={(e) =>
-                        handleChange("proteinGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="carbGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Carbohydrates (g)
-                    </label>
-                    <input
-                      id="carbGoal"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={settings.carbGoal}
-                      onChange={(e) =>
-                        handleChange("carbGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="fatGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Fat (g)
-                    </label>
-                    <input
-                      id="fatGoal"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={settings.fatGoal}
-                      onChange={(e) =>
-                        handleChange("fatGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="saturatesGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Saturates (g)
-                    </label>
-                    <input
-                      id="saturatesGoal"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={settings.saturatesGoal}
-                      onChange={(e) =>
-                        handleChange(
-                          "saturatesGoal",
-                          parseFloat(e.target.value),
-                        )
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="sugarsGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Sugars (g)
-                    </label>
-                    <input
-                      id="sugarsGoal"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={settings.sugarsGoal}
-                      onChange={(e) =>
-                        handleChange("sugarsGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="fibreGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Fibre (g)
-                    </label>
-                    <input
-                      id="fibreGoal"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={settings.fibreGoal}
-                      onChange={(e) =>
-                        handleChange("fibreGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="saltGoal"
-                      className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                    >
-                      Salt (g)
-                    </label>
-                    <input
-                      id="saltGoal"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={settings.saltGoal}
-                      onChange={(e) =>
-                        handleChange("saltGoal", parseFloat(e.target.value))
-                      }
-                      className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Measurement Units Section */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-                Measurement Units
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="calorieUnit"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                  >
-                    Calorie Unit
-                  </label>
-                  <select
-                    id="calorieUnit"
-                    value={settings.calorieUnit}
-                    onChange={(e) =>
-                      handleChange("calorieUnit", e.target.value)
-                    }
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                  >
-                    <option value="kcal">kcal</option>
-                    <option value="kJ">kJ</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="macroUnit"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                  >
-                    Macronutrient Unit
-                  </label>
-                  <select
-                    id="macroUnit"
-                    value={settings.macroUnit}
-                    onChange={(e) => handleChange("macroUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                  >
-                    <option value="g">Grams (g)</option>
-                    <option value="oz">Ounces (oz)</option>
-                    <option value="mg">Milligrams (mg)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Food Measurement Units Section */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-                Food Measurement Units
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="weightUnit"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                  >
-                    Weight Unit
-                  </label>
-                  <select
-                    id="weightUnit"
-                    value={settings.weightUnit}
-                    onChange={(e) => handleChange("weightUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                  >
-                    <option value="g">Grams (g)</option>
-                    <option value="oz">Ounces (oz)</option>
-                    <option value="kg">Kilograms (kg)</option>
-                    <option value="lbs">Pounds (lbs)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="volumeUnit"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-                  >
-                    Volume Unit
-                  </label>
-                  <select
-                    id="volumeUnit"
-                    value={settings.volumeUnit}
-                    onChange={(e) => handleChange("volumeUnit", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-                  >
-                    <option value="ml">Millilitres (ml)</option>
-                    <option value="cup">Cups</option>
-                    <option value="tbsp">Tablespoons (tbsp)</option>
-                    <option value="tsp">Teaspoons (tsp)</option>
-                    <option value="L">Litres (L)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            <FoodMeasurementUnitsSection
+              settings={settings}
+              onChange={handleChange}
+            />
 
             {/* Message */}
             {message && (
@@ -470,106 +198,20 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
               </div>
             )}
 
-            {/* Data & Privacy Section */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-                Data &amp; Privacy
-              </h2>
+            <DataPrivacySection
+              showDeleteConfirm={showDeleteConfirm}
+              isExporting={isExporting}
+              isDeleting={isDeleting}
+              onExport={handleExportData}
+              onDeleteClick={() => setShowDeleteConfirm(true)}
+              onDeleteConfirm={handleDeleteAccount}
+              onDeleteCancel={() => setShowDeleteConfirm(false)}
+            />
 
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={handleExportData}
-                  disabled={isExporting}
-                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50 disabled:opacity-50"
-                >
-                  {isExporting ? "Exporting..." : "Export My Data"}
-                </button>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 px-1">
-                  Download all your personal data in JSON format (meals, foods,
-                  settings).
-                </p>
-
-                {!showDeleteConfirm ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 px-6 py-3 font-medium transition-colors text-red-600 dark:text-red-400"
-                  >
-                    Delete My Account
-                  </button>
-                ) : (
-                  <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
-                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                      This will permanently delete your account and all
-                      associated data (meals, foods, settings). This action
-                      cannot be undone.
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleDeleteAccount}
-                        disabled={isDeleting}
-                        className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
-                      >
-                        {isDeleting ? "Deleting..." : "Yes, Delete Everything"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-2 flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-                  <Link
-                    href="/privacy"
-                    className="underline hover:no-underline"
-                  >
-                    Privacy Policy
-                  </Link>
-                  <Link href="/terms" className="underline hover:no-underline">
-                    Terms of Service
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions Section */}
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6 mb-40">
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-                Actions
-              </h2>
-
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setShowMyFoods(true)}
-                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
-                >
-                  My Foods
-                </button>
-                {session?.user?.isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
-                  >
-                    Admin Panel
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
+            <ActionsSection
+              isAdmin={session?.user?.isAdmin || false}
+              onMyFoodsClick={() => setShowMyFoods(true)}
+            />
           </form>
         </div>
       </div>

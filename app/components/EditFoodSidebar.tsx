@@ -8,6 +8,7 @@ import {
   parseMeasurement,
   formatSalt,
 } from "@/lib/unitConversions";
+import HelpButton from "./HelpButton";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -89,9 +90,16 @@ export default function EditFoodSidebar({
         >
           Back
         </button>
-        <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          Edit Serving
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+            Edit Serving
+          </h2>
+          <HelpButton
+            title="Edit Serving"
+            content="Adjust the serving size of this food by entering the amount and units. You can use the quantity field to increase or decrease the serving. The nutrition information will update automatically based on the serving size you specify."
+            ariaLabel="Help: How to adjust serving size"
+          />
+        </div>
         <div className="w-12" />
       </div>
 

@@ -7,6 +7,7 @@ import CreateFoodSidebar from "../components/CreateFoodSidebar";
 import EditFoodSidebar from "../components/EditFoodSidebar";
 import DeleteFoodModal from "../components/DeleteFoodModal";
 import DailySummaryAccordion from "../components/DailySummaryAccordion";
+import HelpButton from "@/app/components/HelpButton";
 import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
 
@@ -333,7 +334,7 @@ export default function DiaryClient({
       await removeFood(deleteTarget.mealIndex, deleteTarget.itemId);
       setShowDeleteConfirm(false);
       setDeleteTarget(null);
-    } catch (err) {
+    } catch {
       // Error is already set in removeFood
     } finally {
       setIsDeleting(false);
@@ -371,9 +372,16 @@ export default function DiaryClient({
       {/* Header */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-            Diary
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
+              Diary
+            </h1>
+            <HelpButton
+              title="Food Diary"
+              content="Log your daily food intake to track calories and nutrition. Click on any food to adjust serving size, or remove it if needed. Use the date selector to view and record meals from different days."
+              ariaLabel="Help: Food diary overview"
+            />
+          </div>
         </div>
       </div>
 
@@ -459,6 +467,16 @@ export default function DiaryClient({
             goals={goals}
             userSettings={userSettings}
           />
+          <div className="mb-6 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              Meals
+            </h2>
+            <HelpButton
+              title="How to Use"
+              content="Click 'Add Food' at the bottom of each meal section to log foods. Click on any food item to adjust the serving size. Click the 'Remove' button to delete a food from your diary. Your daily totals are calculated automatically and displayed at the top."
+              ariaLabel="Help: How to add and manage foods"
+            />
+          </div>
           {meals.map((meal, mealIndex) => (
             <div key={meal.name} className="mb-8">
               <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import HelpButton from "@/app/components/HelpButton";
 
 type TimeRange = "day" | "week" | "month";
 
@@ -165,9 +166,16 @@ export default function DashboardClient({
           {/* Time Range Selector */}
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
-                View Period
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                  View Period
+                </h3>
+                <HelpButton
+                  title="View Period"
+                  content="Choose between Day, Week, or Month to view your nutrition totals. Week view shows daily averages (week total ÷ 7), and month view shows daily averages (month total ÷ number of days)."
+                  ariaLabel="Help: View period explained"
+                />
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setTimeRange("day")}
@@ -273,9 +281,16 @@ export default function DashboardClient({
               isLoading ? "opacity-50" : ""
             }`}
           >
-            <h3 className="text-lg font-semibold text-black dark:text-zinc-50 mb-4">
-              Nutrition Summary
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                Nutrition Summary
+              </h3>
+              <HelpButton
+                title="Nutrition Summary"
+                content="Each card shows your current intake vs. daily goal. The progress bar indicates how close you are to your goal (full = 100%). On week/month view, shown values are averages per day. Adjust goals in Settings."
+                ariaLabel="Help: Nutrition summary explained"
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               {/* Calories */}
               <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">

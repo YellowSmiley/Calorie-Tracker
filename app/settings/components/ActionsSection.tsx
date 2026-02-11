@@ -1,0 +1,53 @@
+import Link from "next/link";
+import { signOut } from "next-auth/react";
+import HelpButton from "@/app/components/HelpButton";
+
+interface ActionsSectionProps {
+  isAdmin: boolean;
+  onMyFoodsClick: () => void;
+}
+
+export default function ActionsSection({
+  isAdmin,
+  onMyFoodsClick,
+}: ActionsSectionProps) {
+  return (
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6 mb-40">
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+          Actions
+        </h2>
+        <HelpButton
+          title="Actions"
+          content="Quick access to other functions. 'My Foods' shows all your custom food entries that you've created. 'Admin Panel' is available if you're an admin user. 'Sign Out' securely logs you out of your account."
+          ariaLabel="Help: Actions explained"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={onMyFoodsClick}
+          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+        >
+          My Foods
+        </button>
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
+          >
+            Admin Panel
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+        >
+          Sign Out
+        </button>
+      </div>
+    </div>
+  );
+}
