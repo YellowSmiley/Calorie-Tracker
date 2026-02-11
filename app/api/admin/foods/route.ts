@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
         // Fetch creator names separately
         const foodsWithCreator = await Promise.all(
-            foods.map(async (food: typeof foods[number]) => {
+            foods.map(async (food) => {
                 const creator = food.createdBy
                     ? await prisma.user.findUnique({
                         where: { id: food.createdBy },
