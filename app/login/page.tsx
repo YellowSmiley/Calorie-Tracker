@@ -39,7 +39,7 @@ export default function LoginPage() {
         password: password,
         redirect: false,
       });
-      if (!result?.ok) {
+      if (result?.error || !result?.ok) {
         setError(
           "Failed to login. Please check your credentials and try again.",
         );

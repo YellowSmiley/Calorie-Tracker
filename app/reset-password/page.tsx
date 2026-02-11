@@ -23,10 +23,20 @@ function ResetPasswordContent() {
     e.preventDefault();
     setMessage("");
 
-    if (password.length < 8) {
-      setStatus("error");
-      setMessage("Password must be at least 8 characters.");
-      return;
+    // Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+    const passwordRequirements = [
+      { regex: /.{8,}/, message: "at least 8 characters" },
+      { regex: /[A-Z]/, message: "one uppercase letter" },
+      { regex: /[a-z]/, message: "one lowercase letter" },
+      { regex: /[0-9]/, message: "one number" },
+      { regex: /[^A-Za-z0-9]/, message: "one special character" },
+    ];
+    for (const req of passwordRequirements) {
+      if (!req.regex.test(password)) {
+        setStatus("error");
+        setMessage(`Password must contain ${req.message}.`);
+        return;
+      }
     }
 
     if (password !== confirmPassword) {
