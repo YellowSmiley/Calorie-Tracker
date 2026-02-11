@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItem } from "../diary/types";
 import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
+import EditFoodSidebar from "./EditFoodSidebar";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -67,11 +68,12 @@ export default function FoodListSidebar({
   userSettings,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [quantities, setQuantities] = useState<Record<string, string>>({});
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [total, setTotal] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -141,17 +143,8 @@ export default function FoodListSidebar({
     }
   }, [loadMore]);
 
-  const getQty = (foodId: string): number => {
-    const raw = quantities[foodId];
-    if (raw === undefined) return 1;
-    if (raw === "") return 0;
-    const n = parseInt(raw);
-    return isNaN(n) || n < 1 ? 0 : n;
-  };
-
   const handleClose = () => {
     setSearchQuery("");
-    setQuantities({});
     setFoods([]);
     setTotal(0);
     setHasLoaded(false);
@@ -159,10 +152,8 @@ export default function FoodListSidebar({
   };
 
   const handleSelectFood = (food: FoodItem) => {
-    const qty = getQty(food.id) || 1;
-    onSelectFood(food, qty);
-    setSearchQuery("");
-    setQuantities({});
+    setSelectedFood(food);
+    setShowEditForm(true);
   };
 
   const getServingDisplay = (food: FoodItem) => {
@@ -184,6 +175,12 @@ export default function FoodListSidebar({
       line: `${parsed.amount}${unit}${parsed.description ? ` ${parsed.description}` : ""}`,
       calories: food.baseCalories,
     };
+  };
+
+  const applyServingChange = async (serving: number) => {
+    if (!selectedFood) return;
+    onSelectFood(selectedFood, serving);
+    setShowEditForm(false);
   };
 
   return (
@@ -241,7 +238,11 @@ export default function FoodListSidebar({
         )}
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
           {foods.map((food) => (
-            <div key={food.id} className="flex items-center gap-3 px-4 py-3">
+            <div
+              key={food.id}
+              className="flex items-center gap-3 px-4 py-3"
+              onClick={() => handleSelectFood(food)}
+            >
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-black dark:text-zinc-50">
                   {food.name}
@@ -255,31 +256,6 @@ export default function FoodListSidebar({
                     </p>
                   );
                 })()}
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <label className="text-xs text-zinc-400 dark:text-zinc-500">
-                  Qty
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={quantities[food.id] ?? "1"}
-                  onChange={(e) =>
-                    setQuantities((prev) => ({
-                      ...prev,
-                      [food.id]: e.target.value,
-                    }))
-                  }
-                  className="w-14 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1 text-center text-sm bg-transparent text-black dark:text-zinc-50"
-                />
-                <button
-                  onClick={() => handleSelectFood(food)}
-                  disabled={isLoading || !getQty(food.id)}
-                  className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-1 text-sm font-medium text-black dark:text-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Add
-                </button>
               </div>
             </div>
           ))}
@@ -319,6 +295,18 @@ export default function FoodListSidebar({
           )}
         </div>
       </div>
+      {showEditForm && (
+        <EditFoodSidebar
+          isOpen={showEditForm}
+          food={selectedFood}
+          onClose={() => {
+            setShowEditForm(false);
+          }}
+          onSubmit={applyServingChange}
+          userSettings={userSettings}
+          isAdd
+        />
+      )}
     </div>
   );
 }

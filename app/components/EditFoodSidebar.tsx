@@ -20,6 +20,7 @@ interface EditFoodSidebarProps {
     macroUnit: string;
   };
   isLoading?: boolean;
+  isAdd?: boolean;
 }
 
 export default function EditFoodSidebar({
@@ -29,6 +30,7 @@ export default function EditFoodSidebar({
   onSubmit,
   userSettings,
   isLoading = false,
+  isAdd = false,
 }: EditFoodSidebarProps) {
   const parsed = useMemo(
     () => parseMeasurement(food?.measurement || "1 serving"),
@@ -38,18 +40,23 @@ export default function EditFoodSidebar({
   const defaultServing = food?.defaultServingAmount || parsed.amount;
 
   const [servingSize, setServingSize] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [quantity, setQuantity] = useState("1");
 
   // Initialise when food / sidebar opens (adjust state during render)
   const [prevKey, setPrevKey] = useState("");
-  const currentKey = `${food?.id}-${food?.serving}-${isOpen}`;
+  const currentKey = `${food?.id}-${food?.serving}-${isOpen}-${isAdd}`;
 
   if (currentKey !== prevKey && food && isOpen) {
     setPrevKey(currentKey);
-    const totalAmount = food.serving * parsed.amount;
-    const qty = Number((totalAmount / defaultServing).toFixed(2));
-    setServingSize(String(defaultServing));
-    setQuantity(String(qty));
+    if (isAdd) {
+      setServingSize(String(defaultServing));
+      setQuantity("1");
+    } else {
+      const totalAmount = food.serving * parsed.amount;
+      const qty = Number((totalAmount / defaultServing).toFixed(2));
+      setServingSize(String(defaultServing));
+      setQuantity(String(qty));
+    }
   }
 
   const servingSizeNum = parseFloat(servingSize) || 0;
@@ -73,8 +80,13 @@ export default function EditFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const serving = totalAmount / parsed.amount;
-    onSubmit(serving);
+    if (isAdd) {
+      // In add mode, always treat as 1 base serving
+      onSubmit(1);
+    } else {
+      const serving = totalAmount / parsed.amount;
+      onSubmit(serving);
+    }
   };
 
   return (
@@ -92,12 +104,20 @@ export default function EditFoodSidebar({
         </button>
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-            Edit Serving
+            {isAdd ? "Add Food" : "Edit Serving"}
           </h2>
           <HelpButton
-            title="Edit Serving"
-            content="Adjust the serving size of this food by entering the amount and units. You can use the quantity field to increase or decrease the serving. The nutrition information will update automatically based on the serving size you specify."
-            ariaLabel="Help: How to adjust serving size"
+            title={isAdd ? "Add Food" : "Edit Serving"}
+            content={
+              isAdd
+                ? "Fill in the details to add a new food item. Enter the name, serving size, and nutrition information."
+                : "Adjust the serving size of this food by entering the amount and units. You can use the quantity field to increase or decrease the serving. The nutrition information will update automatically based on the serving size you specify."
+            }
+            ariaLabel={
+              isAdd
+                ? "Help: How to add a new food item"
+                : "Help: How to adjust serving size"
+            }
           />
         </div>
         <div className="w-12" />
@@ -316,7 +336,11 @@ export default function EditFoodSidebar({
               disabled={isLoading || totalAmount <= 0}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Updating..." : "Update Serving"}
+              {isLoading
+                ? "Updating..."
+                : isAdd
+                  ? "Add Food"
+                  : "Update Serving"}
             </button>
           </div>
         </div>

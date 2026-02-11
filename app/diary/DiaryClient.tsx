@@ -128,7 +128,11 @@ export default function DiaryClient({
       salt: items.reduce((sum, item) => sum + item.salt, 0),
     };
   };
-  const addFoodFromList = async (food: FoodItem, quantity: number = 1) => {
+  const addFoodFromList = async (
+    food: FoodItem,
+    quantity: number = 1,
+    serving?: number,
+  ) => {
     if (selectedMealIndex === null) return;
 
     setIsLoadingFood(true);
@@ -137,9 +141,10 @@ export default function DiaryClient({
     try {
       // Calculate serving multiplier from default serving amount if available
       let servingMultiplier = 1;
-      if (food.defaultServingAmount) {
+      if (serving || food.defaultServingAmount) {
         const parsed = parseMeasurement(food.measurement);
-        servingMultiplier = food.defaultServingAmount / parsed.amount;
+        servingMultiplier =
+          ((serving || food.defaultServingAmount) ?? 0) / parsed.amount;
       }
       // Apply quantity
       servingMultiplier *= quantity;
