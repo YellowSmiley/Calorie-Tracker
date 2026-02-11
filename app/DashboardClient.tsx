@@ -166,7 +166,7 @@ export default function DashboardClient({
           {/* Time Range Selector */}
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
                   View Period
                 </h3>
@@ -176,6 +176,8 @@ export default function DashboardClient({
                   ariaLabel="Help: View period explained"
                 />
               </div>
+            </div>
+            <div className="flex items-center justify-center mb-4">
               <div className="flex gap-2">
                 <button
                   onClick={() => setTimeRange("day")}
