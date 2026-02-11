@@ -32,9 +32,19 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
+    // Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+    const passwordRequirements = [
+      { regex: /.{8,}/, message: "at least 8 characters" },
+      { regex: /[A-Z]/, message: "one uppercase letter" },
+      { regex: /[a-z]/, message: "one lowercase letter" },
+      { regex: /[0-9]/, message: "one number" },
+      { regex: /[^A-Za-z0-9]/, message: "one special character" },
+    ];
+    for (const req of passwordRequirements) {
+      if (!req.regex.test(password)) {
+        setError(`Password must contain ${req.message}`);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -223,7 +233,8 @@ export default function RegisterPage() {
                       minLength={8}
                     />
                     <p className="text-xs text-zinc-500">
-                      Must be at least 8 characters
+                      Must be at least 8 characters, incl. uppercase, lowercase,
+                      number, special character
                     </p>
                   </div>
                   <div className="grid gap-2 text-left">

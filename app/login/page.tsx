@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [resetSent, setResetSent] = useState(false);
+  const [resetSending, setResetSending] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
 
   const isLoading = isGoogleLoading || isFormLoading || isResetLoading;
@@ -20,6 +21,8 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
     try {
       await signIn("google", { callbackUrl: "/" });
+    } catch {
+      setError("Failed to sign in. Please try again.");
     } finally {
       setIsGoogleLoading(false);
     }
@@ -43,12 +46,15 @@ export default function LoginPage() {
       } else {
         window.location.href = "/";
       }
+    } catch {
+      setError("Failed to sign in. Please try again.");
     } finally {
       setIsFormLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
+    setResetSending(true);
     setError("");
     setResetSent(false);
 
@@ -69,6 +75,7 @@ export default function LoginPage() {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsResetLoading(false);
+      setResetSending(false);
     }
   };
 
@@ -148,6 +155,14 @@ export default function LoginPage() {
               </div>
             )}
 
+            {resetSending && (
+              <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Sending password reset link to {email}...
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSignIn} className="space-y-3">
               <div className="grid gap-2 text-left">
                 <label
@@ -179,7 +194,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    disabled={isLoading}
+                    disabled={isLoading || resetSending}
                     className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 underline underline-offset-2 disabled:opacity-50"
                   >
                     Forgot password?
