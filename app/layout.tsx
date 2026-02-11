@@ -5,6 +5,7 @@ import Navigation from "./components/Navigation";
 import CookieBanner from "./components/CookieBanner";
 import Providers from "./providers";
 import { Analytics } from "@vercel/analytics/next";
+import AdSense from "./components/AdSense";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
       >
         <Analytics />
         <Providers>
+          <AdSense />
           {children}
           <Navigation />
           <CookieBanner />
