@@ -97,19 +97,13 @@ A full-stack Next.js application for tracking daily food intake and macronutrien
    npx prisma migrate dev --name init
    ```
 
-6. **Seed the database** (optional — adds default foods)
-
-   ```bash
-   npm run seed
-   ```
-
-7. **Start the development server**
+6. **Start the development server**
 
    ```bash
    npm run dev
    ```
 
-8. **Open the app**
+7. **Open the app**
 
    Navigate to [http://localhost:3000](http://localhost:3000)
 
@@ -163,7 +157,6 @@ A full-stack Next.js application for tracking daily food intake and macronutrien
 ├── prisma/
 │   ├── schema.prisma             # Database schema
 │   ├── migrations/               # Database migrations
-│   └── seed.ts                   # Seed data (default foods)
 ├── types/
 │   └── next-auth.d.ts            # Extended NextAuth types
 ├── auth.ts                       # NextAuth v5 configuration
@@ -232,7 +225,6 @@ npm run test:ci          # Run Jest unit tests (CI mode)
 npm run test:e2e         # Run Playwright end-to-end tests
 npm run test:e2e:ui      # Run Playwright tests with UI
 npm run test:e2e:debug   # Run Playwright tests in debug mode
-npm run seed             # Seed database with default foods
 npx prisma studio        # Open Prisma Studio (database GUI)
 npx prisma migrate dev   # Run database migrations
 ```
@@ -279,13 +271,7 @@ This will:
 4. Run `prisma migrate deploy` automatically on startup
 5. Start the production server on port **3000**
 
-#### 3. Seed the database (optional, first run only)
-
-```bash
-docker compose exec app npx prisma db seed
-```
-
-#### 4. Verify
+#### 3. Verify
 
 ```bash
 docker compose ps      # Both services should be "running"

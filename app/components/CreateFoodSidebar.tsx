@@ -132,7 +132,7 @@ export default function CreateFoodSidebar({
     const servingAmount = parseFloat(formData.defaultServingAmount);
     onSubmit({
       name: formData.name,
-      measurementAmount: parseFloat(formData.measurementAmount) || 0,
+      measurementAmount: parseFloat(formData.measurementAmount) || 100,
       measurementType: formData.measurementType,
       calories: convertCaloriesFromInput(
         parseFloat(formData.calories) || 0,

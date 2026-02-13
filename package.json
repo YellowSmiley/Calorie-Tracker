@@ -12,7 +12,6 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "seed": "node --import tsx prisma/seed.ts",
     "migrate": "prisma migrate dev"
   },
   "dependencies": {
@@ -51,8 +50,5 @@
     "ts-jest": "^29.4.6",
     "tsx": "^4.21.0",
     "typescript": "^5"
-  },
-  "prisma": {
-    "seed": "node --import tsx prisma/seed.ts"
   }
 }
