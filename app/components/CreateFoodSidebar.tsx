@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import {
   convertCaloriesFromInput,
@@ -10,6 +9,7 @@ import NutritionLabelPhotoInput from "./NutritionLabelPhotoInput";
 import { FoodItem, MeasurementType } from "../diary/types";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
+import BarcodeInput from "./BarcodeInput";
 
 export type CreateFoodSidebarOnSubmitData = Omit<
   FoodItem,
@@ -183,6 +183,7 @@ export default function CreateFoodSidebar({
   function handleExtractedLabel(data: Partial<Record<string, string>>) {
     setFormData((prev) => ({
       ...prev,
+      name: data.name ?? prev.name,
       calories: data.calories ?? prev.calories,
       protein: data.protein ?? prev.protein,
       carbs: data.carbs ?? prev.carbs,
@@ -229,9 +230,12 @@ export default function CreateFoodSidebar({
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-6xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Wrapping in isOpen to clear on close */}
               {isOpen && (
-                <div className="md:col-span-3  pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                <div className="md:col-span-3 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                  {/* Barcode input sits in front of NutritionLabelPhotoInput */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <BarcodeInput onExtract={handleExtractedLabel} />
                     <NutritionLabelPhotoInput
                       onExtract={handleExtractedLabel}
                     />

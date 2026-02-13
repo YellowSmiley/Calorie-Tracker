@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               // "img-src 'self' data: https:",
               "font-src 'self'",
-              "connect-src 'self' https://cdn.jsdelivr.net data: blob:",
+              "connect-src 'self' https://cdn.jsdelivr.net https://world.openfoodfacts.org data: blob:",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
