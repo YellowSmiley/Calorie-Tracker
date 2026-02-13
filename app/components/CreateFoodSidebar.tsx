@@ -6,6 +6,7 @@ import {
   convertMacroFromInput,
 } from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
+import NutritionLabelPhotoInput from "./NutritionLabelPhotoInput";
 import { FoodItem, MeasurementType } from "../diary/types";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
@@ -191,6 +192,21 @@ export default function CreateFoodSidebar({
     onClose();
   };
 
+  // Handler for extracted nutrition label data
+  function handleExtractedLabel(data: Partial<Record<string, string>>) {
+    setFormData((prev) => ({
+      ...prev,
+      calories: data.calories ?? prev.calories,
+      protein: data.protein ?? prev.protein,
+      carbs: data.carbs ?? prev.carbs,
+      fat: data.fat ?? prev.fat,
+      saturates: data.saturates ?? prev.saturates,
+      sugars: data.sugars ?? prev.sugars,
+      fibre: data.fibre ?? prev.fibre,
+      salt: data.salt ?? prev.salt,
+    }));
+  }
+
   return (
     <div
       className={`fixed top-0 right-0 h-full w-full bg-zinc-50 dark:bg-zinc-950 shadow-lg z-50 flex flex-col transition-transform duration-300 ${
@@ -225,6 +241,7 @@ export default function CreateFoodSidebar({
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-6xl">
+            <NutritionLabelPhotoInput onExtract={handleExtractedLabel} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
