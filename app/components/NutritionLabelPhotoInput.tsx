@@ -55,16 +55,12 @@ export default function NutritionLabelPhotoInput({
           if (match) nutrition[key] = match[1];
         }
         onExtract(nutrition);
-      } catch (err: any) {
+      } catch (err) {
         // fallback: no extraction
         onExtract({});
         // Error handling for pixReadStream errors
-        if (
-          typeof err === "object" &&
-          err.message &&
-          (err.message.includes("pixReadStream") || err.message.includes("no pix returned") || err.message.includes("Unknown format"))
-        ) {
-          setError("Image format not supported or corrupted. Please try a different photo.");
+        if (err) {
+          setError("Something went wrong. Please try a different photo.");
         } else {
           setError("Failed to extract text from image. Please try again.");
         }
