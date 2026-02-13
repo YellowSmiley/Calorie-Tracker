@@ -81,7 +81,7 @@ export default function NutritionLabelPhotoInput({
   }
 
   return (
-    <div className="mb-4">
+    <div className="w-full md:col-span-1">
       <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
         Upload or Take Photo of Nutrition Label
       </label>
@@ -93,32 +93,34 @@ export default function NutritionLabelPhotoInput({
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <button
-        type="button"
-        className="rounded-lg border border-zinc-200 dark:border-zinc-700 px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50 mb-2"
-        onClick={handleTakePhoto}
-        disabled={loading}
-      >
-        {loading ? "Extracting..." : "Take Photo / Upload"}
-      </button>
-      {image && (
-        <div className="mt-2 max-w-xs rounded-lg border overflow-hidden">
-          <Image
-            src={image}
-            alt="Nutrition Label"
-            width={320}
-            height={240}
-            style={{ objectFit: "contain" }}
-            className="rounded-lg"
-            priority
-          />
-        </div>
-      )}
-      {error && (
-        <div className="mt-2 text-red-600 dark:text-red-400 text-sm font-medium">
-          {error}
-        </div>
-      )}
+      <div className="w-full">
+        <button
+          type="button"
+          className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50 mb-2"
+          onClick={handleTakePhoto}
+          disabled={loading}
+        >
+          {loading ? "Extracting..." : "Take Photo / Upload"}
+        </button>
+        {image && (
+          <div className="mt-2 w-full rounded-lg border overflow-hidden">
+            <Image
+              src={image}
+              alt="Nutrition Label"
+              width={320}
+              height={240}
+              style={{ objectFit: "contain", width: "100%", height: "auto" }}
+              className="rounded-lg"
+              priority
+            />
+          </div>
+        )}
+        {error && (
+          <div className="mt-2 w-full text-red-600 dark:text-red-400 text-sm font-medium">
+            {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

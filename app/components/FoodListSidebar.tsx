@@ -294,18 +294,16 @@ export default function FoodListSidebar({
           )}
         </div>
       </div>
-      {showEditForm && (
-        <EditFoodSidebar
-          isOpen={showEditForm}
-          food={selectedFood}
-          onClose={() => {
-            setShowEditForm(false);
-          }}
-          onSubmit={applyServingChange}
-          userSettings={userSettings}
-          isAdd
-        />
-      )}
+      <EditFoodSidebar
+        isOpen={showEditForm}
+        food={selectedFood}
+        onClose={() => {
+          setShowEditForm(false);
+        }}
+        onSubmit={applyServingChange}
+        userSettings={userSettings}
+        isAdd
+      />
     </div>
   );
 }

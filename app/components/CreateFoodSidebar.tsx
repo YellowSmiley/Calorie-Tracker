@@ -42,7 +42,7 @@ export default function CreateFoodSidebar({
   isLoading = false,
   editingFood = null,
 }: CreateFoodSidebarProps) {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     name: "",
     measurementAmount: "",
     measurementType: "weight" as MeasurementType,
@@ -56,7 +56,8 @@ export default function CreateFoodSidebar({
     salt: "",
     defaultServingAmount: "",
     defaultServingDescription: "",
-  });
+  };
+  const [formData, setFormData] = useState(initialFormData);
 
   const hasInitialized = useRef<string | null>(null);
 
@@ -93,21 +94,7 @@ export default function CreateFoodSidebar({
       if (hasInitialized.current !== foodKey) {
         hasInitialized.current = foodKey;
 
-        setFormData({
-          name: "",
-          measurementAmount: "",
-          measurementType: "weight",
-          calories: "",
-          protein: "",
-          carbs: "",
-          fat: "",
-          saturates: "",
-          sugars: "",
-          fibre: "",
-          salt: "",
-          defaultServingAmount: "",
-          defaultServingDescription: "",
-        });
+        setFormData(initialFormData);
       }
     } else if (!isOpen) {
       hasInitialized.current = null;
@@ -241,8 +228,16 @@ export default function CreateFoodSidebar({
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-6xl">
-            <NutritionLabelPhotoInput onExtract={handleExtractedLabel} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {isOpen && (
+                <div className="md:col-span-3  pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <NutritionLabelPhotoInput
+                      onExtract={handleExtractedLabel}
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
                   Food Name *
