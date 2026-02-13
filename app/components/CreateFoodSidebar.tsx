@@ -141,12 +141,27 @@ export default function CreateFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Build measurement string from value and unit
+    // Build measurement string from value and unit, default to 100 if empty
     const unit =
       formData.measurementType === "weight"
         ? userSettings.weightUnit
         : userSettings.volumeUnit;
-    const measurement = `${formData.measurementValue}${unit}`;
+    const measurementValue =
+      formData.measurementValue.trim() === ""
+        ? "100"
+        : formData.measurementValue;
+    const measurement = `${measurementValue}${unit}`;
+
+    // Validate required nutrition fields
+    if (
+      formData.saturates.trim() === "" ||
+      formData.sugars.trim() === "" ||
+      formData.fibre.trim() === "" ||
+      formData.salt.trim() === ""
+    ) {
+      alert("Saturates, Sugars, Fibre, and Salt are required.");
+      return;
+    }
 
     // Convert from user's input units to database storage units (kcal, grams)
     const servingAmount = parseFloat(formData.defaultServingAmount);
@@ -296,7 +311,7 @@ export default function CreateFoodSidebar({
                   {formData.measurementType === "weight"
                     ? userSettings.weightUnit
                     : userSettings.volumeUnit}
-                  ) *
+                  )
                 </label>
                 <input
                   type="number"
@@ -310,7 +325,6 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="100"
-                  required
                 />
               </div>
 
@@ -383,7 +397,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Saturates ({userSettings.macroUnit})
+                  Saturates ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -394,12 +408,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Sugars ({userSettings.macroUnit})
+                  Sugars ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -410,12 +425,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fibre ({userSettings.macroUnit})
+                  Fibre ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -426,12 +442,13 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Salt ({userSettings.macroUnit})
+                  Salt ({userSettings.macroUnit}) *
                 </label>
                 <input
                   type="number"
@@ -442,6 +459,7 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
+                  required
                 />
               </div>
             </div>
@@ -508,10 +526,10 @@ export default function CreateFoodSidebar({
               {isLoading
                 ? editingFood
                   ? "Updating..."
-                  : "Adding..."
+                  : "Creating..."
                 : editingFood
                   ? "Update Food"
-                  : "Add Food"}
+                  : "Create Food"}
             </button>
           </div>
         </div>
