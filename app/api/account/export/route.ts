@@ -61,7 +61,8 @@ export async function GET() {
         food: {
           select: {
             name: true,
-            measurement: true,
+            measurementType: true,
+            measurementAmount: true,
           },
         },
       },
@@ -73,7 +74,8 @@ export async function GET() {
       select: {
         id: true,
         name: true,
-        measurement: true,
+        measurementType: true,
+        measurementAmount: true,
         calories: true,
         protein: true,
         carbs: true,
@@ -109,7 +111,8 @@ export async function GET() {
         date: entry.date,
         mealType: entry.mealType,
         foodName: entry.food.name,
-        foodMeasurement: entry.food.measurement,
+        foodMeasurementAmount: entry.food.measurementAmount,
+        foodMeasurementType: entry.food.measurementType,
         serving: entry.serving,
         calories: entry.calories,
         protein: entry.protein,

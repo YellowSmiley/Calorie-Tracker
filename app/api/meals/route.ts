@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { MeasurementType } from "@/app/diary/types";
 
 const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
 const MAX_SERVING = 1000;
@@ -62,7 +63,8 @@ export async function GET(request: Request) {
     serving: number;
     food: {
       name: string;
-      measurement: string;
+      measurementType: MeasurementType;
+      measurementAmount: number;
       calories: number;
       protein: number;
       carbs: number;
@@ -83,7 +85,8 @@ export async function GET(request: Request) {
       .map((entry) => ({
         id: entry.id,
         name: entry.food.name,
-        measurement: entry.food.measurement,
+        measurementAmount: entry.food.measurementAmount,
+        measurementType: entry.food.measurementType,
         calories: entry.calories,
         baseCalories: entry.food.calories,
         serving: entry.serving,
@@ -177,7 +180,8 @@ export async function POST(request: Request) {
     item: {
       id: entry.id,
       name: entry.food.name,
-      measurement: entry.food.measurement,
+      measurementAmount: entry.food.measurementAmount,
+      measurementType: entry.food.measurementType,
       calories: entry.calories,
       baseCalories: entry.food.calories,
       serving: entry.serving,

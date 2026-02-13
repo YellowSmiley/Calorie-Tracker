@@ -3,23 +3,24 @@
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FoodListSidebar from "../components/FoodListSidebar";
-import CreateFoodSidebar from "../components/CreateFoodSidebar";
+import CreateFoodSidebar, {
+  CreateFoodSidebarOnSubmitData,
+} from "../components/CreateFoodSidebar";
 import EditFoodSidebar from "../components/EditFoodSidebar";
 import DeleteFoodModal from "../components/DeleteFoodModal";
 import DailySummaryAccordion from "../components/DailySummaryAccordion";
 import HelpButton from "@/app/components/HelpButton";
-import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
+import {
+  formatCalories,
+  getMeasurementInputLabel,
+} from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
+import { UserSettings } from "../settings/types";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
   activeDate: string;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  userSettings: UserSettings;
   userGoals: {
     calories: number;
     protein: number;
@@ -138,9 +139,9 @@ export default function DiaryClient({
       // Calculate serving multiplier from total amount (serving)
       let servingMultiplier = 1;
       if (serving || food.defaultServingAmount) {
-        const parsed = parseMeasurement(food.measurement);
         servingMultiplier =
-          ((serving || food.defaultServingAmount) ?? 0) / parsed.amount;
+          ((serving || food.defaultServingAmount) ?? 0) /
+          food.measurementAmount;
       }
       // Do NOT multiply by quantity again; serving should already be total amount
 
@@ -178,20 +179,7 @@ export default function DiaryClient({
     }
   };
 
-  const addCustomFood = async (formData: {
-    name: string;
-    measurement: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    saturates: number;
-    sugars: number;
-    fibre: number;
-    salt: number;
-    defaultServingAmount?: number | null;
-    defaultServingDescription?: string | null;
-  }) => {
+  const addCustomFood = async (formData: CreateFoodSidebarOnSubmitData) => {
     if (selectedMealIndex === null || !formData.name) return;
 
     setIsLoadingCustom(true);
@@ -214,8 +202,8 @@ export default function DiaryClient({
         // Calculate serving multiplier from default serving amount if available
         let servingMultiplier = 1;
         if (created.food.defaultServingAmount) {
-          const parsed = parseMeasurement(created.food.measurement);
-          servingMultiplier = created.food.defaultServingAmount / parsed.amount;
+          servingMultiplier =
+            created.food.defaultServingAmount / created.food.measurementAmount;
         }
 
         const entryResponse = await fetch("/api/meals", {
@@ -516,11 +504,16 @@ export default function DiaryClient({
                           </p>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
                             {(() => {
-                              const parsed = parseMeasurement(item.measurement);
                               const actualAmount = Number(
-                                (item.serving * parsed.amount).toFixed(2),
+                                (item.serving * item.measurementAmount).toFixed(
+                                  2,
+                                ),
                               );
-                              const amountStr = `${actualAmount}${parsed.inputUnit}${parsed.description ? ` ${parsed.description}` : ""}`;
+                              const parsed = getMeasurementInputLabel(
+                                item.measurementType,
+                                userSettings,
+                              );
+                              const amountStr = `${actualAmount}${parsed.inputUnit}`;
                               if (
                                 item.defaultServingDescription &&
                                 item.defaultServingAmount

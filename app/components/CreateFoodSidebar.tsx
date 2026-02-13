@@ -6,46 +6,29 @@ import {
   convertMacroFromInput,
 } from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
+import { FoodItem, MeasurementType } from "../diary/types";
+import { UserSettings } from "../settings/types";
+import { Food } from "@prisma/client";
 
-interface Food {
-  id: string;
-  name: string;
-  measurement: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  saturates: number;
-  sugars: number;
-  fibre: number;
-  salt: number;
-  defaultServingAmount?: number | null;
-  defaultServingDescription?: string | null;
-}
+export type CreateFoodSidebarOnSubmitData = Omit<
+  FoodItem,
+  | "baseCalories"
+  | "serving"
+  | "baseProtein"
+  | "baseCarbs"
+  | "id"
+  | "baseFat"
+  | "baseSaturates"
+  | "baseSugars"
+  | "baseFibre"
+  | "baseSalt"
+>;
 
 interface CreateFoodSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: {
-    name: string;
-    measurement: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    saturates: number;
-    sugars: number;
-    fibre: number;
-    salt: number;
-    defaultServingAmount?: number | null;
-    defaultServingDescription?: string | null;
-  }) => void;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  onSubmit: (data: CreateFoodSidebarOnSubmitData) => void;
+  userSettings: UserSettings;
   isLoading?: boolean;
   editingFood?: Food | null;
 }
@@ -60,8 +43,8 @@ export default function CreateFoodSidebar({
 }: CreateFoodSidebarProps) {
   const [formData, setFormData] = useState({
     name: "",
-    measurementValue: "",
-    measurementType: "weight",
+    measurementAmount: "",
+    measurementType: "weight" as MeasurementType,
     calories: "",
     protein: "",
     carbs: "",
@@ -84,19 +67,10 @@ export default function CreateFoodSidebar({
       if (hasInitialized.current !== foodKey) {
         hasInitialized.current = foodKey;
 
-        const measurement = editingFood.measurement;
-        const match = measurement.match(/^([\d.]+)(.*)$/);
-        const measurementValue = match ? match[1] : "";
-        const measurementUnit = match ? match[2] : "";
-
-        const isWeight = ["g", "kg", "oz", "lbs", "lb"].includes(
-          measurementUnit,
-        );
-
         setFormData({
           name: editingFood.name,
-          measurementValue,
-          measurementType: isWeight ? "weight" : "volume",
+          measurementAmount: String(editingFood.measurementAmount),
+          measurementType: editingFood.measurementType as MeasurementType,
           calories: String(editingFood.calories),
           protein: String(editingFood.protein),
           carbs: String(editingFood.carbs),
@@ -120,7 +94,7 @@ export default function CreateFoodSidebar({
 
         setFormData({
           name: "",
-          measurementValue: "",
+          measurementAmount: "",
           measurementType: "weight",
           calories: "",
           protein: "",
@@ -137,20 +111,11 @@ export default function CreateFoodSidebar({
     } else if (!isOpen) {
       hasInitialized.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingFood?.id, isOpen]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Build measurement string from value and unit, default to 100 if empty
-    const unit =
-      formData.measurementType === "weight"
-        ? userSettings.weightUnit
-        : userSettings.volumeUnit;
-    const measurementValue =
-      formData.measurementValue.trim() === ""
-        ? "100"
-        : formData.measurementValue;
-    const measurement = `${measurementValue}${unit}`;
 
     // Validate required nutrition fields
     if (
@@ -167,7 +132,8 @@ export default function CreateFoodSidebar({
     const servingAmount = parseFloat(formData.defaultServingAmount);
     onSubmit({
       name: formData.name,
-      measurement: measurement,
+      measurementAmount: parseFloat(formData.measurementAmount) || 0,
+      measurementType: formData.measurementType,
       calories: convertCaloriesFromInput(
         parseFloat(formData.calories) || 0,
         userSettings.calorieUnit,
@@ -209,7 +175,7 @@ export default function CreateFoodSidebar({
   const handleClose = () => {
     setFormData({
       name: "",
-      measurementValue: "",
+      measurementAmount: "",
       measurementType: "weight",
       calories: "",
       protein: "",
@@ -285,7 +251,7 @@ export default function CreateFoodSidebar({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      measurementType: e.target.value,
+                      measurementType: e.target.value as MeasurementType,
                     })
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50"
@@ -316,11 +282,11 @@ export default function CreateFoodSidebar({
                 <input
                   type="number"
                   step="0.1"
-                  value={formData.measurementValue}
+                  value={formData.measurementAmount}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      measurementValue: e.target.value,
+                      measurementAmount: e.target.value,
                     })
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"

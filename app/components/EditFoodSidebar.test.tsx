@@ -1,12 +1,14 @@
 import { render, fireEvent } from "@testing-library/react";
 import EditFoodSidebar from "./EditFoodSidebar";
 import { FoodItem } from "../diary/types";
+import { UserSettings } from "../settings/types";
 
 describe("EditFoodSidebar Add Food logic", () => {
   const baseFood = {
     id: "egg1",
     name: "Medium Egg",
-    measurement: "1 medium egg",
+    measurementAmount: 100,
+    measurementType: "weight",
     defaultServingAmount: 70,
     defaultServingDescription: "1 medium egg",
     baseCalories: 131,
@@ -27,7 +29,12 @@ describe("EditFoodSidebar Add Food logic", () => {
     saturates: 2.4,
     sugars: 0.1,
   } satisfies FoodItem;
-  const userSettings = { calorieUnit: "kcal", macroUnit: "g" };
+  const userSettings: UserSettings = {
+    calorieUnit: "kcal",
+    macroUnit: "g",
+    weightUnit: "g",
+    volumeUnit: "ml",
+  };
 
   it("should call onSubmit with correct serving when quantity is changed in add mode", () => {
     const onSubmit = jest.fn();
@@ -46,6 +53,6 @@ describe("EditFoodSidebar Add Food logic", () => {
     const submitBtn = getByRole("button", { name: /add food/i });
     fireEvent.click(submitBtn);
     // Should call onSubmit with the correct total amount (5 × 70 = 350)
-    expect(onSubmit).toHaveBeenCalledWith(350);
+    expect(onSubmit).toHaveBeenCalledWith(3.5);
   });
 });

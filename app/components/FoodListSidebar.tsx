@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FoodItem } from "../diary/types";
-import { formatCalories, parseMeasurement } from "@/lib/unitConversions";
+import { FoodItem, MeasurementType } from "../diary/types";
+import {
+  formatCalories,
+  getMeasurementInputLabel,
+} from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
 import EditFoodSidebar from "./EditFoodSidebar";
+import { UserSettings } from "../settings/types";
+import { Food } from "@prisma/client";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -12,32 +17,16 @@ interface FoodListSidebarProps {
   onSelectFood: (food: FoodItem, serving: number) => void;
   onOpenCreateForm: () => void;
   isLoading?: boolean;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-  };
+  userSettings: UserSettings;
 }
 
 const PAGE_SIZE = 50;
 
-const mapFood = (food: {
-  id: string;
-  name: string;
-  measurement: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  saturates?: number;
-  sugars?: number;
-  fibre?: number;
-  salt?: number;
-  defaultServingAmount?: number | null;
-  defaultServingDescription?: string | null;
-}): FoodItem => ({
+const mapFood = (food: Food): FoodItem => ({
   id: food.id,
   name: food.name,
-  measurement: food.measurement,
+  measurementAmount: food.measurementAmount,
+  measurementType: food.measurementType as MeasurementType,
   calories: food.calories,
   baseCalories: food.calories,
   serving: 1,
@@ -156,23 +145,25 @@ export default function FoodListSidebar({
     setShowEditForm(true);
   };
 
-  const getServingDisplay = (food: FoodItem) => {
-    const parsed = parseMeasurement(food.measurement);
-    const unit = parsed.inputUnit;
+  const getServingDisplay = (
+    food: FoodItem,
+    userSettings: Omit<UserSettings, "calorieUnit" | "macroUnit">,
+  ) => {
+    const unit = getMeasurementInputLabel(food.measurementType, userSettings);
 
     if (food.defaultServingAmount) {
-      const servingRatio = food.defaultServingAmount / parsed.amount;
+      const servingRatio = food.defaultServingAmount / food.measurementAmount;
       const servingCals = Math.round(food.baseCalories * servingRatio);
       const desc = food.defaultServingDescription
         ? ` · ${food.defaultServingDescription}`
         : "";
       return {
-        line: `${food.defaultServingAmount}${unit}${desc}`,
+        line: `${food.defaultServingAmount}${unit.inputUnit}${desc}`,
         calories: servingCals,
       };
     }
     return {
-      line: `${parsed.amount}${unit}${parsed.description ? ` ${parsed.description}` : ""}`,
+      line: `${food.measurementAmount}${unit.inputUnit}`,
       calories: food.baseCalories,
     };
   };
@@ -181,8 +172,7 @@ export default function FoodListSidebar({
     if (!selectedFood) return;
     // 'serving' here is actually the number of base servings (e.g., 5), but DiaryClient expects total amount (e.g., 350g)
     // So calculate total amount
-    const parsed = parseMeasurement(selectedFood.measurement);
-    const totalAmount = serving * parsed.amount;
+    const totalAmount = serving * selectedFood.measurementAmount;
     onSelectFood(selectedFood, totalAmount);
     setShowEditForm(false);
   };
@@ -252,7 +242,7 @@ export default function FoodListSidebar({
                   {food.name}
                 </p>
                 {(() => {
-                  const serving = getServingDisplay(food);
+                  const serving = getServingDisplay(food, userSettings);
                   return (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       {serving.line} •{" "}

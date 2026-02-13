@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "./DashboardClient";
+import { UserSettings } from "./settings/types";
 
 export default async function Home() {
   const session = await auth();
@@ -26,7 +27,7 @@ export default async function Home() {
     },
   });
 
-  const userSettings = {
+  const userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit"> = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     macroUnit: user?.macroUnit ?? "g",
   };

@@ -12,3 +12,10 @@ export interface SettingsData {
   weightUnit: string;
   volumeUnit: string;
 }
+
+export interface UserSettings {
+  calorieUnit: string | null | undefined;
+  macroUnit: string | null | undefined;
+  weightUnit: string | null | undefined;
+  volumeUnit: string | null | undefined;
+}

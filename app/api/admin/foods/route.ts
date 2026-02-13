@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
+import { FoodItem } from "@/app/diary/types";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -21,10 +22,7 @@ export async function GET(request: NextRequest) {
 
     const where = search
       ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { measurement: { contains: search, mode: "insensitive" as const } },
-          ],
+          OR: [{ name: { contains: search, mode: "insensitive" as const } }],
         }
       : {};
 
@@ -75,7 +73,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       name,
-      measurement,
+      measurementType,
+      measurementAmount,
       calories,
       protein,
       carbs,
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
       salt,
       defaultServingAmount,
       defaultServingDescription,
-    } = body;
+    } = body as Partial<FoodItem>;
 
     if (
       !name ||
@@ -96,13 +95,18 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
     }
+    if (measurementType !== "volume" && measurementType !== "weight") {
+      return NextResponse.json(
+        { error: "Invalid measurement type" },
+        { status: 400 },
+      );
+    }
     if (
-      !measurement ||
-      typeof measurement !== "string" ||
-      measurement.length > 100
+      measurementAmount === undefined ||
+      typeof measurementAmount !== "number"
     ) {
       return NextResponse.json(
-        { error: "Invalid measurement" },
+        { error: "Invalid measurement amount" },
         { status: 400 },
       );
     }
@@ -118,7 +122,15 @@ export async function POST(request: NextRequest) {
       typeof carbs !== "number" ||
       carbs < 0 ||
       typeof fat !== "number" ||
-      fat < 0
+      fat < 0 ||
+      typeof saturates !== "number" ||
+      saturates < 0 ||
+      typeof sugars !== "number" ||
+      sugars < 0 ||
+      typeof fibre !== "number" ||
+      fibre < 0 ||
+      typeof salt !== "number" ||
+      salt < 0
     ) {
       return NextResponse.json(
         { error: "Invalid macro values" },
@@ -129,7 +141,9 @@ export async function POST(request: NextRequest) {
     const newFood = await prisma.food.create({
       data: {
         name,
-        measurement,
+        measurementType,
+        measurementAmount:
+          measurementAmount && measurementAmount > 0 ? measurementAmount : 100,
         calories,
         protein,
         carbs,

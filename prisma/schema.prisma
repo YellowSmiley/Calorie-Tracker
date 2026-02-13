@@ -84,7 +84,8 @@ model VerificationToken {
 model Food {
   id          String   @id @default(cuid())
   name        String
-  measurement String
+  measurementAmount Float
+  measurementType String
   calories    Float
   protein     Float
   carbs       Float

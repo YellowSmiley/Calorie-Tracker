@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 import HelpButton from "@/app/components/HelpButton";
+import { UserSettings } from "./settings/types";
 
 type TimeRange = "day" | "week" | "month";
 
 interface DashboardClientProps {
   userName: string;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-  };
+  userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit">;
   userGoals: {
     calories: number;
     protein: number;
@@ -67,6 +65,7 @@ export default function DashboardClient({
 
   useEffect(() => {
     fetchTotals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange, selectedDate]);
 
   const fetchTotals = async () => {

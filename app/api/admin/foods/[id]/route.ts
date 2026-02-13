@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
+import { FoodItem } from "@/app/diary/types";
 
 export async function PUT(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function PUT(
 
   try {
     const { id: foodId } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as FoodItem;
 
     // Validate input (same rules as POST)
     if (
@@ -37,11 +38,21 @@ export async function PUT(
       );
     }
     if (
-      body.measurement &&
-      (typeof body.measurement !== "string" || body.measurement.length > 100)
+      body.measurementType &&
+      body.measurementType !== "weight" &&
+      body.measurementType !== "volume"
     ) {
       return NextResponse.json(
-        { error: "Invalid measurement" },
+        { error: "Invalid measurement type" },
+        { status: 400 },
+      );
+    }
+    if (
+      body.measurementAmount !== undefined &&
+      typeof body.measurementAmount !== "number"
+    ) {
+      return NextResponse.json(
+        { error: "Invalid measurement amount" },
         { status: 400 },
       );
     }
@@ -110,7 +121,8 @@ export async function PUT(
       where: { id: foodId },
       data: {
         name: body.name,
-        measurement: body.measurement,
+        measurementAmount: body.measurementAmount,
+        measurementType: body.measurementType,
         calories: body.calories,
         protein: body.protein,
         carbs: body.carbs,

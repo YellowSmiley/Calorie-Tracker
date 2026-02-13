@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import UserFoodsClient from "./UserFoodsClient";
 import { Metadata } from "next";
+import { UserSettings } from "../settings/types";
 
 export const metadata: Metadata = {
   title: "My Foods - Calorie Tracker",
@@ -27,7 +28,7 @@ export default async function UserFoodsPage() {
     },
   });
 
-  const userSettings = {
+  const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     macroUnit: user?.macroUnit ?? "g",
     weightUnit: user?.weightUnit ?? "g",

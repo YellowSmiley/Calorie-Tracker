@@ -5,20 +5,18 @@ import type { FoodItem } from "../diary/types";
 import {
   formatCalories,
   formatMacro,
-  parseMeasurement,
   formatSalt,
+  getMeasurementInputLabel,
 } from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
+import { UserSettings } from "../settings/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
   food: FoodItem | null;
   onClose: () => void;
   onSubmit: (serving: number) => void;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-  };
+  userSettings: UserSettings;
   isLoading?: boolean;
   isAdd?: boolean;
 }
@@ -32,12 +30,8 @@ export default function EditFoodSidebar({
   isLoading = false,
   isAdd = false,
 }: EditFoodSidebarProps) {
-  const parsed = useMemo(
-    () => parseMeasurement(food?.measurement || "1 serving"),
-    [food?.measurement],
-  );
-
-  const defaultServing = food?.defaultServingAmount || parsed.amount;
+  const foodMeasurementAmount = food?.measurementAmount || 100;
+  const defaultServing = food?.defaultServingAmount || foodMeasurementAmount;
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -52,7 +46,7 @@ export default function EditFoodSidebar({
       setServingSize(String(defaultServing));
       setQuantity("1");
     } else {
-      const totalAmount = food.serving * parsed.amount;
+      const totalAmount = food.serving * foodMeasurementAmount;
       const qty = Number((totalAmount / defaultServing).toFixed(2));
       setServingSize(String(defaultServing));
       setQuantity(String(qty));
@@ -65,7 +59,7 @@ export default function EditFoodSidebar({
 
   const calculatedNutrition = useMemo(() => {
     if (!food) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    const serving = totalAmount / parsed.amount;
+    const serving = totalAmount / foodMeasurementAmount;
     return {
       calories: Number((food.baseCalories * serving).toFixed(1)),
       protein: Number((food.baseProtein * serving).toFixed(1)),
@@ -76,11 +70,11 @@ export default function EditFoodSidebar({
       fibre: Number((food.baseFibre * serving).toFixed(1)),
       salt: Number((food.baseSalt * serving).toFixed(2)),
     };
-  }, [food, totalAmount, parsed.amount]);
+  }, [food, totalAmount, foodMeasurementAmount]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const serving = totalAmount / parsed.amount;
+    const serving = totalAmount / foodMeasurementAmount;
     onSubmit(serving);
   };
 
@@ -139,7 +133,7 @@ export default function EditFoodSidebar({
             {/* Base Nutrition Info */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
-                Base Nutrition (Per {food?.measurement || ""})
+                Base Nutrition (Per {foodMeasurementAmount || ""})
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -214,7 +208,7 @@ export default function EditFoodSidebar({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
-                    Serving Size ({parsed.inputUnit})
+                    Serving Size ({food?.measurementType})
                   </label>
                   <input
                     id="serving-size-input"
@@ -248,7 +242,7 @@ export default function EditFoodSidebar({
               </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center">
                 {totalAmount > 0
-                  ? `Total: ${Number(totalAmount.toFixed(2))}${parsed.inputUnit}${parsed.description ? ` ${parsed.description}` : ""}`
+                  ? `Total: ${Number(totalAmount.toFixed(2))}${getMeasurementInputLabel(food?.measurementType, userSettings).inputUnit || ""}`
                   : "Enter serving size and quantity"}
               </p>
             </div>

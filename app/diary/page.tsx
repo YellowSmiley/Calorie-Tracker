@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DiaryClient from "./DiaryClient";
-import type { Meal } from "./types";
+import type { FoodItem, Meal } from "./types";
+import { UserSettings } from "../settings/types";
 
 const initialMeals: Meal[] = [
   { name: "Breakfast", items: [] },
@@ -54,7 +55,7 @@ export default async function DiaryPage({
     },
   });
 
-  const userSettings = {
+  const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     macroUnit: user?.macroUnit ?? "g",
     weightUnit: user?.weightUnit ?? "g",
@@ -73,7 +74,7 @@ export default async function DiaryPage({
   };
 
   const { start, end } = getDateRange(activeDate);
-  const entries = (await prisma.mealEntry.findMany({
+  const entries = await prisma.mealEntry.findMany({
     where: {
       userId: session.user.id,
       date: {
@@ -83,33 +84,7 @@ export default async function DiaryPage({
     },
     include: { food: true },
     orderBy: { createdAt: "asc" },
-  })) as Array<{
-    id: string;
-    mealType: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    saturates: number;
-    sugars: number;
-    fibre: number;
-    salt: number;
-    serving: number;
-    food: {
-      name: string;
-      measurement: string;
-      calories: number;
-      protein: number;
-      carbs: number;
-      fat: number;
-      saturates: number;
-      sugars: number;
-      fibre: number;
-      salt: number;
-      defaultServingAmount: number | null;
-      defaultServingDescription: string | null;
-    };
-  }>;
+  });
 
   const meals = mealOrder.map((type) => ({
     name: type[0] + type.slice(1).toLowerCase(),
@@ -118,7 +93,8 @@ export default async function DiaryPage({
       .map((entry) => ({
         id: entry.id,
         name: entry.food.name,
-        measurement: entry.food.measurement,
+        measurementType: entry.food.measurementType,
+        measurementAmount: entry.food.measurementAmount,
         calories: entry.calories,
         baseCalories: entry.food.calories,
         serving: entry.serving,
@@ -138,7 +114,7 @@ export default async function DiaryPage({
         baseSalt: entry.food.salt,
         defaultServingAmount: entry.food.defaultServingAmount,
         defaultServingDescription: entry.food.defaultServingDescription,
-      })),
+      })) as FoodItem[],
   }));
 
   return (

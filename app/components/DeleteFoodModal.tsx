@@ -3,6 +3,7 @@
 import type { FoodItem } from "@/app/diary/types";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 import HelpButton from "./HelpButton";
+import { UserSettings } from "../settings/types";
 
 interface DeleteFoodModalProps {
   item: FoodItem | null;
@@ -12,12 +13,7 @@ interface DeleteFoodModalProps {
   error?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  userSettings: UserSettings;
 }
 
 export default function DeleteFoodModal({
@@ -75,7 +71,7 @@ export default function DeleteFoodModal({
                   {item.name}
                 </p>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                  {item.measurement}
+                  {item.measurementAmount}
                 </p>
               </div>
             </div>

@@ -1,16 +1,12 @@
 "use client";
 
+import { UserSettings } from "../settings/types";
 import FoodTable from "./FoodTable";
 
 interface MyFoodsSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  userSettings: UserSettings;
 }
 
 export default function MyFoodsSidebar({

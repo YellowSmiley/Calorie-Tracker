@@ -8,16 +8,11 @@ import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import FoodMeasurementUnitsSection from "./components/FoodMeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
-import { SettingsData } from "./types";
+import { SettingsData, UserSettings } from "./types";
 import { signOut } from "next-auth/react";
 
 interface SettingsClientProps {
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  userSettings: UserSettings;
 }
 
 export default function SettingsClient({ userSettings }: SettingsClientProps) {

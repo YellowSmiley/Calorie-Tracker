@@ -1,33 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import CreateFoodSidebar from "./CreateFoodSidebar";
-
-interface Food {
-  id: string;
-  name: string;
-  measurement: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  saturates: number;
-  sugars: number;
-  fibre: number;
-  salt: number;
-  createdBy?: string | null;
-  createdByName?: string | null;
-  defaultServingAmount?: number | null;
-  defaultServingDescription?: string | null;
-}
+import CreateFoodSidebar, {
+  CreateFoodSidebarOnSubmitData,
+} from "./CreateFoodSidebar";
+import { UserSettings } from "../settings/types";
+import { Food } from "@prisma/client";
 
 interface FoodTableProps {
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-    weightUnit: string;
-    volumeUnit: string;
-  };
+  userSettings: UserSettings;
   apiBasePath: string; // "/api/foods" or "/api/admin/foods"
   showCreatedBy?: boolean;
   emptyMessage?: string;
@@ -120,16 +101,7 @@ export default function FoodTable({
     }
   }, [loadMore]);
 
-  const handleFoodSubmit = async (formData: {
-    name: string;
-    measurement: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    defaultServingAmount?: number | null;
-    defaultServingDescription?: string | null;
-  }) => {
+  const handleFoodSubmit = async (formData: CreateFoodSidebarOnSubmitData) => {
     setIsLoadingCustom(true);
     setError(null);
 
@@ -274,12 +246,12 @@ export default function FoodTable({
                   {food.name}
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {food.measurement} • {food.calories} kcal • P:{food.protein}g
-                  C:{food.carbs}g F:{food.fat}g
+                  {food.measurementAmount} • {food.calories} kcal • P:
+                  {food.protein}g C:{food.carbs}g F:{food.fat}g
                   {food.defaultServingDescription
-                    ? ` • ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount}${food.measurement.replace(/^[\d.]+/, "")})` : ""}`
+                    ? ` • ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
                     : ""}
-                  {showCreatedBy ? ` • ${food.createdByName || "Unknown"}` : ""}
+                  {showCreatedBy ? ` • ${food.createdBy || "Unknown"}` : ""}
                 </p>
               </div>
               <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

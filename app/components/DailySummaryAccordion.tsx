@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import { UserSettings } from "../settings/types";
 
 interface DailySummaryAccordionProps {
   totals: {
@@ -24,10 +25,7 @@ interface DailySummaryAccordionProps {
     fibre: number;
     salt: number;
   };
-  userSettings: {
-    calorieUnit: string;
-    macroUnit: string;
-  };
+  userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit">;
 }
 
 export default function DailySummaryAccordion({
@@ -65,7 +63,7 @@ export default function DailySummaryAccordion({
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-[1000px] opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
+          isOpen ? "max-h-250 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
         }`}
       >
         <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
