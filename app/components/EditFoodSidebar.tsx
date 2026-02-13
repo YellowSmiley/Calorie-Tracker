@@ -80,13 +80,8 @@ export default function EditFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isAdd) {
-      // In add mode, always treat as 1 base serving
-      onSubmit(1);
-    } else {
-      const serving = totalAmount / parsed.amount;
-      onSubmit(serving);
-    }
+    const serving = totalAmount / parsed.amount;
+    onSubmit(serving);
   };
 
   return (
@@ -222,6 +217,7 @@ export default function EditFoodSidebar({
                     Serving Size ({parsed.inputUnit})
                   </label>
                   <input
+                    id="serving-size-input"
                     type="number"
                     step="any"
                     min="0"
@@ -232,10 +228,14 @@ export default function EditFoodSidebar({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
+                  <label
+                    className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2"
+                    htmlFor="quantity-input"
+                  >
                     Quantity
                   </label>
                   <input
+                    id="quantity-input"
                     type="number"
                     step="any"
                     min="0"

@@ -9,7 +9,7 @@ import EditFoodSidebar from "./EditFoodSidebar";
 interface FoodListSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectFood: (food: FoodItem, quantity: number) => void;
+  onSelectFood: (food: FoodItem, serving: number) => void;
   onOpenCreateForm: () => void;
   isLoading?: boolean;
   userSettings: {
@@ -179,7 +179,11 @@ export default function FoodListSidebar({
 
   const applyServingChange = async (serving: number) => {
     if (!selectedFood) return;
-    onSelectFood(selectedFood, serving);
+    // 'serving' here is actually the number of base servings (e.g., 5), but DiaryClient expects total amount (e.g., 350g)
+    // So calculate total amount
+    const parsed = parseMeasurement(selectedFood.measurement);
+    const totalAmount = serving * parsed.amount;
+    onSelectFood(selectedFood, totalAmount);
     setShowEditForm(false);
   };
 
