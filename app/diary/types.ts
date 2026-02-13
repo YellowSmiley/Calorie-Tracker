@@ -24,6 +24,7 @@ export interface FoodItem {
   baseSalt: number;
   defaultServingAmount?: number | null;
   defaultServingDescription?: string | null;
+  createdByName?: string;
 }
 
 export interface Meal {

@@ -2,7 +2,10 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
+import { Food } from "@prisma/client";
 import { FoodItem } from "@/app/diary/types";
+
+export type FoodWithCreator = Food & { createdByName?: string };
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Fetch creator names separately
-    const foodsWithCreator = await Promise.all(
+    const foodsWithCreator: FoodWithCreator[] = await Promise.all(
       foods.map(async (food) => {
         const creator = food.createdBy
           ? await prisma.user.findUnique({

@@ -6,6 +6,9 @@ import CreateFoodSidebar, {
 } from "./CreateFoodSidebar";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
+import { getMeasurementInputLabel } from "@/lib/unitConversions";
+import { MeasurementType } from "../diary/types";
+import { FoodWithCreator } from "../api/admin/foods/route";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -22,7 +25,8 @@ export default function FoodTable({
   showCreatedBy = false,
   emptyMessage = "You haven't created any foods yet. Click 'Create Food' to get started.",
 }: FoodTableProps) {
-  const [foods, setFoods] = useState<Food[]>([]);
+  // For admin API, foods may have createdByName
+  const [foods, setFoods] = useState<FoodWithCreator[]>([]);
   const [total, setTotal] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -51,8 +55,11 @@ export default function FoodTable({
           setError("Failed to fetch foods");
           return;
         }
-        const data = await res.json();
-        const fetched: Food[] = data.foods || [];
+        const data = (await res.json()) as {
+          foods: FoodWithCreator[];
+          total: number;
+        };
+        const fetched = data.foods || [];
         setFoods((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
         setHasLoaded(true);
@@ -246,12 +253,20 @@ export default function FoodTable({
                   {food.name}
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {food.measurementAmount} • {food.calories} kcal • P:
-                  {food.protein}g C:{food.carbs}g F:{food.fat}g
+                  {food.measurementAmount}
+                  {
+                    getMeasurementInputLabel(
+                      food.measurementType as MeasurementType,
+                      userSettings,
+                    ).inputUnit
+                  }{" "}
+                  • {food.calories} kcal
                   {food.defaultServingDescription
                     ? ` • ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
                     : ""}
-                  {showCreatedBy ? ` • ${food.createdBy || "Unknown"}` : ""}
+                  {showCreatedBy
+                    ? ` • ${food.createdByName || food.createdBy || "Unknown"}`
+                    : ""}
                 </p>
               </div>
               <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

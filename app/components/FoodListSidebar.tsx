@@ -10,6 +10,7 @@ import HelpButton from "./HelpButton";
 import EditFoodSidebar from "./EditFoodSidebar";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
+import { FoodWithCreator } from "../api/admin/foods/route";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ interface FoodListSidebarProps {
 
 const PAGE_SIZE = 50;
 
-const mapFood = (food: Food): FoodItem => ({
+const mapFood = (food: FoodWithCreator): FoodItem => ({
   id: food.id,
   name: food.name,
   measurementAmount: food.measurementAmount,
@@ -46,6 +47,7 @@ const mapFood = (food: Food): FoodItem => ({
   baseSalt: food.salt ?? 0,
   defaultServingAmount: food.defaultServingAmount,
   defaultServingDescription: food.defaultServingDescription,
+  createdByName: food.createdByName,
 });
 
 export default function FoodListSidebar({
@@ -82,7 +84,10 @@ export default function FoodListSidebar({
             console.error("Failed to fetch foods");
           return;
         }
-        const data = await res.json();
+        const data = (await res.json()) as {
+          foods: Food[];
+          total: number;
+        };
         const mapped = (data.foods || []).map(mapFood);
         setFoods((prev) => (append ? [...prev, ...mapped] : mapped));
         setTotal(data.total ?? 0);

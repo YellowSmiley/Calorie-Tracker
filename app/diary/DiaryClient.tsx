@@ -16,6 +16,7 @@ import {
 } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
 import { UserSettings } from "../settings/types";
+import { FoodWithCreator } from "../api/admin/foods/route";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
@@ -196,7 +197,10 @@ export default function DiaryClient({
         throw new Error("Failed to create food");
       }
 
-      const created = await createResponse.json();
+      const created = (await createResponse.json()) as {
+        food: FoodWithCreator;
+        total: number;
+      };
 
       if (created.food?.id) {
         // Calculate serving multiplier from default serving amount if available
