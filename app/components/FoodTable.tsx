@@ -28,21 +28,18 @@ export default function FoodTable({
   // For admin API, foods may have createdByName
   const [foods, setFoods] = useState<FoodWithCreator[]>([]);
   const [total, setTotal] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingFood, setEditingFood] = useState<Food | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [isLoadingCustom, setIsLoadingCustom] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchFoods = useCallback(
     async (search: string, skip: number, append: boolean) => {
-      loadingTimerRef.current = setTimeout(() => setIsFetching(true), 100);
+      setIsLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams({
@@ -62,14 +59,13 @@ export default function FoodTable({
         const fetched = data.foods || [];
         setFoods((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
-        setHasLoaded(true);
+        setIsLoading(false);
       } catch (err) {
         if (process.env.NODE_ENV === "development")
           console.error("Error fetching foods:", err);
         setError("Error fetching foods");
       } finally {
-        if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
-        setIsFetching(false);
+        setIsLoading(false);
       }
     },
     [apiBasePath],
@@ -77,14 +73,13 @@ export default function FoodTable({
 
   // Fetch on mount
   useEffect(() => {
-    if (!hasLoaded) {
-      fetchFoods("", 0, false);
-    }
-  }, [hasLoaded, fetchFoods]);
+    fetchFoods("", 0, false);
+  }, [fetchFoods]);
 
   // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!searchQuery) return; // Don't search if input is empty
     debounceRef.current = setTimeout(() => {
       fetchFoods(searchQuery, 0, false);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -95,21 +90,23 @@ export default function FoodTable({
   }, [searchQuery, fetchFoods]);
 
   const loadMore = useCallback(() => {
-    if (isFetching || foods.length >= total) return;
+    if (isLoading || foods.length >= total) return;
     fetchFoods(searchQuery, foods.length, true);
-  }, [isFetching, foods.length, total, searchQuery, fetchFoods]);
+  }, [isLoading, foods.length, total, searchQuery, fetchFoods]);
 
   // Infinite scroll
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
+    // Only load more if user has scrolled past 2720px (40 rows * 68px)
+    if (el.scrollTop < 2720) return;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
       loadMore();
     }
   }, [loadMore]);
 
   const handleFoodSubmit = async (formData: CreateFoodSidebarOnSubmitData) => {
-    setIsLoadingCustom(true);
+    setIsLoading(true);
     setError(null);
 
     try {
@@ -160,7 +157,7 @@ export default function FoodTable({
         console.error("Error saving food:", err);
       setError("Error saving food");
     } finally {
-      setIsLoadingCustom(false);
+      setIsLoading(false);
     }
   };
 
@@ -298,14 +295,14 @@ export default function FoodTable({
           ))}
 
           {/* Loading indicator */}
-          {isFetching && (
+          {isLoading && (
             <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
               Loading...
             </div>
           )}
 
           {/* No results */}
-          {!isFetching && hasLoaded && foods.length === 0 && (
+          {!isLoading && foods.length === 0 && (
             <div className="px-4 py-6 text-center">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
                 {searchQuery
@@ -322,7 +319,7 @@ export default function FoodTable({
           )}
 
           {/* Create button at end of list */}
-          {!isFetching && foods.length > 0 && foods.length >= total && (
+          {!isLoading && foods.length > 0 && foods.length >= total && (
             <div className="px-4 py-4 text-center">
               <button
                 onClick={() => setShowCreateForm(true)}
@@ -344,7 +341,7 @@ export default function FoodTable({
         }}
         onSubmit={handleFoodSubmit}
         userSettings={userSettings}
-        isLoading={isLoadingCustom}
+        isLoading={isLoading}
         editingFood={editingFood}
       />
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import UserManagement from "./UserManagement";
 import FoodDatabase from "./FoodDatabase";
+import HelpButton from "../components/HelpButton";
 
 type AdminTab = "users" | "foods";
 
@@ -10,19 +11,26 @@ export default function AdminClient() {
   const [activeTab, setActiveTab] = useState<AdminTab>("users");
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-full flex flex-col">
       {/* Header */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-            Admin Panel
-          </h1>
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
+              Admin Panel
+            </h1>
+            <HelpButton
+              title="Admin Panel"
+              content="Manage users and food database. Use the tabs to switch between user management and food database management."
+              ariaLabel="Help: Admin panel overview"
+            />
+          </div>
         </div>
       </div>
 
       {/* Tab Navigation - styled like bottom nav */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="max-w-6xl mx-auto flex gap-4">
+        <div className="max-w-3xl mx-auto flex gap-4">
           <button
             onClick={() => setActiveTab("users")}
             className={`flex h-12 items-center justify-center rounded-lg px-6 text-base font-medium transition-colors ${
