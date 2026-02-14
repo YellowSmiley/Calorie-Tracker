@@ -2,8 +2,8 @@
 
 import type { FoodItem } from "@/app/diary/types";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
-import HelpButton from "./HelpButton";
-import { UserSettings } from "../settings/types";
+import HelpButton from "../../components/HelpButton";
+import { UserSettings } from "../../settings/types";
 
 interface DeleteFoodModalProps {
   item: FoodItem | null;

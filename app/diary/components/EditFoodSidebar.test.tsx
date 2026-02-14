@@ -1,7 +1,7 @@
 import { render, fireEvent } from "@testing-library/react";
 import EditFoodSidebar from "./EditFoodSidebar";
-import { FoodItem } from "../diary/types";
-import { UserSettings } from "../settings/types";
+import { FoodItem } from "../types";
+import { UserSettings } from "../../settings/types";
 
 describe("EditFoodSidebar Add Food logic", () => {
   const baseFood = {

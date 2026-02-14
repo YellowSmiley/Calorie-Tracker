@@ -5,6 +5,8 @@ import {
   convertMacroFromInput,
   formatCalories,
   formatMacro,
+  formatSalt,
+  getMeasurementInputLabel,
 } from "./unitConversions";
 
 describe("convertCaloriesForDisplay", () => {
@@ -154,5 +156,37 @@ describe("formatMacro", () => {
 
   it("handles null value", () => {
     expect(formatMacro(null, { macroUnit: "g" })).toBe("0g");
+  });
+});
+
+describe("formatSalt", () => {
+  it("formats salt values with one decimal and 'g' unit", () => {
+    expect(formatSalt(0.567, { macroUnit: "g" })).toBe("0.57g");
+  });
+  it("handles null value", () => {
+    expect(formatSalt(null, { macroUnit: "g" })).toBe("0g");
+  });
+});
+
+describe("getMeasurementInputLabel", () => {
+  it("returns 'Amount (g)' for weight measurement type with g unit", () => {
+    expect(
+      getMeasurementInputLabel("weight", { weightUnit: "g", volumeUnit: "ml" }),
+    ).toEqual({ label: "Weight (g)", inputUnit: "g" });
+  });
+
+  it("returns 'Amount (oz)' for weight measurement type with oz unit", () => {
+    expect(
+      getMeasurementInputLabel("weight", {
+        weightUnit: "oz",
+        volumeUnit: "ml",
+      }),
+    ).toEqual({ label: "Weight (oz)", inputUnit: "oz" });
+  });
+
+  it("returns 'Amount (ml)' for volume measurement type with ml unit", () => {
+    expect(
+      getMeasurementInputLabel("volume", { weightUnit: "g", volumeUnit: "ml" }),
+    ).toEqual({ label: "Volume (ml)", inputUnit: "ml" });
   });
 });

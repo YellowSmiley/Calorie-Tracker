@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import CreateFoodSidebar, {
   CreateFoodSidebarOnSubmitData,
-} from "./CreateFoodSidebar";
+} from "../diary/components/create-food-sidebar/CreateFoodSidebar";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
 import { getMeasurementInputLabel } from "@/lib/unitConversions";

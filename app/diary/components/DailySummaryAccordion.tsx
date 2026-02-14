@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
-import { UserSettings } from "../settings/types";
+import { UserSettings } from "../../settings/types";
 
 interface DailySummaryAccordionProps {
   totals: {

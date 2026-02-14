@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import MyFoodsSidebar from "../components/MyFoodsSidebar";
+import MyFoodsSidebar from "./components/MyFoodsSidebar";
 import NutritionGoalsSection from "./components/NutritionGoalsSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import FoodMeasurementUnitsSection from "./components/FoodMeasurementUnitsSection";

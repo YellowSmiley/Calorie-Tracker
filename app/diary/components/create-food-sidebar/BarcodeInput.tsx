@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 
 interface BarcodeInputProps {
@@ -9,10 +8,8 @@ interface BarcodeInputProps {
 }
 
 export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
-  const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [barcode, setBarcode] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,14 +59,13 @@ export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
     }
     setLoading(false);
   }
+
   async function handleImageUpload(file: File) {
     setLoading(true);
     setError(null);
-    setBarcode(null);
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
-      setImage(base64);
       // Create an image element to draw to canvas
       const img = new window.Image();
       img.onload = async () => {
@@ -87,7 +83,6 @@ export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
         try {
           const codeReader = new BrowserMultiFormatReader();
           const result = await codeReader.decodeFromImageElement(img);
-          setBarcode(result.getText());
           fetchProduct(result.getText());
         } catch (err) {
           if (err instanceof NotFoundException) {
@@ -138,101 +133,10 @@ export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
         >
           {loading ? "Scanning..." : "Take Photo / Upload"}
         </button>
-        {image && (
-          <>
-            <div className="mt-2 w-full rounded-lg border overflow-hidden">
-              <Image
-                src={image}
-                alt="Barcode"
-                width={320}
-                height={120}
-                style={{ objectFit: "contain", width: "100%", height: "auto" }}
-                className="rounded-lg"
-                priority
-              />
-            </div>
-            {product && (
-              <div className="mt-2 w-full rounded-lg border bg-zinc-50 dark:bg-zinc-900 p-3 text-xs text-black dark:text-zinc-100">
-                <div className="font-semibold mb-1">Detected Product Info</div>
-                <div>
-                  <b>Name:</b>{" "}
-                  {product.product_name || <span className="italic">N/A</span>}
-                </div>
-                {product.brands && (
-                  <div>
-                    <b>Brand:</b> {product.brands}
-                  </div>
-                )}
-                {product.nutriments && (
-                  <div className="mt-1">
-                    <b>Nutritional info per 100g:</b>
-                    <ul className="list-disc ml-5">
-                      <li>
-                        Calories:{" "}
-                        {product.nutriments["energy-kcal_100g"] ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        kcal
-                      </li>
-                      <li>
-                        Protein:{" "}
-                        {product.nutriments.proteins_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Fat:{" "}
-                        {product.nutriments.fat_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Saturates:{" "}
-                        {product.nutriments["saturated-fat_100g"] ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Carbs:{" "}
-                        {product.nutriments.carbohydrates_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Sugars:{" "}
-                        {product.nutriments.sugars_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Fibre:{" "}
-                        {product.nutriments.fiber_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                      <li>
-                        Salt:{" "}
-                        {product.nutriments.salt_100g ?? (
-                          <span className="italic">N/A</span>
-                        )}{" "}
-                        g
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-        {barcode && (
-          <div className="mt-2 w-full text-green-700 dark:text-green-400 text-sm font-medium">
-            Barcode detected: {barcode}
+        {product && (
+          <div className="mt-2 w-full text-green-600 dark:text-green-400 text-sm font-medium">
+            Product found: {product.product_name}! Please review and edit values
+            as needed before submitting (may be inaccurate)
           </div>
         )}
         {error && (

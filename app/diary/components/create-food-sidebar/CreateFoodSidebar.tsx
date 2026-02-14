@@ -4,10 +4,10 @@ import {
   convertCaloriesFromInput,
   convertMacroFromInput,
 } from "@/lib/unitConversions";
-import HelpButton from "./HelpButton";
+import HelpButton from "../../../components/HelpButton";
 import NutritionLabelPhotoInput from "./NutritionLabelPhotoInput";
-import { FoodItem, MeasurementType } from "../diary/types";
-import { UserSettings } from "../settings/types";
+import { FoodItem, MeasurementType } from "../../types";
+import { UserSettings } from "../../../settings/types";
 import { Food } from "@prisma/client";
 import BarcodeInput from "./BarcodeInput";
 

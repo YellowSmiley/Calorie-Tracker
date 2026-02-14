@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import Image from "next/image";
 import Tesseract from "tesseract.js";
 
 interface NutritionLabelPhotoInputProps {
@@ -9,9 +8,9 @@ interface NutritionLabelPhotoInputProps {
 export default function NutritionLabelPhotoInput({
   onExtract,
 }: NutritionLabelPhotoInputProps) {
-  const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [product, setProduct] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleImageUpload(file: File) {
@@ -20,7 +19,6 @@ export default function NutritionLabelPhotoInput({
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
-      setImage(base64);
       // Convert base64 data URL to Blob
       function dataURLtoBlob(dataurl: string) {
         const arr = dataurl.split(","),
@@ -37,6 +35,7 @@ export default function NutritionLabelPhotoInput({
         const {
           data: { text },
         } = await Tesseract.recognize(imageUrl, "eng");
+        setProduct(text);
         // Parse nutrition values from OCR text
         const nutrition: Partial<Record<string, string>> = {};
         // Simple regexes for UK nutrition label fields
@@ -102,17 +101,10 @@ export default function NutritionLabelPhotoInput({
         >
           {loading ? "Extracting..." : "Take Photo / Upload"}
         </button>
-        {image && (
-          <div className="mt-2 w-full rounded-lg border overflow-hidden">
-            <Image
-              src={image}
-              alt="Nutrition Label"
-              width={320}
-              height={240}
-              style={{ objectFit: "contain", width: "100%", height: "auto" }}
-              className="rounded-lg"
-              priority
-            />
+        {product && (
+          <div className="mt-2 w-full text-green-600 dark:text-green-400 text-sm font-medium">
+            Successfully extracted nutrition info! Please review and edit values
+            as needed before submitting (may be inaccurate)
           </div>
         )}
         {error && (

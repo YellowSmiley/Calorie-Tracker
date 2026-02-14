@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FoodItem, MeasurementType } from "../diary/types";
+import { FoodItem, MeasurementType } from "../types";
 import {
   formatCalories,
   getMeasurementInputLabel,
 } from "@/lib/unitConversions";
-import HelpButton from "./HelpButton";
+import HelpButton from "../../components/HelpButton";
 import EditFoodSidebar from "./EditFoodSidebar";
-import { UserSettings } from "../settings/types";
+import { UserSettings } from "../../settings/types";
 import { Food } from "@prisma/client";
-import { FoodWithCreator } from "../api/admin/foods/route";
+import { FoodWithCreator } from "../../api/admin/foods/route";
 
 interface FoodListSidebarProps {
   isOpen: boolean;

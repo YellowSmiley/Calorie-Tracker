@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { FoodItem } from "../diary/types";
+import type { FoodItem } from "../types";
 import {
   formatCalories,
   formatMacro,
   formatSalt,
   getMeasurementInputLabel,
 } from "@/lib/unitConversions";
-import HelpButton from "./HelpButton";
-import { UserSettings } from "../settings/types";
+import HelpButton from "../../components/HelpButton";
+import { UserSettings } from "../../settings/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;

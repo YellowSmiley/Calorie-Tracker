@@ -1,7 +1,7 @@
 "use client";
 
-import { UserSettings } from "../settings/types";
-import FoodTable from "./FoodTable";
+import { UserSettings } from "../types";
+import FoodTable from "../../components/FoodTable";
 
 interface MyFoodsSidebarProps {
   isOpen: boolean;

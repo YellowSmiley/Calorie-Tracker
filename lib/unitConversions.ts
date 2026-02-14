@@ -107,17 +107,6 @@ export function formatSalt(
   return `${Number(converted.toFixed(2))}${unit}`;
 }
 
-// Parse a measurement string like "100g", "1 cup cooked", "250ml" into { amount, unit, description }
-export interface ParsedMeasurement {
-  amount: number; // e.g. 100
-  unit: string; // e.g. "g", "ml", "cup", "large"
-  description: string; // e.g. "cooked", "" (extra text after the unit)
-  isWeight: boolean; // g, kg, oz, lbs
-  isVolume: boolean; // ml, L, cup, tbsp, tsp
-  inputLabel: string; // user-friendly label e.g. "Weight (g)" or "Volume (ml)"
-  inputUnit: string; // the unit to show in the input e.g. "g", "ml"
-}
-
 // Takes MeasurementType | undefined and shows gram or ml depending on user settings
 export function getMeasurementInputLabel(
   measurementType: MeasurementType | undefined,

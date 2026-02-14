@@ -2,6 +2,19 @@
 
 A full-stack Next.js application for tracking daily food intake and macronutrients (calories, protein, carbs, and fat).
 
+## Open Food Facts Integration
+
+This project uses [Open Food Facts](https://world.openfoodfacts.org/) — an open, collaborative food products database made by everyone, for everyone:
+
+> "Open Food Facts is a food products database made by everyone, for everyone. You can use it to make better food choices, and as it is open data, anyone can re-use it for any purpose."
+
+**How it's used:**
+
+- **Barcode Scanning:** When you scan a barcode in the app, it queries Open Food Facts to fetch nutrition data for food products. If a match is found, the food's details are auto-filled, making it easier to log foods quickly.
+- **Fallback for Missing Foods:** If a barcode is not found in the local database, the app attempts to retrieve it from Open Food Facts before prompting for manual entry.
+
+See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use) for more information.
+
 ## Features
 
 - 📊 **Daily Food Diary** - Track meals across Breakfast, Lunch, Dinner, and Snacks

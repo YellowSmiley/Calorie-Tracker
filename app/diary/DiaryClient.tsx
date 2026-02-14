@@ -2,13 +2,13 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import FoodListSidebar from "../components/FoodListSidebar";
+import FoodListSidebar from "./components/FoodListSidebar";
 import CreateFoodSidebar, {
   CreateFoodSidebarOnSubmitData,
-} from "../components/CreateFoodSidebar";
-import EditFoodSidebar from "../components/EditFoodSidebar";
-import DeleteFoodModal from "../components/DeleteFoodModal";
-import DailySummaryAccordion from "../components/DailySummaryAccordion";
+} from "./components/create-food-sidebar/CreateFoodSidebar";
+import EditFoodSidebar from "./components/EditFoodSidebar";
+import DeleteFoodModal from "./components/DeleteFoodModal";
+import DailySummaryAccordion from "./components/DailySummaryAccordion";
 import HelpButton from "@/app/components/HelpButton";
 import {
   formatCalories,
