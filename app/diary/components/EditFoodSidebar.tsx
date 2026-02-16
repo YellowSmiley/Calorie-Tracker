@@ -219,6 +219,9 @@ export default function EditFoodSidebar({
                     onChange={(e) => setServingSize(e.target.value)}
                     className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
                     placeholder={String(defaultServing)}
+                    data-testid={
+                      isAdd ? "add-food-serving-size" : "edit-food-serving-size"
+                    }
                   />
                 </div>
                 <div>
@@ -237,6 +240,9 @@ export default function EditFoodSidebar({
                     onChange={(e) => setQuantity(e.target.value)}
                     className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
                     placeholder="1"
+                    data-testid={
+                      isAdd ? "add-food-quantity" : "edit-food-quantity"
+                    }
                   />
                 </div>
               </div>
@@ -257,7 +263,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Calories
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-calories"
+                        : "edit-food-nutrition-calories"
+                    }
+                  >
                     {formatCalories(calculatedNutrition.calories, userSettings)}
                   </p>
                 </div>
@@ -265,7 +278,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Protein
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-protein"
+                        : "edit-food-nutrition-protein"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.protein, userSettings)}
                   </p>
                 </div>
@@ -273,7 +293,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Carbs
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-carbs"
+                        : "edit-food-nutrition-carbs"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.carbs, userSettings)}
                   </p>
                 </div>
@@ -281,7 +308,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Fat
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-fat"
+                        : "edit-food-nutrition-fat"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.fat, userSettings)}
                   </p>
                 </div>
@@ -289,7 +323,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Saturates
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-saturates"
+                        : "edit-food-nutrition-saturates"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.saturates, userSettings)}
                   </p>
                 </div>
@@ -297,7 +338,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Sugars
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-sugars"
+                        : "edit-food-nutrition-sugars"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.sugars, userSettings)}
                   </p>
                 </div>
@@ -305,7 +353,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Fibre
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-fibre"
+                        : "edit-food-nutrition-fibre"
+                    }
+                  >
                     {formatMacro(calculatedNutrition.fibre, userSettings)}
                   </p>
                 </div>
@@ -313,7 +368,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Salt
                   </p>
-                  <p className="text-xl font-bold text-black dark:text-zinc-50">
+                  <p
+                    className="text-xl font-bold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-nutrition-salt"
+                        : "edit-food-nutrition-salt"
+                    }
+                  >
                     {formatSalt(calculatedNutrition.salt, userSettings)}
                   </p>
                 </div>
@@ -329,6 +391,7 @@ export default function EditFoodSidebar({
               type="submit"
               disabled={isLoading || totalAmount <= 0}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid={isAdd ? "add-food-submit" : "edit-food-submit"}
             >
               {isLoading
                 ? "Updating..."

@@ -255,6 +255,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="e.g., Chicken Breast"
                   required
+                  data-testid="create-food-name"
                 />
               </div>
 
@@ -271,6 +272,7 @@ export default function CreateFoodSidebar({
                     })
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50"
+                  data-testid="create-food-measurement-type"
                 >
                   <option
                     value="weight"
@@ -307,6 +309,7 @@ export default function CreateFoodSidebar({
                   }
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="100"
+                  data-testid="create-food-measurement-amount"
                 />
               </div>
 
@@ -323,6 +326,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-calories"
                 />
               </div>
 
@@ -340,6 +344,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-protein"
                 />
               </div>
 
@@ -357,6 +362,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-carbs"
                 />
               </div>
 
@@ -374,6 +380,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-fat"
                 />
               </div>
 
@@ -391,6 +398,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-saturates"
                 />
               </div>
 
@@ -408,6 +416,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-sugars"
                 />
               </div>
 
@@ -425,6 +434,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-fibre"
                 />
               </div>
 
@@ -442,6 +452,7 @@ export default function CreateFoodSidebar({
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="0"
                   required
+                  data-testid="create-food-salt"
                 />
               </div>
             </div>
@@ -472,6 +483,7 @@ export default function CreateFoodSidebar({
                     }
                     className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                     placeholder="e.g. 70"
+                    data-testid="create-food-serving-amount"
                   />
                 </div>
                 <div>
@@ -490,6 +502,7 @@ export default function CreateFoodSidebar({
                     }
                     className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                     placeholder="e.g. 1 medium egg"
+                    data-testid="create-food-serving-description"
                   />
                 </div>
               </div>
@@ -504,6 +517,7 @@ export default function CreateFoodSidebar({
               type="submit"
               disabled={isLoading}
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="create-food-submit"
             >
               {isLoading
                 ? editingFood

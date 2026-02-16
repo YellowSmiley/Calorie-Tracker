@@ -434,7 +434,10 @@ export default function DiaryClient({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 p-4">
+        <div
+          className="bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 p-4"
+          data-testid="diary-error"
+        >
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-900 dark:text-zinc-200">
@@ -443,6 +446,7 @@ export default function DiaryClient({
               <button
                 onClick={() => setError(null)}
                 className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300 text-sm"
+                data-testid="diary-error-dismiss"
               >
                 Dismiss
               </button>
@@ -470,7 +474,11 @@ export default function DiaryClient({
             />
           </div>
           {meals.map((meal, mealIndex) => (
-            <div key={meal.name} className="mb-8">
+            <div
+              key={meal.name}
+              className="mb-8"
+              data-testid={`diary-meal-${meal.name.toLowerCase()}`}
+            >
               <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
                 {meal.name}
               </h2>
@@ -493,6 +501,7 @@ export default function DiaryClient({
                     {meal.items.map((item) => (
                       <tr
                         key={item.id}
+                        data-testid={`diary-food-row-${item.id}`}
                         onClick={() => {
                           setEditTarget({
                             mealIndex,
@@ -502,7 +511,10 @@ export default function DiaryClient({
                         }}
                         className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
                       >
-                        <td className="px-4 py-3">
+                        <td
+                          className="px-4 py-3"
+                          data-testid={`diary-food-name-${item.id}`}
+                        >
                           <p className="text-black dark:text-zinc-50 font-medium">
                             {item.name}
                           </p>
@@ -537,7 +549,10 @@ export default function DiaryClient({
                             })()}
                           </p>
                         </td>
-                        <td className="px-4 py-3">
+                        <td
+                          className="px-4 py-3"
+                          data-testid={`diary-food-calories-${item.id}`}
+                        >
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
                             {formatCalories(item.calories, userSettings)}
                           </p>
@@ -549,6 +564,7 @@ export default function DiaryClient({
                               showDeleteModal(mealIndex, item.id);
                             }}
                             className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                            data-testid={`diary-food-remove-${item.id}`}
                           >
                             Remove
                           </button>
@@ -556,7 +572,10 @@ export default function DiaryClient({
                       </tr>
                     ))}
                     {/* Totals Row */}
-                    <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                    <tr
+                      className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900"
+                      data-testid={`diary-meal-total-${meal.name.toLowerCase()}`}
+                    >
                       <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
                         Total
                       </td>
@@ -570,6 +589,7 @@ export default function DiaryClient({
                     </tr>
                     <tr
                       className="hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      data-testid={`diary-add-food-${meal.name.toLowerCase()}`}
                       onClick={() => {
                         setSelectedMealIndex(mealIndex);
                         setShowFoodList(true);

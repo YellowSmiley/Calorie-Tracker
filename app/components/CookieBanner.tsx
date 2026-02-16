@@ -49,6 +49,7 @@ export default function CookieBanner() {
         <button
           onClick={handleAcknowledge}
           className="shrink-0 rounded-lg bg-foreground text-background px-5 py-2 text-sm font-medium transition-opacity hover:opacity-90"
+          data-testid="cookie-banner-button"
         >
           Got it
         </button>

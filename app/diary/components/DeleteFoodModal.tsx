@@ -29,7 +29,10 @@ export default function DeleteFoodModal({
   if (!isOpen || !item) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      data-testid="delete-food-modal"
+    >
       <div className="w-full max-w-md rounded-lg bg-white dark:bg-zinc-950 shadow-xl">
         {/* Header */}
         <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
@@ -64,7 +67,10 @@ export default function DeleteFoodModal({
           )}
 
           {/* Item Details */}
-          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3">
+          <div
+            className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3"
+            data-testid="delete-food-details"
+          >
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium text-black dark:text-zinc-50">
@@ -82,7 +88,10 @@ export default function DeleteFoodModal({
                 <span className="text-zinc-600 dark:text-zinc-400">
                   Calories:
                 </span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-calories"
+                >
                   {formatCalories(item.calories, userSettings)}
                 </span>
               </div>
@@ -90,19 +99,28 @@ export default function DeleteFoodModal({
                 <span className="text-zinc-600 dark:text-zinc-400">
                   Protein:
                 </span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-protein"
+                >
                   {formatMacro(item.protein, userSettings)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400">Carbs:</span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-carbs"
+                >
                   {formatMacro(item.carbs, userSettings)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400">Fat:</span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-fat"
+                >
                   {formatMacro(item.fat, userSettings)}
                 </span>
               </div>
@@ -110,7 +128,10 @@ export default function DeleteFoodModal({
                 <span className="text-zinc-600 dark:text-zinc-400">
                   Saturates:
                 </span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-saturates"
+                >
                   {formatMacro(item.saturates, userSettings)}
                 </span>
               </div>
@@ -118,19 +139,28 @@ export default function DeleteFoodModal({
                 <span className="text-zinc-600 dark:text-zinc-400">
                   Sugars:
                 </span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-sugars"
+                >
                   {formatMacro(item.sugars, userSettings)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400">Fibre:</span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-fibre"
+                >
                   {formatMacro(item.fibre, userSettings)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400">Salt:</span>
-                <span className="font-medium text-black dark:text-zinc-50">
+                <span
+                  className="font-medium text-black dark:text-zinc-50"
+                  data-testid="delete-food-salt"
+                >
                   {formatSalt(item.salt, userSettings)}
                 </span>
               </div>
@@ -144,6 +174,7 @@ export default function DeleteFoodModal({
             onClick={onCancel}
             disabled={isLoading}
             className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-50 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="delete-food-cancel"
           >
             Cancel
           </button>
@@ -151,6 +182,7 @@ export default function DeleteFoodModal({
             onClick={onConfirm}
             disabled={isLoading}
             className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="delete-food-confirm"
           >
             {isLoading ? "Removing..." : "Remove Item"}
           </button>

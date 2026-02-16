@@ -20,6 +20,7 @@ export default function Navigation() {
               : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
           }`}
           href="/"
+          data-testid="nav-dashboard"
         >
           Dashboard
         </Link>
@@ -30,6 +31,7 @@ export default function Navigation() {
               : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
           }`}
           href="/diary"
+          data-testid="nav-diary"
         >
           Diary
         </Link>
@@ -40,6 +42,7 @@ export default function Navigation() {
               : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
           }`}
           href="/settings"
+          data-testid="nav-settings"
         >
           Settings
         </Link>
