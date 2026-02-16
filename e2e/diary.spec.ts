@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 function randomFoodName() {
   return "TestFood-" + Math.random().toString(36).substring(2, 10);
@@ -6,6 +6,22 @@ function randomFoodName() {
 
 const testerEmail = process.env.E2E_TEST_EMAIL ?? "";
 const testerPassword = process.env.E2E_TEST_PASSWORD ?? "";
+
+// Check for current food items in breakfast (if any) and remove them to start with a clean slate
+const resetFoodItems = async (page: Page) => {
+  await page.getByTestId("nav-settings").click();
+  await page.getByTestId("my-foods-button").click();
+  const foodRowDeleteBtns = await page
+    .locator('[data-testid^="delete-food-button-"]')
+    .all();
+  for (const btn of foodRowDeleteBtns) {
+    await btn.click();
+    const modal = page.getByTestId("delete-food-modal");
+    await expect(modal).toBeVisible();
+    await modal.getByTestId("delete-food-confirm").click();
+  }
+  await page.getByTestId("my-foods-back-button").click();
+};
 
 test.describe("Diary Feature", () => {
   test.beforeEach(async ({ page }) => {
@@ -18,19 +34,7 @@ test.describe("Diary Feature", () => {
     ]);
     await page.getByTestId("cookie-banner-button").click();
 
-    // Check for current food items in breakfast (if any) and remove them to start with a clean slate
-    await page.getByTestId("nav-settings").click();
-    await page.getByTestId("my-foods-button").click();
-    const foodRowDeleteBtns = await page
-      .locator('[data-testid^="delete-food-button-"]')
-      .all();
-    for (const btn of foodRowDeleteBtns) {
-      await btn.click();
-      const modal = page.getByTestId("delete-food-modal");
-      await expect(modal).toBeVisible();
-      await modal.getByTestId("delete-food-confirm").click();
-    }
-    await page.getByTestId("my-foods-back-button").click();
+    await resetFoodItems(page);
 
     // Continue with tests
     await page.getByTestId("nav-diary").click();
@@ -223,5 +227,7 @@ test.describe("Diary Feature", () => {
     await foodRow.getByTestId(/diary-food-remove-/).click();
     await modal.getByTestId("delete-food-confirm").click();
     await expect(foodRow).not.toBeVisible();
+
+    await resetFoodItems(page);
   });
 });
