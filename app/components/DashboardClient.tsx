@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 import HelpButton from "@/app/components/HelpButton";
-import { UserSettings } from "./settings/types";
+import { UserSettings } from "../settings/types";
 
 type TimeRange = "day" | "week" | "month";
 
@@ -142,9 +142,16 @@ export default function DashboardClient({
       {/* Header */}
       <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-            Dashboard
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
+              Dashboard
+            </h1>
+            <HelpButton
+              title="Dashboard Overview"
+              content="Your Dashboard provides a snapshot of your nutrition intake. Use the View Period selector to switch between daily, weekly, and monthly views. Each card shows your current intake vs. your goals, with progress bars to visualize how close you are to reaching them. Adjust your goals in Settings to see changes reflected here."
+              ariaLabel="Help: Dashboard overview"
+            />
+          </div>
         </div>
       </div>
 
@@ -319,10 +326,12 @@ export default function DashboardClient({
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
-                  {formatCalories(
-                    userGoals.calories * getGoalMultiplier(),
-                    userSettings,
-                  )}
+                  <span data-testid="goal-calories">
+                    {formatCalories(
+                      userGoals.calories * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </span>
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -357,10 +366,12 @@ export default function DashboardClient({
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
-                  {formatMacro(
-                    userGoals.protein * getGoalMultiplier(),
-                    userSettings,
-                  )}
+                  <span data-testid="goal-protein">
+                    {formatMacro(
+                      userGoals.protein * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </span>
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -395,10 +406,12 @@ export default function DashboardClient({
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
-                  {formatMacro(
-                    userGoals.carbs * getGoalMultiplier(),
-                    userSettings,
-                  )}
+                  <span data-testid="goal-carbs">
+                    {formatMacro(
+                      userGoals.carbs * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </span>
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -432,10 +445,12 @@ export default function DashboardClient({
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
-                  {formatMacro(
-                    userGoals.fat * getGoalMultiplier(),
-                    userSettings,
-                  )}
+                  <span data-testid="goal-fat">
+                    {formatMacro(
+                      userGoals.fat * getGoalMultiplier(),
+                      userSettings,
+                    )}
+                  </span>
                 </p>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -456,12 +471,29 @@ export default function DashboardClient({
                   {formatMacro(totals.saturates, userSettings)}
                 </p>
                 <div className="overflow-hidden">
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                    of{" "}
+                  <p
+                    className={`text-xs text-zinc-600 dark:text-zinc-300 transition-all duration-300 ${
+                      timeRange !== "day"
+                        ? "opacity-100 max-h-6 mt-1"
+                        : "opacity-0 max-h-0 mt-0"
+                    }`}
+                    data-testid="avg-saturates"
+                  >
+                    Avg:{" "}
                     {formatMacro(
-                      userGoals.saturates * getGoalMultiplier(),
+                      getDailyAverage(totals.saturates),
                       userSettings,
                     )}
+                    /day
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+                    Goal:{" "}
+                    <span data-testid="goal-saturates">
+                      {formatMacro(
+                        userGoals.saturates * getGoalMultiplier(),
+                        userSettings,
+                      )}
+                    </span>
                   </p>
                 </div>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -483,12 +515,26 @@ export default function DashboardClient({
                   {formatMacro(totals.sugars, userSettings)}
                 </p>
                 <div className="overflow-hidden">
+                  <p
+                    className={`text-xs text-zinc-600 dark:text-zinc-300 transition-all duration-300 ${
+                      timeRange !== "day"
+                        ? "opacity-100 max-h-6 mt-1"
+                        : "opacity-0 max-h-0 mt-0"
+                    }`}
+                    data-testid="avg-sugars"
+                  >
+                    Avg:{" "}
+                    {formatMacro(getDailyAverage(totals.sugars), userSettings)}
+                    /day
+                  </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                    of{" "}
-                    {formatMacro(
-                      userGoals.sugars * getGoalMultiplier(),
-                      userSettings,
-                    )}
+                    Goal:{" "}
+                    <span data-testid="goal-sugars">
+                      {formatMacro(
+                        userGoals.sugars * getGoalMultiplier(),
+                        userSettings,
+                      )}
+                    </span>
                   </p>
                 </div>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -510,12 +556,26 @@ export default function DashboardClient({
                   {formatMacro(totals.fibre, userSettings)}
                 </p>
                 <div className="overflow-hidden">
+                  <p
+                    className={`text-xs text-zinc-600 dark:text-zinc-300 transition-all duration-300 ${
+                      timeRange !== "day"
+                        ? "opacity-100 max-h-6 mt-1"
+                        : "opacity-0 max-h-0 mt-0"
+                    }`}
+                    data-testid="avg-fibre"
+                  >
+                    Avg:{" "}
+                    {formatMacro(getDailyAverage(totals.fibre), userSettings)}
+                    /day
+                  </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                    of{" "}
-                    {formatMacro(
-                      userGoals.fibre * getGoalMultiplier(),
-                      userSettings,
-                    )}
+                    Goal:{" "}
+                    <span data-testid="goal-fibre">
+                      {formatMacro(
+                        userGoals.fibre * getGoalMultiplier(),
+                        userSettings,
+                      )}
+                    </span>
                   </p>
                 </div>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -537,12 +597,25 @@ export default function DashboardClient({
                   {formatSalt(totals.salt, userSettings)}
                 </p>
                 <div className="overflow-hidden">
+                  <p
+                    className={`text-xs text-zinc-600 dark:text-zinc-300 transition-all duration-300 ${
+                      timeRange !== "day"
+                        ? "opacity-100 max-h-6 mt-1"
+                        : "opacity-0 max-h-0 mt-0"
+                    }`}
+                    data-testid="avg-salt"
+                  >
+                    Avg:{" "}
+                    {formatSalt(getDailyAverage(totals.salt), userSettings)}/day
+                  </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                    of{" "}
-                    {formatSalt(
-                      userGoals.salt * getGoalMultiplier(),
-                      userSettings,
-                    )}
+                    Goal:{" "}
+                    <span data-testid="goal-salt">
+                      {formatSalt(
+                        userGoals.salt * getGoalMultiplier(),
+                        userSettings,
+                      )}
+                    </span>
                   </p>
                 </div>
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">

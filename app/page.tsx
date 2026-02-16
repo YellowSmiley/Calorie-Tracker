@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import DashboardClient from "./DashboardClient";
+import DashboardClient from "./components/DashboardClient";
 import { UserSettings } from "./settings/types";
 
 export default async function Home() {
