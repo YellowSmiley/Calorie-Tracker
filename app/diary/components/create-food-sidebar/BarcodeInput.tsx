@@ -21,7 +21,6 @@ export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
         `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
       );
       const data: Root = await res.json();
-      console.log("data:", JSON.stringify(data));
       if (data.product) {
         const p = data.product;
         setProduct(p);

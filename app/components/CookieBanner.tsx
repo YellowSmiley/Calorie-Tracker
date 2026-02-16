@@ -32,7 +32,7 @@ export default function CookieBanner() {
   if (consent || dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-5 shadow-lg">
       <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <p className="flex-1 text-sm text-zinc-600 dark:text-zinc-400">
           This site uses strictly necessary cookies to keep you signed in and

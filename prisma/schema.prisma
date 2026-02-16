@@ -24,6 +24,7 @@ model User {
   sessions      Session[]
   mealEntries   MealEntry[]
   createdFoods  Food[]
+  provider      String?    @default("credentials") // 'google', 'credentials', etc.
   
   // User role
   isAdmin       Boolean    @default(false)

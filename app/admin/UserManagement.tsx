@@ -1,34 +1,29 @@
 "use client";
 
+import { User } from "@prisma/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-
-interface User {
-  id: string;
-  name: string | null;
-  email: string | null;
-  isAdmin: boolean;
-  createdAt?: string;
-}
+import EditUserSidebar from "./components/EditUserSidebar";
 
 const PAGE_SIZE = 50;
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchUsers = useCallback(
     async (search: string, skip: number, append: boolean) => {
-      loadingTimerRef.current = setTimeout(() => setIsFetching(true), 100);
+      setIsLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams({
@@ -45,14 +40,12 @@ export default function UserManagement() {
         const fetched: User[] = data.users || [];
         setUsers((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
-        setHasLoaded(true);
       } catch (err) {
         if (process.env.NODE_ENV === "development")
           console.error("Error fetching users:", err);
         setError("Error fetching users");
       } finally {
-        if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
-        setIsFetching(false);
+        setIsLoading(false);
       }
     },
     [],
@@ -60,14 +53,13 @@ export default function UserManagement() {
 
   // Fetch on mount
   useEffect(() => {
-    if (!hasLoaded) {
-      fetchUsers("", 0, false);
-    }
-  }, [hasLoaded, fetchUsers]);
+    fetchUsers("", 0, false);
+  }, [fetchUsers]);
 
   // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!searchQuery) return; // Don't search if input is empty
     debounceRef.current = setTimeout(() => {
       fetchUsers(searchQuery, 0, false);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -78,14 +70,16 @@ export default function UserManagement() {
   }, [searchQuery, fetchUsers]);
 
   const loadMore = useCallback(() => {
-    if (isFetching || users.length >= total) return;
+    if (isLoading || users.length >= total) return;
     fetchUsers(searchQuery, users.length, true);
-  }, [isFetching, users.length, total, searchQuery, fetchUsers]);
+  }, [isLoading, users.length, total, searchQuery, fetchUsers]);
 
   // Infinite scroll
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
+    // Only load more if user has scrolled past 2720px (40 rows * 68px)
+    if (el.scrollTop < 2720) return;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
       loadMore();
     }
@@ -161,11 +155,24 @@ export default function UserManagement() {
           {users.map((user) => (
             <div
               key={user.id}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 cursor-pointer"
+              onClick={
+                user.provider === "credentials"
+                  ? () => {
+                      setEditUser(user);
+                      setEditError(null);
+                    }
+                  : undefined
+              }
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-black dark:text-zinc-50">
+                <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
                   {user.name || "No name"}
+                  {user.provider === "credentials" && (
+                    <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
+                      Our User
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {user.email || "No email"}
@@ -174,7 +181,8 @@ export default function UserManagement() {
               </div>
               <div className="shrink-0">
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setDeleteUser(user);
                     setDeleteError(null);
                   }}
@@ -185,16 +193,54 @@ export default function UserManagement() {
               </div>
             </div>
           ))}
+          {/* Edit User Sidebar */}
+          <EditUserSidebar
+            key={editUser?.id}
+            user={editUser}
+            isOpen={!!editUser}
+            onClose={() => setEditUser(null)}
+            isSaving={isSaving}
+            error={editError}
+            onSave={async (name, email, password) => {
+              setIsSaving(true);
+              setEditError(null);
+              try {
+                const response = await fetch(
+                  `/api/admin/users/${editUser?.id}`,
+                  {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password }),
+                  },
+                );
+                if (response.ok) {
+                  setUsers((prev) =>
+                    prev.map((u) =>
+                      u.id === editUser?.id ? { ...u, name, email } : u,
+                    ),
+                  );
+                  setEditUser(null);
+                } else {
+                  const data = await response.json();
+                  setEditError(data.error || "Failed to update user");
+                }
+              } catch (err) {
+                setEditError("Error updating user");
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+          />
 
           {/* Loading indicator */}
-          {isFetching && (
+          {isLoading && (
             <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
               Loading...
             </div>
           )}
 
           {/* No results */}
-          {!isFetching && hasLoaded && users.length === 0 && (
+          {!isLoading && users.length === 0 && (
             <div className="px-4 py-6 text-center">
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {searchQuery
