@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import DeleteFoodModal from "../diary/components/DeleteFoodModal";
 import CreateFoodSidebar, {
   CreateFoodSidebarOnSubmitData,
 } from "../diary/components/create-food-sidebar/CreateFoodSidebar";
@@ -12,26 +13,23 @@ import { FoodWithCreator } from "../api/admin/foods/route";
 
 interface FoodTableProps {
   userSettings: UserSettings;
-  apiBasePath: string; // "/api/foods" or "/api/admin/foods"
-  showCreatedBy?: boolean;
-  emptyMessage?: string;
+  isAdmin?: boolean;
 }
 
 const PAGE_SIZE = 50;
 
-export default function FoodTable({
-  userSettings,
-  apiBasePath,
-  showCreatedBy = false,
-  emptyMessage = "You haven't created any foods yet. Click 'Create Food' to get started.",
-}: FoodTableProps) {
+export default function FoodTable({ userSettings }: FoodTableProps) {
   // For admin API, foods may have createdByName
   const [foods, setFoods] = useState<FoodWithCreator[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingFood, setEditingFood] = useState<Food | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<FoodWithCreator | null>(
+    null,
+  );
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -47,7 +45,7 @@ export default function FoodTable({
           take: String(PAGE_SIZE),
           skip: String(skip),
         });
-        const res = await fetch(`${apiBasePath}?${params}`);
+        const res = await fetch(`/api/admin/foods?${params}`);
         if (!res.ok) {
           setError("Failed to fetch foods");
           return;
@@ -68,7 +66,7 @@ export default function FoodTable({
         setIsLoading(false);
       }
     },
-    [apiBasePath],
+    [],
   );
 
   // Fetch on mount
@@ -112,13 +110,8 @@ export default function FoodTable({
     try {
       if (editingFood) {
         // Update existing food
-        const url = apiBasePath.includes("admin")
-          ? `${apiBasePath}/${editingFood.id}`
-          : apiBasePath;
-
-        const body = apiBasePath.includes("admin")
-          ? formData
-          : { id: editingFood.id, ...formData };
+        const url = `/api/admin/foods/${editingFood.id}`;
+        const body = formData;
 
         const response = await fetch(url, {
           method: "PUT",
@@ -138,7 +131,7 @@ export default function FoodTable({
         }
       } else {
         // Create new food
-        const response = await fetch(apiBasePath, {
+        const response = await fetch("/api/admin/foods", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -166,27 +159,24 @@ export default function FoodTable({
     setShowCreateForm(true);
   };
 
-  const handleDeleteFood = async (foodId: string) => {
+  const handleDeleteFood = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      const url = apiBasePath.includes("admin")
-        ? `${apiBasePath}/${foodId}`
-        : apiBasePath;
+      const url = `/api/admin/foods/${deleteTarget.id}`;
 
       const options: RequestInit = {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       };
 
-      if (!apiBasePath.includes("admin")) {
-        options.body = JSON.stringify({ id: foodId });
-      }
-
       const response = await fetch(url, options);
 
       if (response.ok) {
-        setFoods((prev) => prev.filter((f) => f.id !== foodId));
+        setFoods((prev) => prev.filter((f) => f.id !== deleteTarget.id));
         setTotal((prev) => prev - 1);
-        setDeleteConfirm(null);
+        setDeleteTarget(null);
+        setShowDeleteModal(false);
         setError(null);
       } else {
         setError("Failed to delete food");
@@ -195,6 +185,8 @@ export default function FoodTable({
       if (process.env.NODE_ENV === "development")
         console.error("Error deleting food:", err);
       setError("Error deleting food");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -209,6 +201,7 @@ export default function FoodTable({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
+            data-testid="food-search-input"
           />
         </div>
       </div>
@@ -244,6 +237,7 @@ export default function FoodTable({
               key={food.id}
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900"
               onClick={() => startEditing(food)}
+              data-testid={`food-search-result-${food.id}`}
             >
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-black dark:text-zinc-50">
@@ -261,36 +255,22 @@ export default function FoodTable({
                   {food.defaultServingDescription
                     ? ` • ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
                     : ""}
-                  {showCreatedBy
-                    ? ` • ${food.createdByName || food.createdBy || "Unknown"}`
-                    : ""}
+                  {` • ${food.createdByName || food.createdBy || "Unknown"}`}
                 </p>
               </div>
               <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                {deleteConfirm === food.id ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleDeleteFood(food.id)}
-                      className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirm(null)}
-                      className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setDeleteConfirm(food.id)}
-                    className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setDeleteTarget(food);
+                    setShowDeleteModal(true);
+                  }}
+                  className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                  data-testid={`delete-food-button-${food.id}`}
+                >
+                  Delete
+                </button>
               </div>
+              {/* Delete Food Modal */}
             </div>
           ))}
 
@@ -304,10 +284,13 @@ export default function FoodTable({
           {/* No results */}
           {!isLoading && foods.length === 0 && (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+              <p
+                className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
+                data-testid="no-foods-found"
+              >
                 {searchQuery
                   ? `No foods found for "${searchQuery}"`
-                  : emptyMessage}
+                  : "You haven't created any foods yet. Click 'Create Food' to get started."}
               </p>
               <button
                 onClick={() => setShowCreateForm(true)}
@@ -345,6 +328,20 @@ export default function FoodTable({
         userSettings={userSettings}
         isLoading={isLoading}
         editingFood={editingFood}
+      />
+
+      <DeleteFoodModal
+        isOpen={showDeleteModal}
+        item={deleteTarget}
+        mealName={"My Foods"}
+        onConfirm={handleDeleteFood}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setDeleteTarget(null);
+        }}
+        isLoading={isDeleting}
+        error={error}
+        userSettings={userSettings}
       />
     </div>
   );

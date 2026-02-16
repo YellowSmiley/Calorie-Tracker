@@ -40,6 +40,7 @@ export default function DailySummaryAccordion({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+        data-testid="daily-summary-accordion-button"
       >
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
           Daily Summary
@@ -89,13 +90,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Calories
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-calories"
+                >
                   {formatCalories(totals.calories, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-calories"
+                >
                   {formatCalories(goals.calories, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-calories"
+                >
                   {formatCalories(
                     goals.calories - totals.calories,
                     userSettings,
@@ -106,13 +116,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Protein
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-protein"
+                >
                   {formatMacro(totals.protein, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-protein"
+                >
                   {formatMacro(goals.protein, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-protein"
+                >
                   {formatMacro(goals.protein - totals.protein, userSettings)}
                 </td>
               </tr>
@@ -120,13 +139,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Carbohydrates
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-carbs"
+                >
                   {formatMacro(totals.carbs, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-carbs"
+                >
                   {formatMacro(goals.carbs, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-carbs"
+                >
                   {formatMacro(goals.carbs - totals.carbs, userSettings)}
                 </td>
               </tr>
@@ -134,13 +162,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Fat
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-fat"
+                >
                   {formatMacro(totals.fat, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-fat"
+                >
                   {formatMacro(goals.fat, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-fat"
+                >
                   {formatMacro(goals.fat - totals.fat, userSettings)}
                 </td>
               </tr>
@@ -148,13 +185,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Saturates
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-saturates"
+                >
                   {formatMacro(totals.saturates, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-saturates"
+                >
                   {formatMacro(goals.saturates, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-saturates"
+                >
                   {formatMacro(
                     goals.saturates - totals.saturates,
                     userSettings,
@@ -165,13 +211,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Sugars
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-sugars"
+                >
                   {formatMacro(totals.sugars, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-sugars"
+                >
                   {formatMacro(goals.sugars, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-sugars"
+                >
                   {formatMacro(goals.sugars - totals.sugars, userSettings)}
                 </td>
               </tr>
@@ -179,13 +234,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Fibre
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-fibre"
+                >
                   {formatMacro(totals.fibre, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-fibre"
+                >
                   {formatMacro(goals.fibre, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-fibre"
+                >
                   {formatMacro(goals.fibre - totals.fibre, userSettings)}
                 </td>
               </tr>
@@ -193,13 +257,22 @@ export default function DailySummaryAccordion({
                 <td className="px-4 py-3 text-black dark:text-zinc-50 font-medium">
                   Salt
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-total-salt"
+                >
                   {formatSalt(totals.salt, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-goal-salt"
+                >
                   {formatSalt(goals.salt, userSettings)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <td
+                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  data-testid="summary-left-salt"
+                >
                   {formatSalt(goals.salt - totals.salt, userSettings)}
                 </td>
               </tr>

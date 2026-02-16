@@ -36,6 +36,7 @@ export default function DataPrivacySection({
       <div className="space-y-3">
         <button
           type="button"
+          data-testid="export-data-button"
           onClick={onExport}
           disabled={isExporting}
           className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50 disabled:opacity-50"
@@ -50,6 +51,7 @@ export default function DataPrivacySection({
         {!showDeleteConfirm ? (
           <button
             type="button"
+            data-testid="delete-account-button"
             onClick={onDeleteClick}
             className="w-full rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 px-6 py-3 font-medium transition-colors text-red-600 dark:text-red-400"
           >
@@ -64,6 +66,7 @@ export default function DataPrivacySection({
             <div className="flex gap-2">
               <button
                 type="button"
+                data-testid="confirm-delete-button"
                 onClick={onDeleteConfirm}
                 disabled={isDeleting}
                 className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
@@ -72,6 +75,7 @@ export default function DataPrivacySection({
               </button>
               <button
                 type="button"
+                data-testid="cancel-delete-button"
                 onClick={onDeleteCancel}
                 className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
               >

@@ -36,6 +36,7 @@ export default function FoodMeasurementUnitsSection({
           </label>
           <select
             id="weightUnit"
+            data-testid="select-weightUnit"
             value={settings.weightUnit}
             onChange={(e) => onChange("weightUnit", e.target.value)}
             className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
@@ -56,6 +57,7 @@ export default function FoodMeasurementUnitsSection({
           </label>
           <select
             id="volumeUnit"
+            data-testid="select-volumeUnit"
             value={settings.volumeUnit}
             onChange={(e) => onChange("volumeUnit", e.target.value)}
             className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"

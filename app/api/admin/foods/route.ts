@@ -10,7 +10,7 @@ export type FoodWithCreator = Food & { createdByName?: string };
 export async function GET(request: NextRequest) {
   const session = await auth();
 
-  if (!session?.user?.id || !session.user.isAdmin) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -23,11 +23,14 @@ export async function GET(request: NextRequest) {
     );
     const skip = parseInt(searchParams.get("skip") || "0") || 0;
 
-    const where = search
-      ? {
-          OR: [{ name: { contains: search, mode: "insensitive" as const } }],
-        }
-      : {};
+    const where = {
+      ...(search
+        ? {
+            OR: [{ name: { contains: search, mode: "insensitive" as const } }],
+          }
+        : {}),
+      ...(!session.user.isAdmin ? { createdBy: session.user.id } : {}),
+    };
 
     const [foods, total] = await Promise.all([
       prisma.food.findMany({
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await auth();
 
-  if (!session?.user?.id || !session.user.isAdmin) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

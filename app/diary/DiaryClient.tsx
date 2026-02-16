@@ -187,7 +187,7 @@ export default function DiaryClient({
     setError(null);
 
     try {
-      const createResponse = await fetch("/api/foods", {
+      const createResponse = await fetch("/api/admin/foods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -197,17 +197,14 @@ export default function DiaryClient({
         throw new Error("Failed to create food");
       }
 
-      const created = (await createResponse.json()) as {
-        food: FoodWithCreator;
-        total: number;
-      };
+      const created = (await createResponse.json()) as FoodWithCreator;
 
-      if (created.food?.id) {
+      if (created.id) {
         // Calculate serving multiplier from default serving amount if available
         let servingMultiplier = 1;
-        if (created.food.defaultServingAmount) {
+        if (created.defaultServingAmount) {
           servingMultiplier =
-            created.food.defaultServingAmount / created.food.measurementAmount;
+            created.defaultServingAmount / created.measurementAmount;
         }
 
         const entryResponse = await fetch("/api/meals", {
@@ -215,7 +212,7 @@ export default function DiaryClient({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             mealType: mealTypeByIndex[selectedMealIndex],
-            foodId: created.food.id,
+            foodId: created.id,
             serving: servingMultiplier,
             date: currentDate,
           }),
@@ -385,6 +382,7 @@ export default function DiaryClient({
               onClick={handlePreviousDay}
               className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
               aria-label="Previous day"
+              data-testid="previous-day-button"
             >
               <svg
                 className="w-5 h-5 text-black dark:text-zinc-50"
@@ -413,6 +411,7 @@ export default function DiaryClient({
               onClick={handleNextDay}
               className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
               aria-label="Next day"
+              data-testid="next-day-button"
             >
               <svg
                 className="w-5 h-5 text-black dark:text-zinc-50"

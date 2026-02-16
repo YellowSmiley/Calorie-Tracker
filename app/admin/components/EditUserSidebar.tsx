@@ -68,7 +68,6 @@ export default function EditUserSidebar({
                   onChange={(e) => setName(e.target.value)}
                   className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
                   placeholder="Full name"
-                  required
                 />
               </div>
               <div>

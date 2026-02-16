@@ -10,7 +10,7 @@ export async function PUT(
 ) {
   const session = await auth();
 
-  if (!session?.user?.id || !session.user.isAdmin) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -117,6 +117,16 @@ export async function PUT(
       );
     }
 
+    // Ownership check
+    const existingFood = await prisma.food.findUnique({
+      where: { id: foodId },
+    });
+    if (!existingFood) {
+      return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    }
+    if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
     const updated = await prisma.food.update({
       where: { id: foodId },
       data: {
@@ -170,13 +180,23 @@ export async function DELETE(
 ) {
   const session = await auth();
 
-  if (!session?.user?.id || !session.user.isAdmin) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const { id: foodId } = await params;
 
+    // Ownership check
+    const existingFood = await prisma.food.findUnique({
+      where: { id: foodId },
+    });
+    if (!existingFood) {
+      return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    }
+    if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
     // Delete food (cascade will handle meal entries)
     await prisma.food.delete({
       where: { id: foodId },

@@ -29,6 +29,7 @@ export default function ActionsSection({
           type="button"
           onClick={onMyFoodsClick}
           className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+          data-testid="my-foods-button"
         >
           My Foods
         </button>
@@ -36,6 +37,7 @@ export default function ActionsSection({
           <Link
             href="/admin"
             className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
+            data-testid="admin-panel-link"
           >
             Admin Panel
           </Link>
@@ -44,6 +46,7 @@ export default function ActionsSection({
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+          data-testid="sign-out-button"
         >
           Sign Out
         </button>

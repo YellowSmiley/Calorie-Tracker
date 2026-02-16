@@ -22,6 +22,7 @@ export default function MyFoodsSidebar({
     >
       <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
         <button
+          data-testid="my-foods-back-button"
           onClick={onClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
         >
@@ -34,12 +35,7 @@ export default function MyFoodsSidebar({
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <FoodTable
-          userSettings={userSettings}
-          apiBasePath="/api/foods"
-          showCreatedBy={false}
-          emptyMessage="You haven't created any foods yet. Click 'Create Food' to get started."
-        />
+        <FoodTable userSettings={userSettings} />
       </div>
     </div>
   );

@@ -43,6 +43,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="calorieGoal"
+              data-testid="input-calorie-goal"
               type="number"
               min="0"
               step="1"
@@ -64,6 +65,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="proteinGoal"
+              data-testid="input-protein-goal"
               type="number"
               min="0"
               step="0.1"
@@ -87,6 +89,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="carbGoal"
+              data-testid="input-carb-goal"
               type="number"
               min="0"
               step="0.1"
@@ -106,6 +109,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="fatGoal"
+              data-testid="input-fat-goal"
               type="number"
               min="0"
               step="0.1"
@@ -125,6 +129,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="saturatesGoal"
+              data-testid="input-saturates-goal"
               type="number"
               min="0"
               step="1"
@@ -145,6 +150,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="sugarsGoal"
+              data-testid="input-sugars-goal"
               type="number"
               min="0"
               step="1"
@@ -165,6 +171,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="fibreGoal"
+              data-testid="input-fibre-goal"
               type="number"
               min="0"
               step="1"
@@ -185,6 +192,7 @@ export default function NutritionGoalsSection({
             </label>
             <input
               id="saltGoal"
+              data-testid="input-salt-goal"
               type="number"
               min="0"
               step="0.1"

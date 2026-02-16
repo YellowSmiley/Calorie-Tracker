@@ -10,12 +10,5 @@ export default function FoodDatabase() {
     volumeUnit: "ml",
   };
 
-  return (
-    <FoodTable
-      userSettings={defaultUserSettings}
-      apiBasePath="/api/admin/foods"
-      showCreatedBy={true}
-      emptyMessage="No foods found"
-    />
-  );
+  return <FoodTable userSettings={defaultUserSettings} />;
 }

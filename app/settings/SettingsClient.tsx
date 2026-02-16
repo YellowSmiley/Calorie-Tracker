@@ -216,6 +216,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         <div className="mx-auto max-w-3xl">
           <button
             type="button"
+            data-testid="save-settings-btn"
             onClick={handleSubmit}
             disabled={isSaving}
             className="w-full rounded-lg bg-foreground text-background px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"

@@ -1,12 +1,22 @@
 "use client";
 
-import type { FoodItem } from "@/app/diary/types";
 import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
 import { UserSettings } from "../../settings/types";
 
 interface DeleteFoodModalProps {
-  item: FoodItem | null;
+  item: {
+    name: string;
+    measurementAmount: number;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
+  } | null;
   mealName: string;
   isOpen: boolean;
   isLoading?: boolean;
@@ -32,8 +42,13 @@ export default function DeleteFoodModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
       data-testid="delete-food-modal"
+      style={{ pointerEvents: "auto" }}
     >
-      <div className="w-full max-w-md rounded-lg bg-white dark:bg-zinc-950 shadow-xl">
+      <div
+        className="w-full max-w-md rounded-lg bg-white dark:bg-zinc-950 shadow-xl"
+        style={{ pointerEvents: "auto" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="border-b border-zinc-200 dark:border-zinc-800 p-4">
           <div className="flex items-center gap-2">
@@ -179,7 +194,11 @@ export default function DeleteFoodModal({
             Cancel
           </button>
           <button
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isLoading}
             className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="delete-food-confirm"

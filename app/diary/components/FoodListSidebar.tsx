@@ -193,6 +193,7 @@ export default function FoodListSidebar({
         <button
           onClick={handleClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
+          data-testid="food-list-sidebar-back-button"
         >
           Back
         </button>
@@ -218,6 +219,7 @@ export default function FoodListSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
+            data-testid="food-search-input"
           />
         </div>
       </div>
@@ -241,6 +243,7 @@ export default function FoodListSidebar({
               key={food.id}
               className="flex items-center gap-3 px-4 py-3"
               onClick={() => handleSelectFood(food)}
+              data-testid={`food-item-${food.id}`}
             >
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-black dark:text-zinc-50">
@@ -269,7 +272,10 @@ export default function FoodListSidebar({
           {/* No results */}
           {!isFetching && hasLoaded && foods.length === 0 && (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+              <p
+                className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
+                data-testid="no-foods-found"
+              >
                 No foods found{searchQuery ? ` for "${searchQuery}"` : ""}
               </p>
               <button
