@@ -95,6 +95,51 @@ test.describe("Diary Feature", () => {
 
     // Edit the food row
     await foodRow.click();
+    await page.getByTestId("edit-food-serving-size").fill("100");
+    await page.getByTestId("edit-food-quantity").fill("0.5");
+    // Check Base Nutrition and Nutrition for this entry
+    await expect(page.getByTestId("edit-food-base-calories")).toContainText(
+      calories,
+    );
+    await expect(page.getByTestId("edit-food-base-protein")).toContainText(
+      protein,
+    );
+    await expect(page.getByTestId("edit-food-base-carbs")).toContainText(carbs);
+    await expect(page.getByTestId("edit-food-base-fat")).toContainText(fat);
+    await expect(page.getByTestId("edit-food-base-saturates")).toContainText(
+      saturates,
+    );
+    await expect(page.getByTestId("edit-food-base-sugars")).toContainText(
+      sugars,
+    );
+    await expect(page.getByTestId("edit-food-base-fibre")).toContainText(fibre);
+    await expect(page.getByTestId("edit-food-base-salt")).toContainText(salt);
+    await expect(
+      page.getByTestId("edit-food-nutrition-calories"),
+    ).toContainText("50");
+    await expect(page.getByTestId("edit-food-nutrition-protein")).toContainText(
+      "5",
+    );
+    await expect(page.getByTestId("edit-food-nutrition-carbs")).toContainText(
+      "10",
+    );
+    await expect(page.getByTestId("edit-food-nutrition-fat")).toContainText(
+      "2.5",
+    );
+    await expect(
+      page.getByTestId("edit-food-nutrition-saturates"),
+    ).toContainText("1");
+    await expect(page.getByTestId("edit-food-nutrition-sugars")).toContainText(
+      "1.5",
+    );
+    await expect(page.getByTestId("edit-food-nutrition-fibre")).toContainText(
+      "0.5",
+    );
+    await expect(page.getByTestId("edit-food-nutrition-salt")).toContainText(
+      "0.25",
+    );
+
+    // Check coming down in serving from above base
     await page.getByTestId("edit-food-serving-size").fill("200");
     await page.getByTestId("edit-food-quantity").fill("0.5");
     await page.getByTestId("edit-food-submit").click();

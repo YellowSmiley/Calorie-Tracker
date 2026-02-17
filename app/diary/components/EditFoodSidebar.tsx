@@ -133,14 +133,24 @@ export default function EditFoodSidebar({
             {/* Base Nutrition Info */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
-                Base Nutrition (Per {foodMeasurementAmount || ""})
+                Base Nutrition (Per {foodMeasurementAmount || ""}{" "}
+                {getMeasurementInputLabel(food?.measurementType, userSettings)
+                  .inputUnit || ""}
+                )
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400" data->
                     Calories
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-base-calories"
+                        : "edit-food-base-calories"
+                    }
+                  >
                     {formatCalories(food?.baseCalories || 0, userSettings)}
                   </p>
                 </div>
@@ -148,7 +158,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Protein
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-protein" : "edit-food-base-protein"
+                    }
+                  >
                     {formatMacro(food?.baseProtein || 0, userSettings)}
                   </p>
                 </div>
@@ -156,7 +171,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Carbs
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-carbs" : "edit-food-base-carbs"
+                    }
+                  >
                     {formatMacro(food?.baseCarbs || 0, userSettings)}
                   </p>
                 </div>
@@ -164,7 +184,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Fat
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-fat" : "edit-food-base-fat"
+                    }
+                  >
                     {formatMacro(food?.baseFat || 0, userSettings)}
                   </p>
                 </div>
@@ -172,7 +197,14 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Saturates
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd
+                        ? "add-food-base-saturates"
+                        : "edit-food-base-saturates"
+                    }
+                  >
                     {formatMacro(food?.baseSaturates || 0, userSettings)}
                   </p>
                 </div>
@@ -180,7 +212,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Sugars
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-sugars" : "edit-food-base-sugars"
+                    }
+                  >
                     {formatMacro(food?.baseSugars || 0, userSettings)}
                   </p>
                 </div>
@@ -188,7 +225,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Fibre
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-fibre" : "edit-food-base-fibre"
+                    }
+                  >
                     {formatMacro(food?.baseFibre || 0, userSettings)}
                   </p>
                 </div>
@@ -196,7 +238,12 @@ export default function EditFoodSidebar({
                   <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     Salt
                   </p>
-                  <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                  <p
+                    className="text-lg font-semibold text-black dark:text-zinc-50"
+                    data-testid={
+                      isAdd ? "add-food-base-salt" : "edit-food-base-salt"
+                    }
+                  >
                     {formatSalt(food?.baseSalt || 0, userSettings)}
                   </p>
                 </div>
@@ -208,7 +255,12 @@ export default function EditFoodSidebar({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
-                    Serving Size ({food?.measurementType})
+                    Serving Size (
+                    {getMeasurementInputLabel(
+                      food?.measurementType,
+                      userSettings,
+                    ).inputUnit || ""}
+                    )
                   </label>
                   <input
                     id="serving-size-input"
@@ -256,7 +308,7 @@ export default function EditFoodSidebar({
             {/* Calculated Nutrition */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
-                Nutrition for this entry
+                Nutrition for this entry (Serving size × quantity)
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
