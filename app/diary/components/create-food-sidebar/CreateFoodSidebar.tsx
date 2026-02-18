@@ -128,31 +128,31 @@ export default function CreateFoodSidebar({
       ),
       protein: convertMacroFromInput(
         parseFloat(formData.protein) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       carbs: convertMacroFromInput(
         parseFloat(formData.carbs) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       fat: convertMacroFromInput(
         parseFloat(formData.fat) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       saturates: convertMacroFromInput(
         parseFloat(formData.saturates) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       sugars: convertMacroFromInput(
         parseFloat(formData.sugars) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       fibre: convertMacroFromInput(
         parseFloat(formData.fibre) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       salt: convertMacroFromInput(
         parseFloat(formData.salt) || 0,
-        userSettings.macroUnit,
+        userSettings.weightUnit,
       ),
       defaultServingAmount: servingAmount > 0 ? servingAmount : null,
       defaultServingDescription:
@@ -332,7 +332,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Protein ({userSettings.macroUnit}) *
+                  Protein ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -350,7 +350,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Carbs ({userSettings.macroUnit}) *
+                  Carbs ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -368,7 +368,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fat ({userSettings.macroUnit}) *
+                  Fat ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -386,7 +386,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Saturates ({userSettings.macroUnit}) *
+                  Saturates ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -404,7 +404,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Sugars ({userSettings.macroUnit}) *
+                  Sugars ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -422,7 +422,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fibre ({userSettings.macroUnit}) *
+                  Fibre ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"
@@ -440,7 +440,7 @@ export default function CreateFoodSidebar({
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Salt ({userSettings.macroUnit}) *
+                  Salt ({userSettings.weightUnit}) *
                 </label>
                 <input
                   type="number"

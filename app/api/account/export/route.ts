@@ -32,7 +32,6 @@ export async function GET() {
         fibreGoal: true,
         saltGoal: true,
         calorieUnit: true,
-        macroUnit: true,
         weightUnit: true,
         volumeUnit: true,
       },

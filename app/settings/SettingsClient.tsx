@@ -5,11 +5,14 @@ import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "./components/MyFoodsSidebar";
 import NutritionGoalsSection from "./components/NutritionGoalsSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
-import FoodMeasurementUnitsSection from "./components/FoodMeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
 import { SettingsData, UserSettings } from "./types";
 import { signOut } from "next-auth/react";
+import {
+  convertInputToStorageValue,
+  convertStorageToDisplayValue,
+} from "@/lib/unitConversions";
 
 interface SettingsClientProps {
   userSettings: UserSettings;
@@ -27,7 +30,6 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     fibreGoal: 30,
     saltGoal: 6,
     calorieUnit: "kcal",
-    macroUnit: "g",
     weightUnit: "g",
     volumeUnit: "ml",
   });
@@ -46,12 +48,59 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     fetchSettings();
   }, []);
 
+  const convertBackSettings = (data: SettingsData): SettingsData => {
+    const convertedBackSettings: SettingsData = {
+      ...data,
+      calorieGoal: convertStorageToDisplayValue(
+        data.calorieGoal,
+        data.calorieUnit,
+        "calorie",
+      ),
+      proteinGoal: convertStorageToDisplayValue(
+        data.proteinGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      carbGoal: convertStorageToDisplayValue(
+        data.carbGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      fatGoal: convertStorageToDisplayValue(
+        data.fatGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      saturatesGoal: convertStorageToDisplayValue(
+        data.saturatesGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      sugarsGoal: convertStorageToDisplayValue(
+        data.sugarsGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      fibreGoal: convertStorageToDisplayValue(
+        data.fibreGoal,
+        data.weightUnit,
+        "weight",
+      ),
+      saltGoal: convertStorageToDisplayValue(
+        data.saltGoal,
+        data.weightUnit,
+        "weight",
+      ),
+    };
+    return convertedBackSettings;
+  };
+
   const fetchSettings = async () => {
     try {
       const response = await fetch("/api/settings");
       if (response.ok) {
-        const data = await response.json();
-        setSettings(data);
+        const data = (await response.json()) as SettingsData;
+        setSettings(convertBackSettings(data));
       }
     } catch (error) {
       if (process.env.NODE_ENV === "development")
@@ -67,19 +116,65 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     setIsSaving(true);
     setMessage(null);
 
+    // Convert settings to base units before saving
+
+    const convertedSettings: SettingsData = {
+      ...settings,
+      calorieGoal: convertInputToStorageValue(
+        settings.calorieGoal,
+        settings.calorieUnit,
+        "calorie",
+      ),
+      proteinGoal: convertInputToStorageValue(
+        settings.proteinGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      carbGoal: convertInputToStorageValue(
+        settings.carbGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      fatGoal: convertInputToStorageValue(
+        settings.fatGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      saturatesGoal: convertInputToStorageValue(
+        settings.saturatesGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      sugarsGoal: convertInputToStorageValue(
+        settings.sugarsGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      fibreGoal: convertInputToStorageValue(
+        settings.fibreGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+      saltGoal: convertInputToStorageValue(
+        settings.saltGoal,
+        settings.weightUnit,
+        "weight",
+      ),
+    };
+
     try {
       const response = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(convertedSettings),
       });
 
       if (response.ok) {
-        const updated = await response.json();
-        setSettings(updated);
+        const updated = (await response.json()) as SettingsData;
+        setSettings(convertBackSettings(updated));
         setMessage({ type: "success", text: "Settings saved successfully!" });
       } else {
-        const error = await response.json();
+        const error = (await response.json()) as { error?: string };
         setMessage({
           type: "error",
           text: error.error || "Failed to save settings",
@@ -125,7 +220,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     try {
       const response = await fetch("/api/account", { method: "DELETE" });
       if (!response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { error?: string };
         setMessage({
           type: "error",
           text: data.error || "Failed to delete account",
@@ -168,14 +263,10 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
             <NutritionGoalsSection
               settings={settings}
               onChange={handleChange}
+              userSettings={userSettings}
             />
 
             <MeasurementUnitsSection
-              settings={settings}
-              onChange={handleChange}
-            />
-
-            <FoodMeasurementUnitsSection
               settings={settings}
               onChange={handleChange}
             />
@@ -216,7 +307,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         <div className="mx-auto max-w-3xl">
           <button
             type="button"
-            data-testid="save-settings-btn"
+            data-testid="settings-save-button"
             onClick={handleSubmit}
             disabled={isSaving}
             className="w-full rounded-lg bg-foreground text-background px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"

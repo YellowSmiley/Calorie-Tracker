@@ -161,7 +161,7 @@ export default function DiaryClient({
         throw new Error("Failed to add food to meal");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { item: FoodItem };
       if (data.item) {
         setMeals((prev) =>
           prev.map((meal, index) =>
@@ -263,7 +263,7 @@ export default function DiaryClient({
         throw new Error("Failed to update serving size");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { item: FoodItem };
       if (data.item) {
         setMeals((prev) =>
           prev.map((meal, index) =>
@@ -517,7 +517,10 @@ export default function DiaryClient({
                           <p className="text-black dark:text-zinc-50 font-medium">
                             {item.name}
                           </p>
-                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          <p
+                            className="text-sm text-zinc-500 dark:text-zinc-400"
+                            data-testid={`diary-food-serving-${item.id}`}
+                          >
                             {(() => {
                               const actualAmount = Number(
                                 (item.serving * item.measurementAmount).toFixed(
@@ -552,7 +555,10 @@ export default function DiaryClient({
                           className="px-4 py-3"
                           data-testid={`diary-food-calories-${item.id}`}
                         >
-                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          <p
+                            className="text-sm text-zinc-500 dark:text-zinc-400"
+                            data-testid={`diary-food-calorie-info-${item.id}`}
+                          >
                             {formatCalories(item.calories, userSettings)}
                           </p>
                         </td>

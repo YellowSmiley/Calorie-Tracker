@@ -132,7 +132,14 @@ export default function EditFoodSidebar({
 
             {/* Base Nutrition Info */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
-              <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
+              <h4
+                className="text-sm font-semibold text-black dark:text-zinc-50 mb-3"
+                data-testid={
+                  isAdd
+                    ? "add-food-base-nutrition-title"
+                    : "edit-food-base-nutrition-title"
+                }
+              >
                 Base Nutrition (Per {foodMeasurementAmount || ""}{" "}
                 {getMeasurementInputLabel(food?.measurementType, userSettings)
                   .inputUnit || ""}
@@ -308,7 +315,7 @@ export default function EditFoodSidebar({
             {/* Calculated Nutrition */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
               <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
-                Nutrition for this entry (Serving size × quantity)
+                Nutrition for this entry (Serving size * quantity)
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>

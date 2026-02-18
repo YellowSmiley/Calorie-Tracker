@@ -9,7 +9,7 @@ type TimeRange = "day" | "week" | "month";
 
 interface DashboardClientProps {
   userName: string;
-  userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit">;
+  userSettings: Omit<UserSettings, "volumeUnit">;
   userGoals: {
     calories: number;
     protein: number;
@@ -77,7 +77,9 @@ export default function DashboardClient({
       });
       const response = await fetch(`/api/dashboard?${params}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as {
+          totals: DashboardClientProps["initialTotals"];
+        };
         setTotals(data.totals);
       }
     } catch (error) {

@@ -25,7 +25,7 @@ interface DailySummaryAccordionProps {
     fibre: number;
     salt: number;
   };
-  userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit">;
+  userSettings: Omit<UserSettings, "volumeUnit">;
 }
 
 export default function DailySummaryAccordion({

@@ -23,13 +23,13 @@ export default async function Home() {
       fibreGoal: true,
       saltGoal: true,
       calorieUnit: true,
-      macroUnit: true,
+      weightUnit: true,
     },
   });
 
-  const userSettings: Omit<UserSettings, "weightUnit" | "volumeUnit"> = {
+  const userSettings: Omit<UserSettings, "volumeUnit"> = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    macroUnit: user?.macroUnit ?? "g",
+    weightUnit: user?.weightUnit ?? "g",
   };
 
   const userGoals = {

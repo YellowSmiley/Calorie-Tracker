@@ -1,21 +1,21 @@
-export interface SettingsData {
-  calorieGoal: number;
-  proteinGoal: number;
-  carbGoal: number;
-  fatGoal: number;
-  saturatesGoal: number;
-  sugarsGoal: number;
-  fibreGoal: number;
-  saltGoal: number;
-  calorieUnit: string;
-  macroUnit: string;
-  weightUnit: string;
-  volumeUnit: string;
-}
+import { User } from "@prisma/client";
 
-export interface UserSettings {
-  calorieUnit: string | null | undefined;
-  macroUnit: string | null | undefined;
-  weightUnit: string | null | undefined;
-  volumeUnit: string | null | undefined;
-}
+export type SettingsData = Pick<
+  User,
+  | "calorieGoal"
+  | "proteinGoal"
+  | "carbGoal"
+  | "fatGoal"
+  | "saturatesGoal"
+  | "sugarsGoal"
+  | "fibreGoal"
+  | "saltGoal"
+  | "calorieUnit"
+  | "weightUnit"
+  | "volumeUnit"
+>;
+
+export type UserSettings = Pick<
+  User,
+  "calorieUnit" | "weightUnit" | "volumeUnit"
+>;

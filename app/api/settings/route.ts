@@ -24,7 +24,6 @@ export async function GET() {
         fibreGoal: true,
         saltGoal: true,
         calorieUnit: true,
-        macroUnit: true,
         weightUnit: true,
         volumeUnit: true,
       },
@@ -64,7 +63,6 @@ export async function PUT(request: NextRequest) {
       fibreGoal,
       saltGoal,
       calorieUnit,
-      macroUnit,
       weightUnit,
       volumeUnit,
     } = body;
@@ -120,19 +118,12 @@ export async function PUT(request: NextRequest) {
 
     // Validate unit enum values
     const VALID_CALORIE_UNITS = ["kcal", "kJ"];
-    const VALID_MACRO_UNITS = ["g", "mg", "oz"];
     const VALID_WEIGHT_UNITS = ["g", "kg", "oz", "lbs"];
     const VALID_VOLUME_UNITS = ["ml", "cup", "tbsp", "tsp", "L"];
 
     if (calorieUnit && !VALID_CALORIE_UNITS.includes(calorieUnit)) {
       return NextResponse.json(
         { error: "Invalid calorie unit" },
-        { status: 400 },
-      );
-    }
-    if (macroUnit && !VALID_MACRO_UNITS.includes(macroUnit)) {
-      return NextResponse.json(
-        { error: "Invalid macro unit" },
         { status: 400 },
       );
     }
@@ -198,7 +189,6 @@ export async function PUT(request: NextRequest) {
         fibreGoal: fibreGoal !== undefined ? parseFloat(fibreGoal) : undefined,
         saltGoal: saltGoal !== undefined ? parseFloat(saltGoal) : undefined,
         calorieUnit: calorieUnit ?? "kcal",
-        macroUnit: macroUnit ?? "g",
         weightUnit: weightUnit ?? "g",
         volumeUnit: volumeUnit ?? "ml",
       },
@@ -212,7 +202,6 @@ export async function PUT(request: NextRequest) {
         fibreGoal: true,
         saltGoal: true,
         calorieUnit: true,
-        macroUnit: true,
         weightUnit: true,
         volumeUnit: true,
       },

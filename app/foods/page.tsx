@@ -22,7 +22,6 @@ export default async function UserFoodsPage() {
     where: { id: session.user.id },
     select: {
       calorieUnit: true,
-      macroUnit: true,
       weightUnit: true,
       volumeUnit: true,
     },
@@ -30,7 +29,6 @@ export default async function UserFoodsPage() {
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    macroUnit: user?.macroUnit ?? "g",
     weightUnit: user?.weightUnit ?? "g",
     volumeUnit: user?.volumeUnit ?? "ml",
   };

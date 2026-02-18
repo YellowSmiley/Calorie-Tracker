@@ -120,7 +120,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
         });
 
         if (response.ok) {
-          const updated = await response.json();
+          const updated = (await response.json()) as FoodWithCreator;
           setFoods((prev) =>
             prev.map((f) => (f.id === editingFood.id ? updated : f)),
           );

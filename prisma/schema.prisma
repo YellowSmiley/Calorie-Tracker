@@ -41,7 +41,7 @@ model User {
   
   // Measurement preferences
   calorieUnit   String?    @default("kcal")
-  macroUnit     String?    @default("g")
+  // macroUnit removed; use weightUnit instead
   weightUnit    String?    @default("g")
   volumeUnit    String?    @default("ml")
 }

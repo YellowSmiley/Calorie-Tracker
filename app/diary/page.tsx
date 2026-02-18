@@ -41,7 +41,6 @@ export default async function DiaryPage({
     where: { id: session.user.id },
     select: {
       calorieUnit: true,
-      macroUnit: true,
       weightUnit: true,
       volumeUnit: true,
       calorieGoal: true,
@@ -57,7 +56,6 @@ export default async function DiaryPage({
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    macroUnit: user?.macroUnit ?? "g",
     weightUnit: user?.weightUnit ?? "g",
     volumeUnit: user?.volumeUnit ?? "ml",
   };

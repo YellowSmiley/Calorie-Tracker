@@ -152,7 +152,7 @@ export default function FoodListSidebar({
 
   const getServingDisplay = (
     food: FoodItem,
-    userSettings: Omit<UserSettings, "calorieUnit" | "macroUnit">,
+    userSettings: Omit<UserSettings, "calorieUnit">,
   ) => {
     const unit = getMeasurementInputLabel(food.measurementType, userSettings);
 
@@ -252,7 +252,10 @@ export default function FoodListSidebar({
                 {(() => {
                   const serving = getServingDisplay(food, userSettings);
                   return (
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <p
+                      className="text-sm text-zinc-500 dark:text-zinc-400"
+                      data-testid={`food-item-${food.id}-serving-info`}
+                    >
                       {serving.line} •{" "}
                       {formatCalories(serving.calories, userSettings)}
                     </p>

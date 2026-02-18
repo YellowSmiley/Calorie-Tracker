@@ -99,7 +99,7 @@ export default function UserManagement() {
         setDeleteUser(null);
         setError(null);
       } else {
-        const data = await response.json();
+        const data = (await response.json()) as { error?: string };
         setDeleteError(data.error || "Failed to delete user");
       }
     } catch (err) {
@@ -221,7 +221,7 @@ export default function UserManagement() {
                   );
                   setEditUser(null);
                 } else {
-                  const data = await response.json();
+                  const data = (await response.json()) as { error?: string };
                   setEditError(data.error || "Failed to update user");
                 }
               } catch (err) {

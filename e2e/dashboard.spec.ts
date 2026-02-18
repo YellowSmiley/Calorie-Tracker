@@ -13,7 +13,7 @@ const goals = {
   salt: 6,
 };
 
-test.describe("Dashboard View Period", () => {
+test.describe("Dashboard", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
     await resetFoodItems(page);
@@ -37,9 +37,7 @@ test.describe("Dashboard View Period", () => {
     ).toBeVisible();
   });
 
-  test("View Period buttons change summary and reset state, and goals update", async ({
-    page,
-  }) => {
+  test("Test all the dashboard functionality", async ({ page }) => {
     await expect(page.getByText("Nutrition Summary")).toBeVisible();
 
     // Helper to get goal text by data-testid

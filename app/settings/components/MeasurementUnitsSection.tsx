@@ -2,10 +2,17 @@ import HelpButton from "@/app/components/HelpButton";
 import { SettingsData } from "../types";
 
 interface MeasurementUnitsSectionProps {
-  settings: {
-    calorieUnit: string;
-    macroUnit: string;
-  };
+  settings: Omit<
+    SettingsData,
+    | "calorieGoal"
+    | "proteinGoal"
+    | "carbGoal"
+    | "fatGoal"
+    | "saturatesGoal"
+    | "sugarsGoal"
+    | "fibreGoal"
+    | "saltGoal"
+  >;
   onChange: (field: keyof SettingsData, value: string | number) => void;
 }
 
@@ -36,8 +43,8 @@ export default function MeasurementUnitsSection({
           </label>
           <select
             id="calorieUnit"
-            data-testid="select-calorieUnit"
-            value={settings.calorieUnit}
+            data-testid="measurement-calorie-unit-select"
+            value={settings.calorieUnit || "kcal"}
             onChange={(e) => onChange("calorieUnit", e.target.value)}
             className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
           >
@@ -46,24 +53,49 @@ export default function MeasurementUnitsSection({
           </select>
         </div>
 
-        <div>
-          <label
-            htmlFor="macroUnit"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-          >
-            Macronutrient Unit
-          </label>
-          <select
-            id="macroUnit"
-            data-testid="select-macroUnit"
-            value={settings.macroUnit}
-            onChange={(e) => onChange("macroUnit", e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-          >
-            <option value="g">Grams (g)</option>
-            <option value="oz">Ounces (oz)</option>
-            <option value="mg">Milligrams (mg)</option>
-          </select>
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="weightUnit"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            >
+              Weight Unit
+            </label>
+            <select
+              id="weightUnit"
+              data-testid="measurement-weight-unit-select"
+              value={settings.weightUnit || "g"}
+              onChange={(e) => onChange("weightUnit", e.target.value)}
+              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+            >
+              <option value="g">Grams (g)</option>
+              <option value="oz">Ounces (oz)</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="lbs">Pounds (lbs)</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="volumeUnit"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            >
+              Volume Unit
+            </label>
+            <select
+              id="volumeUnit"
+              data-testid="measurement-volume-unit-select"
+              value={settings.volumeUnit || "ml"}
+              onChange={(e) => onChange("volumeUnit", e.target.value)}
+              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+            >
+              <option value="ml">Millilitres (ml)</option>
+              <option value="cup">Cups</option>
+              <option value="tbsp">Tablespoons (tbsp)</option>
+              <option value="tsp">Teaspoons (tsp)</option>
+              <option value="L">Litres (L)</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>

@@ -77,7 +77,7 @@ export function convertMacroFromInput(
 // Format display value with unit
 export function formatCalories(
   kcalValue: number | null | undefined,
-  settings: Omit<UserSettings, "macroUnit" | "weightUnit" | "volumeUnit">,
+  settings: Omit<UserSettings, "weightUnit" | "volumeUnit">,
 ): string {
   const converted = convertCaloriesForDisplay(kcalValue, settings.calorieUnit);
   return `${Math.round(converted)} ${settings.calorieUnit}`;
@@ -85,32 +85,32 @@ export function formatCalories(
 
 export function formatMacro(
   gramsValue: number | null | undefined,
-  settings: Omit<UserSettings, "calorieUnit" | "weightUnit" | "volumeUnit">,
+  settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
 ): string {
-  const converted = convertMacroForDisplay(gramsValue, settings.macroUnit);
+  const converted = convertMacroForDisplay(gramsValue, settings.weightUnit);
   const formatted =
-    settings.macroUnit === "mg"
+    settings.weightUnit === "mg"
       ? Math.round(converted)
       : Math.round(converted * 10) / 10;
-  return `${formatted}${settings.macroUnit}`;
+  return `${formatted}${settings.weightUnit}`;
 }
 
 export function formatSalt(
   gramsValue: number | null | undefined,
-  settings: Omit<UserSettings, "calorieUnit" | "weightUnit" | "volumeUnit">,
+  settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
 ): string {
   if (gramsValue === null || gramsValue === undefined) {
     return "0g";
   }
-  const converted = convertMacroForDisplay(gramsValue, settings.macroUnit);
-  const unit = settings.macroUnit || "g";
+  const converted = convertMacroForDisplay(gramsValue, settings.weightUnit);
+  const unit = settings.weightUnit || "g";
   return `${Number(converted.toFixed(2))}${unit}`;
 }
 
 // Takes MeasurementType | undefined and shows gram or ml depending on user settings
 export function getMeasurementInputLabel(
   measurementType: MeasurementType | undefined,
-  settings: Omit<UserSettings, "calorieUnit" | "macroUnit">,
+  settings: Omit<UserSettings, "calorieUnit">,
 ): { label: string; inputUnit: string } {
   if (measurementType === "weight") {
     const unit = settings.weightUnit || "g";
@@ -120,5 +120,45 @@ export function getMeasurementInputLabel(
     return { label: `Volume (${unit})`, inputUnit: unit };
   } else {
     return { label: "Measurement", inputUnit: "" };
+  }
+}
+
+// Take a value and unit, convert to grams or kcal for storage
+export function convertInputToStorageValue(
+  inputValue: number | null | undefined,
+  inputUnit: string | null | undefined,
+  measurementType: (MeasurementType | "calorie") | undefined,
+): number {
+  if (inputValue === null || inputValue === undefined || !inputUnit) {
+    return 0;
+  }
+  if (measurementType === "weight") {
+    return convertMacroFromInput(inputValue, inputUnit);
+  } else if (measurementType === "volume") {
+    // For volume, we currently only support ml which is stored as is
+    return inputValue;
+  } else {
+    // Assume it's a calorie value
+    return convertCaloriesFromInput(inputValue, inputUnit);
+  }
+}
+
+// Take a storage value and convert to display value based on user settings
+export function convertStorageToDisplayValue(
+  storageValue: number | null | undefined,
+  inputUnit: string | null | undefined,
+  measurementType: (MeasurementType | "calorie") | undefined,
+): number {
+  if (storageValue === null || storageValue === undefined || !inputUnit) {
+    return 0;
+  }
+  if (measurementType === "weight") {
+    return convertMacroForDisplay(storageValue, inputUnit);
+  } else if (measurementType === "volume") {
+    // For volume, we currently only support ml which is stored as is
+    return storageValue;
+  } else {
+    // Assume it's a calorie value
+    return convertCaloriesForDisplay(storageValue, inputUnit);
   }
 }

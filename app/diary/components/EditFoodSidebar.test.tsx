@@ -31,7 +31,6 @@ describe("EditFoodSidebar Add Food logic", () => {
   } satisfies FoodItem;
   const userSettings: UserSettings = {
     calorieUnit: "kcal",
-    macroUnit: "g",
     weightUnit: "g",
     volumeUnit: "ml",
   };

@@ -15,7 +15,6 @@ const DEFAULT_SUGARS_GOAL = 90;
 const DEFAULT_FIBRE_GOAL = 30;
 const DEFAULT_SALT_GOAL = 6;
 const DEFAULT_CALORIE_UNIT = "kcal";
-const DEFAULT_MACRO_UNIT = "g";
 const DEFAULT_WEIGHT_UNIT = "g";
 const DEFAULT_VOLUME_UNIT = "ml";
 
@@ -102,7 +101,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             calorieUnit: true,
             carbGoal: true,
             fatGoal: true,
-            macroUnit: true,
             weightUnit: true,
             volumeUnit: true,
             proteinGoal: true,
@@ -131,7 +129,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               carbGoal: existingUser.carbGoal ?? DEFAULT_CARB_GOAL,
               fatGoal: existingUser.fatGoal ?? DEFAULT_FAT_GOAL,
               calorieUnit: existingUser.calorieUnit ?? DEFAULT_CALORIE_UNIT,
-              macroUnit: existingUser.macroUnit ?? DEFAULT_MACRO_UNIT,
               weightUnit: existingUser.weightUnit ?? DEFAULT_WEIGHT_UNIT,
               volumeUnit: existingUser.volumeUnit ?? DEFAULT_VOLUME_UNIT,
               fibreGoal: existingUser.fibreGoal ?? DEFAULT_FIBRE_GOAL,
