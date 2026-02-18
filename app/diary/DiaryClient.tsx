@@ -595,7 +595,10 @@ export default function DiaryClient({
                       }}
                     >
                       <td colSpan={3} className="px-4 py-3">
-                        <p className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium">
+                        <p
+                          className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium"
+                          data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
+                        >
                           Add Food
                         </p>
                       </td>

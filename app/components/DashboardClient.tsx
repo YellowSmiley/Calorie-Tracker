@@ -305,7 +305,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Calories
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-calories"
+                >
                   {formatCalories(totals.calories, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -315,6 +318,7 @@ export default function DashboardClient({
                         ? "opacity-100 max-h-6 mt-1"
                         : "opacity-0 max-h-0 mt-0"
                     }`}
+                    data-testid="avg-calories"
                   >
                     Avg:{" "}
                     {formatCalories(
@@ -348,7 +352,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Protein
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-protein"
+                >
                   {formatMacro(totals.protein, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -358,6 +365,7 @@ export default function DashboardClient({
                         ? "opacity-100 max-h-6 mt-1"
                         : "opacity-0 max-h-0 mt-0"
                     }`}
+                    data-testid="avg-protein"
                   >
                     Avg:{" "}
                     {formatMacro(getDailyAverage(totals.protein), userSettings)}
@@ -388,7 +396,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Carbohydrates
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-carbs"
+                >
                   {formatMacro(totals.carbs, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -398,6 +409,7 @@ export default function DashboardClient({
                         ? "opacity-100 max-h-6 mt-1"
                         : "opacity-0 max-h-0 mt-0"
                     }`}
+                    data-testid="avg-carbs"
                   >
                     Avg:{" "}
                     {formatMacro(getDailyAverage(totals.carbs), userSettings)}
@@ -428,7 +440,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Fat
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-fat"
+                >
                   {formatMacro(totals.fat, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -438,6 +453,7 @@ export default function DashboardClient({
                         ? "opacity-100 max-h-6 mt-1"
                         : "opacity-0 max-h-0 mt-0"
                     }`}
+                    data-testid="avg-fat"
                   >
                     Avg:{" "}
                     {formatMacro(getDailyAverage(totals.fat), userSettings)}/day
@@ -467,7 +483,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Saturates
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-saturates"
+                >
                   {formatMacro(totals.saturates, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -511,7 +530,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Sugars
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-sugars"
+                >
                   {formatMacro(totals.sugars, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -540,6 +562,7 @@ export default function DashboardClient({
                 <div className="mt-2 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-zinc-700 dark:bg-zinc-500 transition-all"
+                    data-testid="dashboard-progress-sugars"
                     style={{
                       width: `${Math.min((totals.sugars / (userGoals.sugars * getGoalMultiplier())) * 100, 100)}%`,
                     }}
@@ -552,7 +575,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Fibre
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-fibre"
+                >
                   {formatMacro(totals.fibre, userSettings)}
                 </p>
                 <div className="overflow-hidden">
@@ -593,7 +619,10 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Salt
                 </p>
-                <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                <p
+                  className="text-2xl font-bold text-black dark:text-zinc-50"
+                  data-testid="dashboard-total-salt"
+                >
                   {formatSalt(totals.salt, userSettings)}
                 </p>
                 <div className="overflow-hidden">

@@ -1,41 +1,142 @@
 import { test, expect, Page } from "@playwright/test";
+// Automatically save a screenshot if an expect fails
+test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.status !== testInfo.expectedStatus) {
+    // Save screenshot to test output directory
+    await page.screenshot({
+      path: `test-results/${testInfo.title.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`,
+      fullPage: true,
+    });
+  }
+});
+import { login } from "./tester-login.spec";
 
 function randomFoodName() {
   return "TestFood-" + Math.random().toString(36).substring(2, 10);
 }
 
-const testerEmail = process.env.E2E_TEST_EMAIL ?? "";
-const testerPassword = process.env.E2E_TEST_PASSWORD ?? "";
-
 // Check for current food items in breakfast (if any) and remove them to start with a clean slate
-const resetFoodItems = async (page: Page) => {
+export const resetFoodItems = async (page: Page) => {
   await page.getByTestId("nav-settings").click();
   await page.getByTestId("my-foods-button").click();
-  const foodRowDeleteBtns = await page
-    .locator('[data-testid^="delete-food-button-"]')
-    .all();
-  for (const btn of foodRowDeleteBtns) {
-    await btn.click();
-    const modal = page.getByTestId("delete-food-modal");
-    await expect(modal).toBeVisible();
-    await modal.getByTestId("delete-food-confirm").click();
+  // wait for data-testid="food-search-input"
+  await expect(page.getByTestId("food-search-input")).toBeVisible();
+  // Loop while there are foods to delete
+  while (!(await page.getByTestId("no-foods-found").isVisible())) {
+    // Get all delete-food-button- and click them
+    const deleteButtons = page.getByTestId(/delete-food-button-/);
+    const count = await deleteButtons.count();
+    for (let i = 0; i < count; i++) {
+      await page
+        .getByTestId(/delete-food-button-/)
+        .first()
+        .click();
+      if (await page.getByTestId("food-table-error").isVisible()) {
+        // delete-food-cancel if error and continue loop to try again (sometimes fails due to db constraints)
+        await page.getByTestId("delete-food-cancel").click();
+        continue;
+      }
+      // wait for delete-food-confirm to be visible and click it
+      await page.getByTestId("delete-food-confirm").click();
+      if (await page.getByTestId("food-table-error").isVisible()) {
+        // delete-food-cancel if error and continue loop to try again (sometimes fails due to db constraints)
+        await page.getByTestId("delete-food-cancel").click();
+      }
+      await expect(page.getByTestId("loading-foods")).not.toBeVisible();
+      // wait for delete-food-confirm to not be visible
+      await expect(page.getByTestId("delete-food-confirm")).not.toBeVisible();
+      // wait 1 second before next delete to avoid overwhelming the server
+    }
   }
   await page.getByTestId("my-foods-back-button").click();
 };
 
+type OverrideFields = {
+  name: string;
+  measurementAmount: string;
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+  saturates: string;
+  sugars: string;
+  fibre: string;
+  salt: string;
+  servingDescription: string;
+  servingAmount: string;
+};
+
+const fillFoodForm = async (
+  page: Page,
+  overrides?: Partial<OverrideFields>,
+) => {
+  const foodName = randomFoodName();
+  await page.getByTestId("create-food-name").fill(overrides?.name || foodName);
+  await page
+    .getByTestId("create-food-measurement-amount")
+    .fill(overrides?.measurementAmount || "100");
+  await page
+    .getByTestId("create-food-calories")
+    .fill(overrides?.calories || "100");
+  await page
+    .getByTestId("create-food-protein")
+    .fill(overrides?.protein || "10");
+  await page.getByTestId("create-food-carbs").fill(overrides?.carbs || "20");
+  await page.getByTestId("create-food-fat").fill(overrides?.fat || "5");
+  await page
+    .getByTestId("create-food-saturates")
+    .fill(overrides?.saturates || "2");
+  await page.getByTestId("create-food-sugars").fill(overrides?.sugars || "3");
+  await page.getByTestId("create-food-fibre").fill(overrides?.fibre || "1");
+  await page.getByTestId("create-food-salt").fill(overrides?.salt || "0.5");
+  await page
+    .getByTestId("create-food-serving-description")
+    .fill(overrides?.servingDescription || "1 thing");
+  await page
+    .getByTestId("create-food-serving-amount")
+    .fill(overrides?.servingAmount || "50");
+  return foodName;
+};
+
+export async function createTestFood(
+  page: Page,
+  overrides?: Partial<OverrideFields>,
+) {
+  await page.getByTestId("nav-settings").click();
+  await page.getByTestId("my-foods-button").click();
+  await page.getByTestId("create-food-button").click();
+  const foodName = await fillFoodForm(page, overrides);
+  await page.getByTestId("create-food-submit").click();
+  await page.getByTestId("my-foods-back-button").click();
+  return foodName;
+}
+
+export async function addFoodToMeal(
+  page: Page,
+  mealTestId: "breakfast" | "lunch" | "dinner" | "snacks",
+  foodName: string,
+  servingSize?: string,
+  quantity?: string,
+) {
+  await page.getByTestId(`diary-add-food-button-${mealTestId}`).click();
+  await page.getByTestId("food-search-input").fill(foodName);
+  await page
+    .getByTestId(/food-item-/)
+    .filter({ hasText: foodName })
+    .click();
+  if (servingSize) {
+    await page.getByTestId("edit-food-serving-size").fill(servingSize);
+  }
+  if (quantity) {
+    await page.getByTestId("edit-food-quantity").fill(quantity);
+  }
+  await page.getByTestId("add-food-submit").click();
+}
+
 test.describe("Diary Feature", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.getByTestId("email").fill(testerEmail);
-    await page.getByTestId("password").fill(testerPassword);
-    await Promise.all([
-      page.waitForURL("/"),
-      page.getByTestId("sign-in-button").click(),
-    ]);
-    await page.getByTestId("cookie-banner-button").click();
-
+    await login(page);
     await resetFoodItems(page);
-
     // Continue with tests
     await page.getByTestId("nav-diary").click();
     await expect(page.getByRole("heading", { name: "Diary" })).toBeVisible();
@@ -45,7 +146,7 @@ test.describe("Diary Feature", () => {
     page,
   }) => {
     // Add food to breakfast
-    await page.getByTestId("diary-add-food-breakfast").click();
+    await page.getByTestId("diary-add-food-button-breakfast").click();
     await page.getByTestId("create-food-button").click();
 
     // Consts
@@ -61,24 +162,19 @@ test.describe("Diary Feature", () => {
     const servingDescription = "1 thing";
     const servingAmount = "50";
 
-    // Fill out food form
-    const foodName = randomFoodName();
-    await page.getByTestId("create-food-name").fill(foodName);
-    await page
-      .getByTestId("create-food-measurement-amount")
-      .fill(measurementAmount);
-    await page.getByTestId("create-food-calories").fill(calories);
-    await page.getByTestId("create-food-protein").fill(protein);
-    await page.getByTestId("create-food-carbs").fill(carbs);
-    await page.getByTestId("create-food-fat").fill(fat);
-    await page.getByTestId("create-food-saturates").fill(saturates);
-    await page.getByTestId("create-food-sugars").fill(sugars);
-    await page.getByTestId("create-food-fibre").fill(fibre);
-    await page.getByTestId("create-food-salt").fill(salt);
-    await page
-      .getByTestId("create-food-serving-description")
-      .fill(servingDescription);
-    await page.getByTestId("create-food-serving-amount").fill(servingAmount);
+    const foodName = await fillFoodForm(page, {
+      measurementAmount,
+      calories,
+      protein,
+      carbs,
+      fat,
+      saturates,
+      sugars,
+      fibre,
+      salt,
+      servingDescription,
+      servingAmount,
+    });
     await page.getByTestId("create-food-submit").click();
 
     // Food should be added to table
@@ -261,7 +357,7 @@ test.describe("Diary Feature", () => {
     await page.getByTestId("next-day-button").click();
 
     // Test add food search
-    await page.getByTestId("diary-add-food-breakfast").click();
+    await page.getByTestId("diary-add-food-button-breakfast").click();
     await page.getByTestId("food-search-input").fill(foodName);
     await expect(page.getByTestId(/food-item-/)).toContainText(foodName);
     await page.getByTestId("food-search-input").fill("nonexistentfood");

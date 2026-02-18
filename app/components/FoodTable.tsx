@@ -162,6 +162,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
   const handleDeleteFood = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    setIsLoading(true);
     try {
       const url = `/api/admin/foods/${deleteTarget.id}`;
 
@@ -186,6 +187,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
         console.error("Error deleting food:", err);
       setError("Error deleting food");
     } finally {
+      setIsLoading(false);
       setIsDeleting(false);
     }
   };
@@ -208,7 +210,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="px-4 pt-4">
+        <div className="px-4 pt-4" data-testid="food-table-error">
           <div className="mx-auto w-full max-w-3xl rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-900 dark:text-zinc-200">
@@ -232,7 +234,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
         className="flex-1 overflow-y-auto"
       >
         <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
-          {foods.map((food) => (
+          {foods.map((food, i) => (
             <div
               key={food.id}
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900"
@@ -265,7 +267,7 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
                     setShowDeleteModal(true);
                   }}
                   className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                  data-testid={`delete-food-button-${food.id}`}
+                  data-testid={`delete-food-button-${i}`}
                 >
                   Delete
                 </button>
@@ -276,7 +278,10 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
 
           {/* Loading indicator */}
           {isLoading && (
-            <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            <div
+              className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400"
+              data-testid="loading-foods"
+            >
               Loading...
             </div>
           )}

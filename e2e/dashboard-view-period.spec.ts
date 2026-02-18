@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
-
-const testerEmail = process.env.E2E_TEST_EMAIL ?? "";
-const testerPassword = process.env.E2E_TEST_PASSWORD ?? "";
+import { addFoodToMeal, createTestFood, resetFoodItems } from "./diary.spec";
+import { login } from "./tester-login.spec";
 
 const goals = {
   calories: 3000,
@@ -16,13 +15,23 @@ const goals = {
 
 test.describe("Dashboard View Period", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.getByTestId("email").fill(testerEmail);
-    await page.getByTestId("password").fill(testerPassword);
-    await Promise.all([
-      page.waitForURL("/"),
-      page.getByTestId("sign-in-button").click(),
-    ]);
+    await login(page);
+    await resetFoodItems(page);
+    // Create food with 100 kcal per 100g, serving 50g
+    const foodName = await createTestFood(page, {
+      calories: "100",
+      measurementAmount: "100",
+      servingAmount: "50",
+    });
+    await page.getByTestId("nav-diary").click();
+    await expect(page.getByRole("heading", { name: "Diary" })).toBeVisible();
+    // Add food to breakfast with serving size 50g and quantity 1
+    await addFoodToMeal(page, "breakfast", foodName, "50", "1");
+    // Assert food row is present in diary
+    await expect(
+      page.getByTestId(/diary-food-row-/).filter({ hasText: foodName }),
+    ).toBeVisible();
+    await page.getByTestId("nav-dashboard").click();
     await expect(
       page.getByRole("heading", { name: "Dashboard" }),
     ).toBeVisible();
@@ -49,19 +58,33 @@ test.describe("Dashboard View Period", () => {
       return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     };
 
-    // Helper to check avg visibility
-    const expectAvgVisible = async (testid: string, visible: boolean) => {
-      const el = page.getByTestId(testid);
-      if (visible) {
-        await expect(el).toBeVisible();
-      } else {
-        await expect(el).toHaveCSS("opacity", "0");
-      }
-    };
-
     // DAY
     await page.getByRole("button", { name: "Day" }).click();
-    await page.waitForTimeout(500);
+    expect(
+      await page.getByTestId("dashboard-total-calories").textContent(),
+    ).toContain("50 kcal");
+    expect(
+      await page.getByTestId("dashboard-total-protein").textContent(),
+    ).toContain("5g");
+    expect(
+      await page.getByTestId("dashboard-total-carbs").textContent(),
+    ).toContain("10g");
+    expect(
+      await page.getByTestId("dashboard-total-fat").textContent(),
+    ).toContain("2.5g");
+    expect(
+      await page.getByTestId("dashboard-total-saturates").textContent(),
+    ).toContain("1g");
+    expect(
+      await page.getByTestId("dashboard-total-sugars").textContent(),
+    ).toContain("1.5g");
+    expect(
+      await page.getByTestId("dashboard-total-fibre").textContent(),
+    ).toContain("0.5g");
+    expect(
+      await page.getByTestId("dashboard-total-salt").textContent(),
+    ).toContain("0.25g");
+
     expect(await getGoal("goal-calories")).toContain(`${goals.calories} kcal`);
     expect(await getGoal("goal-protein")).toContain(`${goals.protein}g`);
     expect(await getGoal("goal-carbs")).toContain(`${goals.carbs}g`);
@@ -70,14 +93,18 @@ test.describe("Dashboard View Period", () => {
     expect(await getGoal("goal-sugars")).toContain(`${goals.sugars}g`);
     expect(await getGoal("goal-fibre")).toContain(`${goals.fibre}g`);
     expect(await getGoal("goal-salt")).toContain(`${goals.salt}g`);
-    await expectAvgVisible("avg-saturates", false);
-    await expectAvgVisible("avg-sugars", false);
-    await expectAvgVisible("avg-fibre", false);
-    await expectAvgVisible("avg-salt", false);
+
+    await expect(page.getByTestId("avg-calories")).not.toBeVisible();
+    await expect(page.getByTestId("avg-protein")).not.toBeVisible();
+    await expect(page.getByTestId("avg-carbs")).not.toBeVisible();
+    await expect(page.getByTestId("avg-fat")).not.toBeVisible();
+    await expect(page.getByTestId("avg-saturates")).not.toBeVisible();
+    await expect(page.getByTestId("avg-sugars")).not.toBeVisible();
+    await expect(page.getByTestId("avg-fibre")).not.toBeVisible();
+    await expect(page.getByTestId("avg-salt")).not.toBeVisible();
 
     // WEEK
     await page.getByRole("button", { name: "Week" }).click();
-    await page.waitForTimeout(500);
     expect(await getGoal("goal-calories")).toContain(
       `${goals.calories * 7} kcal`,
     );
@@ -90,15 +117,40 @@ test.describe("Dashboard View Period", () => {
     expect(await getGoal("goal-sugars")).toContain(`${goals.sugars * 7}g`);
     expect(await getGoal("goal-fibre")).toContain(`${goals.fibre * 7}g`);
     expect(await getGoal("goal-salt")).toContain(`${goals.salt * 7}g`);
-    await expectAvgVisible("avg-saturates", true);
-    await expectAvgVisible("avg-sugars", true);
-    await expectAvgVisible("avg-fibre", true);
-    await expectAvgVisible("avg-salt", true);
+
+    const round1dp = (val: number) => Math.round(val * 10) / 10;
+    const round2dp = (val: number) => Math.round(val * 100) / 100;
+    const weekCalories = `Avg: ${Math.round(50 / 7)} kcal/day`;
+    expect(await page.getByTestId("avg-calories").textContent()).toContain(
+      weekCalories,
+    );
+    const avgProtein = `Avg: ${round1dp(5 / 7)}g/day`;
+    expect(await page.getByTestId("avg-protein").textContent()).toContain(
+      avgProtein,
+    );
+    expect(await page.getByTestId("avg-carbs").textContent()).toContain(
+      `Avg: ${round1dp(10 / 7)}g/day`,
+    );
+    expect(await page.getByTestId("avg-fat").textContent()).toContain(
+      `Avg: ${round1dp(2.5 / 7)}g/day`,
+    );
+    expect(await page.getByTestId("avg-saturates").textContent()).toContain(
+      `Avg: ${round1dp(1 / 7)}g/day`,
+    );
+    expect(await page.getByTestId("avg-sugars").textContent()).toContain(
+      `Avg: ${round1dp(1.5 / 7)}g/day`,
+    );
+    expect(await page.getByTestId("avg-fibre").textContent()).toContain(
+      `Avg: ${round1dp(0.5 / 7)}g/day`,
+    );
+    expect(await page.getByTestId("avg-salt").textContent()).toContain(
+      `Avg: ${round2dp(0.25 / 7)}g/day`,
+    );
 
     // MONTH (dynamically get days in month)
     await page.getByRole("button", { name: "Month" }).click();
-    await page.waitForTimeout(500);
     const daysInMonth = await getDaysInMonth();
+
     expect(await getGoal("goal-calories")).toContain(
       `${goals.calories * daysInMonth} kcal`,
     );
@@ -121,9 +173,32 @@ test.describe("Dashboard View Period", () => {
     expect(await getGoal("goal-salt")).toContain(
       `${goals.salt * daysInMonth}g`,
     );
-    await expectAvgVisible("avg-saturates", true);
-    await expectAvgVisible("avg-sugars", true);
-    await expectAvgVisible("avg-fibre", true);
-    await expectAvgVisible("avg-salt", true);
+    const monthCalories = `Avg: ${Math.round(50 / (await getDaysInMonth()))} kcal/day`;
+    expect(await page.getByTestId("avg-calories").textContent()).toContain(
+      monthCalories,
+    );
+    expect(await page.getByTestId("avg-protein").textContent()).toContain(
+      `Avg: ${round1dp(5 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-carbs").textContent()).toContain(
+      `Avg: ${round1dp(10 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-fat").textContent()).toContain(
+      `Avg: ${round1dp(2.5 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-saturates").textContent()).toContain(
+      `Avg: ${round1dp(1 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-sugars").textContent()).toContain(
+      `Avg: ${round1dp(1.5 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-fibre").textContent()).toContain(
+      `Avg: ${round1dp(0.5 / (await getDaysInMonth()))}g/day`,
+    );
+    expect(await page.getByTestId("avg-salt").textContent()).toContain(
+      `Avg: ${round2dp(0.25 / (await getDaysInMonth()))}g/day`,
+    );
+
+    await resetFoodItems(page);
   });
 });

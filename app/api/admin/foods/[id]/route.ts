@@ -191,6 +191,7 @@ export async function DELETE(
     const existingFood = await prisma.food.findUnique({
       where: { id: foodId },
     });
+    console.log({ foodId });
     if (!existingFood) {
       return NextResponse.json({ error: "Food not found" }, { status: 404 });
     }
