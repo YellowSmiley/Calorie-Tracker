@@ -5,18 +5,19 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { checkLoginRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
-
-const DEFAULT_CALORIE_GOAL = 3000;
-const DEFAULT_PROTEIN_GOAL = 150;
-const DEFAULT_CARB_GOAL = 410;
-const DEFAULT_FAT_GOAL = 83;
-const DEFAULT_SATURATES_GOAL = 20;
-const DEFAULT_SUGARS_GOAL = 90;
-const DEFAULT_FIBRE_GOAL = 30;
-const DEFAULT_SALT_GOAL = 6;
-const DEFAULT_CALORIE_UNIT = "kcal";
-const DEFAULT_WEIGHT_UNIT = "g";
-const DEFAULT_VOLUME_UNIT = "ml";
+import {
+  DEFAULT_CALORIE_GOAL,
+  DEFAULT_PROTEIN_GOAL,
+  DEFAULT_CARB_GOAL,
+  DEFAULT_FAT_GOAL,
+  DEFAULT_CALORIE_UNIT,
+  DEFAULT_WEIGHT_UNIT,
+  DEFAULT_VOLUME_UNIT,
+  DEFAULT_FIBRE_GOAL,
+  DEFAULT_SALT_GOAL,
+  DEFAULT_SATURATES_GOAL,
+  DEFAULT_SUGARS_GOAL,
+} from "./lib/consts";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

@@ -176,7 +176,7 @@ export default function UserManagement() {
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {user.email || "No email"}
-                  {user.isAdmin ? " • Admin" : ""}
+                  {user.isAdmin ? " - Admin" : ""}
                 </p>
               </div>
               <div className="shrink-0">

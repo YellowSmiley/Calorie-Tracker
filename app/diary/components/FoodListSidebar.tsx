@@ -160,7 +160,7 @@ export default function FoodListSidebar({
       const servingRatio = food.defaultServingAmount / food.measurementAmount;
       const servingCals = Math.round(food.baseCalories * servingRatio);
       const desc = food.defaultServingDescription
-        ? ` · ${food.defaultServingDescription}`
+        ? ` - ${food.defaultServingDescription}`
         : "";
       return {
         line: `${food.defaultServingAmount}${unit.inputUnit}${desc}`,
@@ -256,7 +256,7 @@ export default function FoodListSidebar({
                       className="text-sm text-zinc-500 dark:text-zinc-400"
                       data-testid={`food-item-${food.id}-serving-info`}
                     >
-                      {serving.line} •{" "}
+                      {serving.line} -{" "}
                       {formatCalories(serving.calories, userSettings)}
                     </p>
                   );

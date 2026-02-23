@@ -253,11 +253,11 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
                       userSettings,
                     ).inputUnit
                   }{" "}
-                  • {food.calories} kcal
+                  - {food.calories} kcal
                   {food.defaultServingDescription
-                    ? ` • ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
+                    ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
                     : ""}
-                  {` • ${food.createdByName || food.createdBy || "Unknown"}`}
+                  {` - ${food.createdByName || food.createdBy || "Unknown"}`}
                 </p>
               </div>
               <div className="shrink-0" onClick={(e) => e.stopPropagation()}>

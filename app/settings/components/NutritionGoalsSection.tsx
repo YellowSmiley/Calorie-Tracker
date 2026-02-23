@@ -32,7 +32,7 @@ export default function NutritionGoalsSection({
               htmlFor="calorieGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Calories ({userSettings.calorieUnit}) *
+              Calories ({settings.calorieUnit}) *
             </label>
             <input
               id="calorieGoal"
@@ -54,7 +54,7 @@ export default function NutritionGoalsSection({
               htmlFor="proteinGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Protein ({userSettings.weightUnit}) *
+              Protein ({settings.weightUnit}) *
             </label>
             <input
               id="proteinGoal"
@@ -78,7 +78,7 @@ export default function NutritionGoalsSection({
               htmlFor="carbGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Carbohydrates ({userSettings.weightUnit}) *
+              Carbohydrates ({settings.weightUnit}) *
             </label>
             <input
               id="carbGoal"
@@ -98,7 +98,7 @@ export default function NutritionGoalsSection({
               htmlFor="fatGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Fat ({userSettings.weightUnit}) *
+              Fat ({settings.weightUnit}) *
             </label>
             <input
               id="fatGoal"
@@ -118,7 +118,7 @@ export default function NutritionGoalsSection({
               htmlFor="saturatesGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Saturates ({userSettings.weightUnit}) *
+              Saturates ({settings.weightUnit}) *
             </label>
             <input
               id="saturatesGoal"
@@ -140,7 +140,7 @@ export default function NutritionGoalsSection({
               htmlFor="sugarsGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Sugars ({userSettings.weightUnit}) *
+              Sugars ({settings.weightUnit}) *
             </label>
             <input
               id="sugarsGoal"
@@ -162,7 +162,7 @@ export default function NutritionGoalsSection({
               htmlFor="fibreGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Fibre ({userSettings.weightUnit}) *
+              Fibre ({settings.weightUnit}) *
             </label>
             <input
               id="fibreGoal"
@@ -184,7 +184,7 @@ export default function NutritionGoalsSection({
               htmlFor="saltGoal"
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
             >
-              Salt ({userSettings.weightUnit}) *
+              Salt ({settings.weightUnit}) *
             </label>
             <input
               id="saltGoal"

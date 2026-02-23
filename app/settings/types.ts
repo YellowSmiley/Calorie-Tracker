@@ -1,5 +1,7 @@
 import { User } from "@prisma/client";
 
+export type AcceptedUnits = "g" | "oz" | "kg" | "lbs" | "mg";
+
 export type SettingsData = Pick<
   User,
   | "calorieGoal"
@@ -11,11 +13,11 @@ export type SettingsData = Pick<
   | "fibreGoal"
   | "saltGoal"
   | "calorieUnit"
-  | "weightUnit"
   | "volumeUnit"
->;
+> & {
+  weightUnit: AcceptedUnits;
+};
 
-export type UserSettings = Pick<
-  User,
-  "calorieUnit" | "weightUnit" | "volumeUnit"
->;
+export type UserSettings = Pick<User, "calorieUnit" | "volumeUnit"> & {
+  weightUnit: AcceptedUnits;
+};

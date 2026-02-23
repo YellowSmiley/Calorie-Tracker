@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import type { FoodItem } from "../types";
 import {
+  convertMacroForDisplay,
+  convertMacroFromInput,
   formatCalories,
   formatMacro,
   formatSalt,
   getMeasurementInputLabel,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
-import { UserSettings } from "../../settings/types";
+import { AcceptedUnits, UserSettings } from "../../settings/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -31,7 +33,10 @@ export default function EditFoodSidebar({
   isAdd = false,
 }: EditFoodSidebarProps) {
   const foodMeasurementAmount = food?.measurementAmount || 100;
-  const defaultServing = food?.defaultServingAmount || foodMeasurementAmount;
+
+  const defaultServing =
+    food?.defaultServingAmount ||
+    convertMacroForDisplay(100, userSettings.weightUnit as AcceptedUnits);
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -57,20 +62,43 @@ export default function EditFoodSidebar({
   const quantityNum = parseFloat(quantity) || 0;
   const totalAmount = servingSizeNum * quantityNum;
 
-  const calculatedNutrition = useMemo(() => {
-    if (!food) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    const serving = totalAmount / foodMeasurementAmount;
+  const calculatedNutrition: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    saturates: number;
+    sugars: number;
+    fibre: number;
+    salt: number;
+  } = useMemo(() => {
+    if (!food)
+      return {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        saturates: 0,
+        sugars: 0,
+        fibre: 0,
+        salt: 0,
+      };
+    const convertedTotalAmount = convertMacroFromInput(
+      totalAmount,
+      userSettings.weightUnit as AcceptedUnits,
+    );
+    const serving = convertedTotalAmount / foodMeasurementAmount; // totalAmount is the amount in user units, foodMeasurementAmount in grams/ml
     return {
-      calories: Number((food.baseCalories * serving).toFixed(1)),
-      protein: Number((food.baseProtein * serving).toFixed(1)),
-      carbs: Number((food.baseCarbs * serving).toFixed(1)),
-      fat: Number((food.baseFat * serving).toFixed(1)),
-      saturates: Number((food.baseSaturates * serving).toFixed(1)),
-      sugars: Number((food.baseSugars * serving).toFixed(1)),
-      fibre: Number((food.baseFibre * serving).toFixed(1)),
-      salt: Number((food.baseSalt * serving).toFixed(2)),
+      calories: food.baseCalories * serving,
+      protein: food.baseProtein * serving,
+      carbs: food.baseCarbs * serving,
+      fat: food.baseFat * serving,
+      saturates: food.baseSaturates * serving,
+      sugars: food.baseSugars * serving,
+      fibre: food.baseFibre * serving,
+      salt: food.baseSalt * serving,
     };
-  }, [food, totalAmount, foodMeasurementAmount]);
+  }, [food, totalAmount, foodMeasurementAmount, userSettings]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,7 +168,11 @@ export default function EditFoodSidebar({
                     : "edit-food-base-nutrition-title"
                 }
               >
-                Base Nutrition (Per {foodMeasurementAmount || ""}{" "}
+                Base Nutrition (Per{" "}
+                {convertMacroForDisplay(
+                  foodMeasurementAmount,
+                  userSettings.weightUnit,
+                ).toFixed(userSettings.weightUnit === "g" ? 0 : 2) || ""}
                 {getMeasurementInputLabel(food?.measurementType, userSettings)
                   .inputUnit || ""}
                 )

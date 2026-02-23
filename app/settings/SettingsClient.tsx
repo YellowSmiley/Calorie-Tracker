@@ -7,7 +7,7 @@ import NutritionGoalsSection from "./components/NutritionGoalsSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
-import { SettingsData, UserSettings } from "./types";
+import { AcceptedUnits, SettingsData, UserSettings } from "./types";
 import { signOut } from "next-auth/react";
 import {
   convertInputToStorageValue,
@@ -53,7 +53,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
       ...data,
       calorieGoal: convertStorageToDisplayValue(
         data.calorieGoal,
-        data.calorieUnit,
+        data.calorieUnit as AcceptedUnits,
         "calorie",
       ),
       proteinGoal: convertStorageToDisplayValue(
@@ -122,7 +122,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
       ...settings,
       calorieGoal: convertInputToStorageValue(
         settings.calorieGoal,
-        settings.calorieUnit,
+        settings.calorieUnit as AcceptedUnits,
         "calorie",
       ),
       proteinGoal: convertInputToStorageValue(

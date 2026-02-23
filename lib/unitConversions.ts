@@ -2,9 +2,11 @@
 // These functions convert for display based on user preferences
 
 import { MeasurementType } from "@/app/diary/types";
-import { UserSettings } from "@/app/settings/types";
+import { AcceptedUnits, UserSettings } from "@/app/settings/types";
 
-// Calorie conversions (stored as kcal)
+/**
+ * Convert a kcal value stored in the database to the user's preferred display unit for calories
+ */
 export function convertCaloriesForDisplay(
   kcalValue: number | null | undefined,
   targetUnit: string | null | undefined,
@@ -21,6 +23,9 @@ export function convertCaloriesForDisplay(
   }
 }
 
+/**
+ * Convert a user input value in their preferred unit for calories back to kcal for storage
+ */
 export function convertCaloriesFromInput(
   inputValue: number | null | undefined,
   inputUnit: string | null | undefined,
@@ -37,10 +42,12 @@ export function convertCaloriesFromInput(
   }
 }
 
-// Macro conversions (stored as grams)
+/**
+ * Convert a grams value stored in the database to the user's preferred display unit for macros
+ */
 export function convertMacroForDisplay(
   gramsValue: number | null | undefined,
-  targetUnit: string | null | undefined,
+  targetUnit: AcceptedUnits | null | undefined,
 ): number {
   if (gramsValue === null || gramsValue === undefined) {
     return 0;
@@ -50,15 +57,22 @@ export function convertMacroForDisplay(
       return gramsValue * 0.035274;
     case "mg":
       return gramsValue * 1000;
+    case "kg":
+      return gramsValue / 1000;
+    case "lbs":
+      return gramsValue * 0.00220462;
     case "g":
     default:
       return gramsValue;
   }
 }
 
+/**
+ * Convert a user input value in their preferred unit back to grams for storage
+ */
 export function convertMacroFromInput(
   inputValue: number | null | undefined,
-  inputUnit: string | null | undefined,
+  inputUnit: AcceptedUnits | null | undefined,
 ): number {
   if (inputValue === null || inputValue === undefined) {
     return 0;
@@ -68,13 +82,19 @@ export function convertMacroFromInput(
       return inputValue / 0.035274;
     case "mg":
       return inputValue / 1000;
+    case "kg":
+      return inputValue * 1000;
+    case "lbs":
+      return inputValue / 0.00220462;
     case "g":
     default:
       return inputValue;
   }
 }
 
-// Format display value with unit
+/**
+ * Format a kcal value for display with the appropriate unit label based on user settings
+ */
 export function formatCalories(
   kcalValue: number | null | undefined,
   settings: Omit<UserSettings, "weightUnit" | "volumeUnit">,
@@ -83,11 +103,17 @@ export function formatCalories(
   return `${Math.round(converted)} ${settings.calorieUnit}`;
 }
 
+/**
+ * Format a grams value for display with the appropriate unit label based on user settings
+ */
 export function formatMacro(
   gramsValue: number | null | undefined,
   settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
 ): string {
-  const converted = convertMacroForDisplay(gramsValue, settings.weightUnit);
+  const converted = convertMacroForDisplay(
+    gramsValue,
+    settings.weightUnit as AcceptedUnits,
+  );
   const formatted =
     settings.weightUnit === "mg"
       ? Math.round(converted)
@@ -95,6 +121,9 @@ export function formatMacro(
   return `${formatted}${settings.weightUnit}`;
 }
 
+/**
+ * Format a salt value for display, ensuring that very small values are shown as 0 and using the appropriate unit label based on user settings
+ */
 export function formatSalt(
   gramsValue: number | null | undefined,
   settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
@@ -102,12 +131,17 @@ export function formatSalt(
   if (gramsValue === null || gramsValue === undefined) {
     return "0g";
   }
-  const converted = convertMacroForDisplay(gramsValue, settings.weightUnit);
+  const converted = convertMacroForDisplay(
+    gramsValue,
+    settings.weightUnit as AcceptedUnits,
+  );
   const unit = settings.weightUnit || "g";
   return `${Number(converted.toFixed(2))}${unit}`;
 }
 
-// Takes MeasurementType | undefined and shows gram or ml depending on user settings
+/**
+ * Get the appropriate label and input unit for a measurement input based on the measurement type and user settings
+ */
 export function getMeasurementInputLabel(
   measurementType: MeasurementType | undefined,
   settings: Omit<UserSettings, "calorieUnit">,
@@ -123,10 +157,12 @@ export function getMeasurementInputLabel(
   }
 }
 
-// Take a value and unit, convert to grams or kcal for storage
+/**
+ * Convert a user input value in their preferred unit for calories or macros back to the standard unit for storage (kcal for calories, grams for macros
+ */
 export function convertInputToStorageValue(
   inputValue: number | null | undefined,
-  inputUnit: string | null | undefined,
+  inputUnit: AcceptedUnits | null | undefined,
   measurementType: (MeasurementType | "calorie") | undefined,
 ): number {
   if (inputValue === null || inputValue === undefined || !inputUnit) {
@@ -143,10 +179,12 @@ export function convertInputToStorageValue(
   }
 }
 
-// Take a storage value and convert to display value based on user settings
+/**
+ * Convert a value stored in the database to the user's preferred display unit for calories or macros, based on the measurement type and user settings
+ */
 export function convertStorageToDisplayValue(
   storageValue: number | null | undefined,
-  inputUnit: string | null | undefined,
+  inputUnit: AcceptedUnits | null | undefined,
   measurementType: (MeasurementType | "calorie") | undefined,
 ): number {
   if (storageValue === null || storageValue === undefined || !inputUnit) {

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import UserFoodsClient from "./UserFoodsClient";
 import { Metadata } from "next";
-import { UserSettings } from "../settings/types";
+import { AcceptedUnits, UserSettings } from "../settings/types";
 
 export const metadata: Metadata = {
   title: "My Foods - Calorie Tracker",
@@ -29,7 +29,7 @@ export default async function UserFoodsPage() {
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    weightUnit: user?.weightUnit ?? "g",
+    weightUnit: (user?.weightUnit as AcceptedUnits) ?? "g",
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 

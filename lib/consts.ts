@@ -1,0 +1,11 @@
+export const DEFAULT_CALORIE_GOAL = 3000;
+export const DEFAULT_PROTEIN_GOAL = 150;
+export const DEFAULT_CARB_GOAL = 410;
+export const DEFAULT_FAT_GOAL = 83;
+export const DEFAULT_SATURATES_GOAL = 20;
+export const DEFAULT_SUGARS_GOAL = 90;
+export const DEFAULT_FIBRE_GOAL = 30;
+export const DEFAULT_SALT_GOAL = 6;
+export const DEFAULT_CALORIE_UNIT = "kcal";
+export const DEFAULT_WEIGHT_UNIT = "g";
+export const DEFAULT_VOLUME_UNIT = "ml";
