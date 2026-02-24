@@ -530,12 +530,10 @@ export default function DiaryClient({
                                   ? getWeightForDisplay(
                                       actualAmount,
                                       userSettings.weightUnit,
-                                      0,
                                     )
                                   : getVolumeForDisplay(
                                       actualAmount,
                                       userSettings.volumeUnit,
-                                      0,
                                     );
                               if (
                                 item.defaultServingDescription &&

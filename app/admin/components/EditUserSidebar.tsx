@@ -38,6 +38,7 @@ export default function EditUserSidebar({
         <button
           onClick={onClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
+          data-testid="edit-user-back-button"
         >
           Back
         </button>

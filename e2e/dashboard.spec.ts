@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { addFoodToMeal, createTestFood, resetFoodItems } from "./diary.spec";
 import { login } from "./tester-login.spec";
+import { resetSettings } from "./settings.spec";
 
 const goals = {
   calories: 3000,
@@ -16,6 +17,7 @@ const goals = {
 test.describe("Dashboard", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
+    await resetSettings(page);
     await resetFoodItems(page);
     // Create food with 100 kcal per 100g, serving 50g
     const foodName = await createTestFood(page, {
@@ -116,30 +118,29 @@ test.describe("Dashboard", () => {
     expect(await getGoal("goal-fibre")).toContain(`${goals.fibre * 7}g`);
     expect(await getGoal("goal-salt")).toContain(`${goals.salt * 7}g`);
 
-    const round1dp = (val: number) => Math.round(val * 10) / 10;
     const round2dp = (val: number) => Math.round(val * 100) / 100;
     const weekCalories = `Avg: ${Math.round(50 / 7)} kcal/day`;
     expect(await page.getByTestId("avg-calories").textContent()).toContain(
       weekCalories,
     );
-    const avgProtein = `Avg: ${round1dp(5 / 7)}g/day`;
+    const avgProtein = `Avg: ${round2dp(5 / 7)}g/day`;
     expect(await page.getByTestId("avg-protein").textContent()).toContain(
       avgProtein,
     );
     expect(await page.getByTestId("avg-carbs").textContent()).toContain(
-      `Avg: ${round1dp(10 / 7)}g/day`,
+      `Avg: ${round2dp(10 / 7)}g/day`,
     );
     expect(await page.getByTestId("avg-fat").textContent()).toContain(
-      `Avg: ${round1dp(2.5 / 7)}g/day`,
+      `Avg: ${round2dp(2.5 / 7)}g/day`,
     );
     expect(await page.getByTestId("avg-saturates").textContent()).toContain(
-      `Avg: ${round1dp(1 / 7)}g/day`,
+      `Avg: ${round2dp(1 / 7)}g/day`,
     );
     expect(await page.getByTestId("avg-sugars").textContent()).toContain(
-      `Avg: ${round1dp(1.5 / 7)}g/day`,
+      `Avg: ${round2dp(1.5 / 7)}g/day`,
     );
     expect(await page.getByTestId("avg-fibre").textContent()).toContain(
-      `Avg: ${round1dp(0.5 / 7)}g/day`,
+      `Avg: ${round2dp(0.5 / 7)}g/day`,
     );
     expect(await page.getByTestId("avg-salt").textContent()).toContain(
       `Avg: ${round2dp(0.25 / 7)}g/day`,
@@ -176,22 +177,22 @@ test.describe("Dashboard", () => {
       monthCalories,
     );
     expect(await page.getByTestId("avg-protein").textContent()).toContain(
-      `Avg: ${round1dp(5 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(5 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-carbs").textContent()).toContain(
-      `Avg: ${round1dp(10 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(10 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-fat").textContent()).toContain(
-      `Avg: ${round1dp(2.5 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(2.5 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-saturates").textContent()).toContain(
-      `Avg: ${round1dp(1 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(1 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-sugars").textContent()).toContain(
-      `Avg: ${round1dp(1.5 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(1.5 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-fibre").textContent()).toContain(
-      `Avg: ${round1dp(0.5 / (await getDaysInMonth()))}g/day`,
+      `Avg: ${round2dp(0.5 / (await getDaysInMonth()))}g/day`,
     );
     expect(await page.getByTestId("avg-salt").textContent()).toContain(
       `Avg: ${round2dp(0.25 / (await getDaysInMonth()))}g/day`,

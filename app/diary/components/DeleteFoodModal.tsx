@@ -2,24 +2,15 @@
 
 import {
   getCalorieForDisplay,
+  getVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
 import { UserSettings } from "../../settings/types";
+import { FoodItem } from "../types";
 
 interface DeleteFoodModalProps {
-  item: {
-    name: string;
-    measurementAmount: number;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    saturates: number;
-    sugars: number;
-    fibre: number;
-    salt: number;
-  } | null;
+  item: FoodItem | null;
   mealName: string;
   isOpen: boolean;
   isLoading?: boolean;
@@ -94,8 +85,19 @@ export default function DeleteFoodModal({
                 <p className="font-medium text-black dark:text-zinc-50">
                   {item.name}
                 </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                  {item.measurementAmount}
+                <p
+                  className="text-sm text-zinc-600 dark:text-zinc-400 mt-1"
+                  data-testid="delete-food-serving-size"
+                >
+                  {item.measurementType === "weight"
+                    ? getWeightForDisplay(
+                        item.measurementAmount,
+                        userSettings.weightUnit,
+                      )
+                    : getVolumeForDisplay(
+                        item.measurementAmount,
+                        userSettings.volumeUnit,
+                      )}
                 </p>
               </div>
             </div>

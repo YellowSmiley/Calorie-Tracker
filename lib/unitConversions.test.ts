@@ -108,9 +108,9 @@ test("getWeightForDisplay", () => {
   expect(getWeightForDisplay(100, "oz", 1)).toBe("3.5oz");
   expect(getWeightForDisplay(100, "kg", 1)).toBe("0.1kg");
   expect(getWeightForDisplay(100, "lbs", 1)).toBe("0.2lbs");
-  expect(getWeightForDisplay(100, "mg", 1)).toBe("100000.0mg");
-  expect(getWeightForDisplay(null, "g", 1)).toBe("0.0g");
-  expect(getWeightForDisplay(undefined, "g", 1)).toBe("0.0g");
+  expect(getWeightForDisplay(100, "mg", 1)).toBe("100000mg");
+  expect(getWeightForDisplay(null, "g", 1)).toBe("0g");
+  expect(getWeightForDisplay(undefined, "g", 1)).toBe("0g");
 });
 
 test("getVolumeForDisplay", () => {
@@ -119,8 +119,8 @@ test("getVolumeForDisplay", () => {
   expect(getVolumeForDisplay(100, "tbsp", 1)).toBe("6.8 tbsp");
   expect(getVolumeForDisplay(100, "tsp", 1)).toBe("20.3 tsp");
   expect(getVolumeForDisplay(100, "L", 1)).toBe("0.1 L");
-  expect(getVolumeForDisplay(null, "ml", 1)).toBe("0.0 ml");
-  expect(getVolumeForDisplay(undefined, "ml", 1)).toBe("0.0 ml");
+  expect(getVolumeForDisplay(null, "ml", 1)).toBe("0 ml");
+  expect(getVolumeForDisplay(undefined, "ml", 1)).toBe("0 ml");
 });
 
 test("getCalorieForDisplay", () => {

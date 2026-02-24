@@ -15,12 +15,17 @@ import {
   DEFAULT_WEIGHT_UNIT,
 } from "@/lib/consts";
 
-const resetSettings = async (page: Page) => {
+export const resetSettings = async (page: Page) => {
   // Go back to settings and reset the values back to default
   await page.getByTestId("nav-settings").click();
-  await page
-    .getByTestId("measurement-calorie-unit-select")
-    .selectOption(DEFAULT_CALORIE_UNIT);
+  while (
+    (await page.getByTestId("measurement-calorie-unit-select").inputValue()) !==
+    DEFAULT_CALORIE_UNIT
+  ) {
+    await page
+      .getByTestId("measurement-calorie-unit-select")
+      .selectOption(DEFAULT_CALORIE_UNIT);
+  }
   await expect(page.getByTestId("measurement-calorie-unit-select")).toHaveValue(
     DEFAULT_CALORIE_UNIT,
   );
@@ -97,16 +102,15 @@ test.describe("Settings", () => {
     await resetFoodItems(page);
     // Create food with 100 kcal per 100g, serving 50g
     foodName = await createTestFood(page, {
-      calories: "1000",
-      measurementAmount: "1000",
-      servingAmount: "500",
-      carbs: "1000",
-      protein: "1000",
-      fat: "100",
-      saturates: "100",
-      sugars: "100",
-      fibre: "100",
-      salt: "100",
+      calories: 1000,
+      measurementAmount: 1000,
+      carbs: 1000,
+      protein: 1000,
+      fat: 100,
+      saturates: 100,
+      sugars: 100,
+      fibre: 100,
+      salt: 100,
     });
     await page.getByTestId("nav-diary").click();
     await expect(page.getByRole("heading", { name: "Diary" })).toBeVisible();
@@ -166,7 +170,7 @@ test.describe("Settings", () => {
       page.getByTestId("nutritional-goals-salt-goal-input"),
     ).toHaveValue("0.211644"); // 6g in oz
     // Change values
-    const kjValue = "10460"; // 2500 kcal in kJ
+    const kjValue = "2092"; // 2500 kcal in kJ
     const proteinValue = "5.3"; // 150g in oz
     const carbValue = "14.5"; // 410g in oz
     const fatValue = "2.9"; // 83g in oz
@@ -296,10 +300,10 @@ test.describe("Settings", () => {
     await page.getByTestId("food-search-input").fill(foodName);
     await expect(
       page.getByTestId(/food-item-/).filter({ hasText: foodName }),
-    ).toContainText(`500oz`);
+    ).toContainText("35oz");
     await expect(
       page.getByTestId(/food-item-/).filter({ hasText: foodName }),
-    ).toContainText(`2092 kJ`);
+    ).toContainText("4184 kJ");
     await page
       .getByTestId(/food-item-/)
       .filter({ hasText: foodName })
@@ -312,12 +316,12 @@ test.describe("Settings", () => {
       `4184 kJ`,
     );
     await expect(page.getByTestId("add-food-base-protein")).toHaveText(
-      "35.3oz",
+      "35.27oz",
     );
-    await expect(page.getByTestId("add-food-base-carbs")).toHaveText("35.3oz");
-    await expect(page.getByTestId("add-food-base-fat")).toHaveText("3.5oz");
+    await expect(page.getByTestId("add-food-base-carbs")).toHaveText("35.27oz");
+    await expect(page.getByTestId("add-food-base-fat")).toHaveText("3.53oz");
     await expect(page.getByTestId("add-food-base-saturates")).toHaveText(
-      "3.5oz",
+      "3.53oz",
     );
     // Change servings and check Nutrition for this entry (Serving size * quantity)
     await page.getByTestId("add-food-serving-size").fill("8.8"); // Quarter of 35.27oz
@@ -332,54 +336,52 @@ test.describe("Settings", () => {
       "17.6oz",
     );
     await expect(page.getByTestId("add-food-nutrition-fat")).toHaveText(
-      "1.8oz",
+      "1.76oz",
     );
     await expect(page.getByTestId("add-food-nutrition-saturates")).toHaveText(
-      "1.8oz",
+      "1.76oz",
     );
     await expect(page.getByTestId("add-food-nutrition-sugars")).toHaveText(
-      "1.8oz",
+      "1.76oz",
     );
     await expect(page.getByTestId("add-food-nutrition-fibre")).toHaveText(
-      "1.8oz",
+      "1.76oz",
     );
     await expect(page.getByTestId("add-food-nutrition-salt")).toHaveText(
       "1.76oz",
     );
-    await page.getByTestId("add-food-submit").click();
-    await expect(page.getByTestId(/diary-food-serving-/)).toHaveText(`3.53oz`);
+    await page.getByTestId("add-food-back-button").click();
+    await expect(
+      page.getByRole("heading", { name: "Select Food" }),
+    ).toBeVisible();
+    await page.getByTestId("food-list-sidebar-back-button").click();
+    await expect(page.getByTestId(/diary-food-serving-/)).toHaveText(
+      "17.64oz (1 thing)",
+    );
     await expect(page.getByTestId(/diary-food-calorie-info-/)).toHaveText(
       `${kjValue} kJ`,
     );
     // Click remove and check delete modal has correct units/values
     await page
-      .getByTestId(/diary-food-remove-/)
+      .getByTestId(/diary-food-row-/)
       .filter({ hasText: foodName })
+      .getByTestId(/diary-food-remove-/)
       .click();
+    await expect(page.getByTestId("delete-food-serving-size")).toHaveText(
+      "35.27oz",
+    );
     await expect(page.getByTestId("delete-food-calories")).toHaveText(
       `${kjValue} kJ`,
     );
-    await expect(page.getByTestId("delete-food-protein")).toHaveText(
-      `${proteinValue}oz`,
-    );
-    await expect(page.getByTestId("delete-food-carbs")).toHaveText(
-      `${carbValue}oz`,
-    );
-    await expect(page.getByTestId("delete-food-fat")).toHaveText(
-      `${fatValue}oz`,
-    );
+    await expect(page.getByTestId("delete-food-protein")).toHaveText("17.64oz");
+    await expect(page.getByTestId("delete-food-carbs")).toHaveText("17.64oz");
+    await expect(page.getByTestId("delete-food-fat")).toHaveText("1.76oz");
     await expect(page.getByTestId("delete-food-saturates")).toHaveText(
-      `${saturatesValue}oz`,
+      "1.76oz",
     );
-    await expect(page.getByTestId("delete-food-sugars")).toHaveText(
-      `${sugarsValue}oz`,
-    );
-    await expect(page.getByTestId("delete-food-fibre")).toHaveText(
-      `${fibreValue}oz`,
-    );
-    await expect(page.getByTestId("delete-food-salt")).toHaveText(
-      `${saltValue}oz`,
-    );
+    await expect(page.getByTestId("delete-food-sugars")).toHaveText("1.76oz");
+    await expect(page.getByTestId("delete-food-fibre")).toHaveText("1.76oz");
+    await expect(page.getByTestId("delete-food-salt")).toHaveText("1.76oz");
     await page.getByTestId("delete-food-cancel").click();
 
     // Dashboard should reflect new goals/units
@@ -388,25 +390,25 @@ test.describe("Settings", () => {
       `${kjValue} kJ`,
     );
     await expect(page.getByTestId("dashboard-total-protein")).toContainText(
-      `${proteinValue}oz`,
+      "17.64oz",
     );
     await expect(page.getByTestId("dashboard-total-carbs")).toContainText(
-      `${carbValue}oz`,
+      "17.64oz",
     );
     await expect(page.getByTestId("dashboard-total-fat")).toContainText(
-      `${fatValue}oz`,
+      "1.76oz",
     );
     await expect(page.getByTestId("dashboard-total-saturates")).toContainText(
-      `${saturatesValue}oz`,
+      "1.76oz",
     );
     await expect(page.getByTestId("dashboard-total-sugars")).toContainText(
-      `${sugarsValue}oz`,
+      "1.76oz",
     );
     await expect(page.getByTestId("dashboard-total-fibre")).toContainText(
-      `${fibreValue}oz`,
+      "1.76oz",
     );
     await expect(page.getByTestId("dashboard-total-salt")).toContainText(
-      `${saltValue}oz`,
+      "1.76oz",
     );
     await expect(page.getByTestId("goal-calories")).toContainText(
       `${kjValue} kJ`,
@@ -430,17 +432,19 @@ test.describe("Settings", () => {
     await expect(page.getByTestId("goal-salt")).toContainText(`${saltValue}oz`);
     // Click week and check averages show correct values/units
     await page.getByRole("button", { name: "Week" }).click();
-    await expect(page.getByTestId("avg-calories")).toHaveText(`${kjValue}kJ`);
-    await expect(page.getByTestId("avg-protein")).toHaveText(
-      `${proteinValue}oz`,
+    await expect(page.getByTestId("avg-calories")).toHaveText(
+      "Avg: 299 kJ/day",
     );
-    await expect(page.getByTestId("avg-carbs")).toHaveText(`${carbValue}oz`);
-    await expect(page.getByTestId("avg-fat")).toHaveText(`${fatValue}oz`);
+    await expect(page.getByTestId("avg-protein")).toHaveText("Avg: 2.52oz/day");
+    await expect(page.getByTestId("avg-carbs")).toHaveText("Avg: 2.52oz/day");
+    await expect(page.getByTestId("avg-fat")).toHaveText("Avg: 0.25oz/day");
     await expect(page.getByTestId("avg-saturates")).toHaveText(
-      `${saturatesValue}oz`,
+      "Avg: 0.25oz/day",
     );
-    await expect(page.getByTestId("avg-sugars")).toHaveText(`${sugarsValue}oz`);
-    await expect(page.getByTestId("avg-fibre")).toHaveText(`${fibreValue}oz`);
-    await expect(page.getByTestId("avg-salt")).toHaveText(`${saltValue}oz`);
+    await expect(page.getByTestId("avg-sugars")).toHaveText("Avg: 0.25oz/day");
+    await expect(page.getByTestId("avg-fibre")).toHaveText("Avg: 0.25oz/day");
+    await expect(page.getByTestId("avg-salt")).toHaveText("Avg: 0.25oz/day");
+
+    await resetFoodItems(page);
   });
 });

@@ -10,6 +10,8 @@ test.afterEach(async ({ page }, testInfo) => {
   }
 });
 import { login } from "./tester-login.spec";
+import { resetSettings } from "./settings.spec";
+import { FoodItem } from "@/app/diary/types";
 
 function randomFoodName() {
   return "TestFood-" + Math.random().toString(36).substring(2, 10);
@@ -51,92 +53,81 @@ export const resetFoodItems = async (page: Page) => {
   await page.getByTestId("my-foods-back-button").click();
 };
 
-type OverrideFields = {
-  name: string;
-  measurementAmount: string;
-  calories: string;
-  protein: string;
-  carbs: string;
-  fat: string;
-  saturates: string;
-  sugars: string;
-  fibre: string;
-  salt: string;
-  servingDescription: string;
-  servingAmount: string;
-};
-
-const fillFoodForm = async (
-  page: Page,
-  overrides?: Partial<OverrideFields>,
-) => {
+const fillFoodForm = async (page: Page, overrides?: Partial<FoodItem>) => {
   const foodName = randomFoodName();
   await page.getByTestId("create-food-name").fill(overrides?.name || foodName);
   await expect(page.getByTestId("create-food-name")).toHaveValue(
     overrides?.name || foodName,
   );
   await page
+    .getByTestId("create-food-measurement-unit")
+    .selectOption(overrides?.measurementType || "weight");
+  await page
     .getByTestId("create-food-measurement-amount")
-    .fill(overrides?.measurementAmount || "100");
+    .fill(`${overrides?.measurementAmount || "100"}`);
   await expect(page.getByTestId("create-food-measurement-amount")).toHaveValue(
-    overrides?.measurementAmount || "100",
+    `${overrides?.measurementAmount || "100"}`,
   );
   await page
     .getByTestId("create-food-calories")
-    .fill(overrides?.calories || "100");
+    .fill(`${overrides?.calories || "100"}`);
   await expect(page.getByTestId("create-food-calories")).toHaveValue(
-    overrides?.calories || "100",
+    `${overrides?.calories || "100"}`,
   );
   await page
     .getByTestId("create-food-protein")
-    .fill(overrides?.protein || "10");
+    .fill(`${overrides?.protein || "10"}`);
   await expect(page.getByTestId("create-food-protein")).toHaveValue(
-    overrides?.protein || "10",
+    `${overrides?.protein || "10"}`,
   );
-  await page.getByTestId("create-food-carbs").fill(overrides?.carbs || "20");
+  await page
+    .getByTestId("create-food-carbs")
+    .fill(`${overrides?.carbs || "20"}`);
   await expect(page.getByTestId("create-food-carbs")).toHaveValue(
-    overrides?.carbs || "20",
+    `${overrides?.carbs || "20"}`,
   );
-  await page.getByTestId("create-food-fat").fill(overrides?.fat || "5");
+  await page.getByTestId("create-food-fat").fill(`${overrides?.fat || "5"}`);
   await expect(page.getByTestId("create-food-fat")).toHaveValue(
-    overrides?.fat || "5",
+    `${overrides?.fat || "5"}`,
   );
   await page
     .getByTestId("create-food-saturates")
-    .fill(overrides?.saturates || "2");
+    .fill(`${overrides?.saturates || "2"}`);
   await expect(page.getByTestId("create-food-saturates")).toHaveValue(
-    overrides?.saturates || "2",
+    `${overrides?.saturates || "2"}`,
   );
-  await page.getByTestId("create-food-sugars").fill(overrides?.sugars || "3");
+  await page
+    .getByTestId("create-food-sugars")
+    .fill(`${overrides?.sugars || "3"}`);
   await expect(page.getByTestId("create-food-sugars")).toHaveValue(
-    overrides?.sugars || "3",
+    `${overrides?.sugars || "3"}`,
   );
-  await page.getByTestId("create-food-fibre").fill(overrides?.fibre || "1");
+  await page
+    .getByTestId("create-food-fibre")
+    .fill(`${overrides?.fibre || "1"}`);
   await expect(page.getByTestId("create-food-fibre")).toHaveValue(
-    overrides?.fibre || "1",
+    `${overrides?.fibre || "1"}`,
   );
-  await page.getByTestId("create-food-salt").fill(overrides?.salt || "0.5");
+  await page
+    .getByTestId("create-food-salt")
+    .fill(`${overrides?.salt || "0.5"}`);
   await expect(page.getByTestId("create-food-salt")).toHaveValue(
-    overrides?.salt || "0.5",
+    `${overrides?.salt || "0.5"}`,
   );
-  await page
-    .getByTestId("create-food-serving-description")
-    .fill(overrides?.servingDescription || "1 thing");
+  await page.getByTestId("create-food-serving-description").fill("1 thing");
   await expect(page.getByTestId("create-food-serving-description")).toHaveValue(
-    overrides?.servingDescription || "1 thing",
+    "1 thing",
   );
-  await page
-    .getByTestId("create-food-serving-amount")
-    .fill(overrides?.servingAmount || "50");
+  await page.getByTestId("create-food-serving-amount").fill(`${"50"}`);
   await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(
-    overrides?.servingAmount || "50",
+    `${"50"}`,
   );
   return foodName;
 };
 
 export async function createTestFood(
   page: Page,
-  overrides?: Partial<OverrideFields>,
+  overrides?: Partial<FoodItem>,
 ) {
   await page.getByTestId("nav-settings").click();
   await page.getByTestId("my-foods-button").click();
@@ -177,6 +168,7 @@ export async function addFoodToMeal(
 test.describe("Diary Feature", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
+    await resetSettings(page);
     await resetFoodItems(page);
     // Continue with tests
     await page.getByTestId("nav-diary").click();
@@ -191,15 +183,15 @@ test.describe("Diary Feature", () => {
     await page.getByTestId("create-food-button").click();
 
     // Consts
-    const measurementAmount = "100";
-    const calories = "100";
-    const protein = "10";
-    const carbs = "20";
-    const fat = "5";
-    const saturates = "2";
-    const sugars = "3";
-    const fibre = "1";
-    const salt = "0.5";
+    const measurementAmount = 100;
+    const calories = 100;
+    const protein = 10;
+    const carbs = 20;
+    const fat = 5;
+    const saturates = 2;
+    const sugars = 3;
+    const fibre = 1;
+    const salt = 0.5;
     const servingDescription = "1 thing";
     const servingAmount = "50";
 
@@ -213,8 +205,6 @@ test.describe("Diary Feature", () => {
       sugars,
       fibre,
       salt,
-      servingDescription,
-      servingAmount,
     });
     await page.getByTestId("create-food-submit").click();
 
@@ -236,21 +226,29 @@ test.describe("Diary Feature", () => {
     await page.getByTestId("edit-food-quantity").fill("0.5");
     // Check Base Nutrition and Nutrition for this entry
     await expect(page.getByTestId("edit-food-base-calories")).toContainText(
-      calories,
+      `${calories}`,
     );
     await expect(page.getByTestId("edit-food-base-protein")).toContainText(
-      protein,
+      `${protein}`,
     );
-    await expect(page.getByTestId("edit-food-base-carbs")).toContainText(carbs);
-    await expect(page.getByTestId("edit-food-base-fat")).toContainText(fat);
+    await expect(page.getByTestId("edit-food-base-carbs")).toContainText(
+      `${carbs}`,
+    );
+    await expect(page.getByTestId("edit-food-base-fat")).toContainText(
+      `${fat}`,
+    );
     await expect(page.getByTestId("edit-food-base-saturates")).toContainText(
-      saturates,
+      `${saturates}`,
     );
     await expect(page.getByTestId("edit-food-base-sugars")).toContainText(
-      sugars,
+      `${sugars}`,
     );
-    await expect(page.getByTestId("edit-food-base-fibre")).toContainText(fibre);
-    await expect(page.getByTestId("edit-food-base-salt")).toContainText(salt);
+    await expect(page.getByTestId("edit-food-base-fibre")).toContainText(
+      `${fibre}`,
+    );
+    await expect(page.getByTestId("edit-food-base-salt")).toContainText(
+      `${salt}`,
+    );
     await expect(
       page.getByTestId("edit-food-nutrition-calories"),
     ).toContainText("50");
@@ -298,19 +296,27 @@ test.describe("Diary Feature", () => {
       ),
     ).toBeVisible();
     await expect(modal.getByTestId("delete-food-calories")).toContainText(
-      calories,
+      `${calories}`,
     );
     await expect(modal.getByTestId("delete-food-protein")).toContainText(
-      protein,
+      `${protein}`,
     );
-    await expect(modal.getByTestId("delete-food-carbs")).toContainText(carbs);
-    await expect(modal.getByTestId("delete-food-fat")).toContainText(fat);
+    await expect(modal.getByTestId("delete-food-carbs")).toContainText(
+      `${carbs}`,
+    );
+    await expect(modal.getByTestId("delete-food-fat")).toContainText(`${fat}`);
     await expect(modal.getByTestId("delete-food-saturates")).toContainText(
-      saturates,
+      `${saturates}`,
     );
-    await expect(modal.getByTestId("delete-food-sugars")).toContainText(sugars);
-    await expect(modal.getByTestId("delete-food-fibre")).toContainText(fibre);
-    await expect(modal.getByTestId("delete-food-salt")).toContainText(salt);
+    await expect(modal.getByTestId("delete-food-sugars")).toContainText(
+      `${sugars}`,
+    );
+    await expect(modal.getByTestId("delete-food-fibre")).toContainText(
+      `${fibre}`,
+    );
+    await expect(modal.getByTestId("delete-food-salt")).toContainText(
+      `${salt}`,
+    );
     // Cancel first
     await modal.getByTestId("delete-food-cancel").click();
     await expect(modal).not.toBeVisible();
@@ -319,21 +325,27 @@ test.describe("Diary Feature", () => {
     await page.getByTestId("daily-summary-accordion-button").click();
 
     await expect(page.getByTestId("summary-total-calories")).toContainText(
-      calories,
+      `${calories}`,
     );
     await expect(page.getByTestId("summary-total-protein")).toContainText(
-      protein,
+      `${protein}`,
     );
-    await expect(page.getByTestId("summary-total-carbs")).toContainText(carbs);
-    await expect(page.getByTestId("summary-total-fat")).toContainText(fat);
+    await expect(page.getByTestId("summary-total-carbs")).toContainText(
+      `${carbs}`,
+    );
+    await expect(page.getByTestId("summary-total-fat")).toContainText(`${fat}`);
     await expect(page.getByTestId("summary-total-saturates")).toContainText(
-      saturates,
+      `${saturates}`,
     );
     await expect(page.getByTestId("summary-total-sugars")).toContainText(
-      sugars,
+      `${sugars}`,
     );
-    await expect(page.getByTestId("summary-total-fibre")).toContainText(fibre);
-    await expect(page.getByTestId("summary-total-salt")).toContainText(salt);
+    await expect(page.getByTestId("summary-total-fibre")).toContainText(
+      `${fibre}`,
+    );
+    await expect(page.getByTestId("summary-total-salt")).toContainText(
+      `${salt}`,
+    );
 
     await expect(page.getByTestId("summary-goal-calories")).toContainText(
       "3000 kcal",

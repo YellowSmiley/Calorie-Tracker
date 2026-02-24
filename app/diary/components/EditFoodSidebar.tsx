@@ -118,6 +118,7 @@ export default function EditFoodSidebar({
         <button
           onClick={onClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
+          data-testid={isAdd ? "add-food-back-button" : "edit-food-back-button"}
         >
           Back
         </button>
@@ -175,12 +176,10 @@ export default function EditFoodSidebar({
                   ? getWeightForDisplay(
                       food?.measurementAmount,
                       userSettings.weightUnit,
-                      0,
                     )
                   : getVolumeForDisplay(
                       food?.measurementAmount,
                       userSettings.volumeUnit,
-                      0,
                     )}
                 )
               </h4>
@@ -198,7 +197,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getCalorieForDisplay(
-                      food?.baseCalories || 0,
+                      food?.baseCalories,
                       userSettings.calorieUnit,
                     )}
                   </p>
@@ -214,7 +213,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseProtein || 0,
+                      food?.baseProtein,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -230,7 +229,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseCarbs || 0,
+                      food?.baseCarbs,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -246,7 +245,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseFat || 0,
+                      food?.baseFat,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -264,7 +263,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseSaturates || 0,
+                      food?.baseSaturates,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -280,7 +279,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseSugars || 0,
+                      food?.baseSugars,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -296,7 +295,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseFibre || 0,
+                      food?.baseFibre,
                       userSettings.weightUnit,
                     )}
                   </p>
@@ -312,7 +311,7 @@ export default function EditFoodSidebar({
                     }
                   >
                     {getWeightForDisplay(
-                      food?.baseSalt || 0,
+                      food?.baseSalt,
                       userSettings.weightUnit,
                     )}
                   </p>

@@ -164,13 +164,13 @@ export function getCalorieForDisplay(
 export function getWeightForDisplay(
   gramsValue: number | null | undefined,
   weightUnit: AcceptedWeightedUnits | null,
-  decimalPlaces: number = 0,
+  decimalPlaces: number = 2,
 ): string {
   const converted = convertWeightForDisplay(
     gramsValue,
     weightUnit as AcceptedWeightedUnits,
   );
-  const formatted = converted.toFixed(decimalPlaces);
+  const formatted = Number(converted.toFixed(decimalPlaces));
   return `${formatted}${weightUnit}`;
 }
 
@@ -194,9 +194,9 @@ export function getMeasurementType(
 export function getVolumeForDisplay(
   mlValue: number | null | undefined,
   volumeUnit: AcceptedVolumeUnits | null | undefined,
-  decimalPlaces: number = 0,
+  decimalPlaces: number = 2,
 ): string {
   const converted = convertVolumeForDisplay(mlValue, volumeUnit);
-  const formatted = converted.toFixed(decimalPlaces);
+  const formatted = Number(converted.toFixed(decimalPlaces));
   return `${formatted} ${volumeUnit}`;
 }
