@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SettingsClient from "./SettingsClient";
 import { prisma } from "@/lib/prisma";
-import { AcceptedUnits, UserSettings } from "./types";
+import { AcceptedWeightedUnits, UserSettings } from "./types";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -12,18 +12,18 @@ export default async function SettingsPage() {
   }
 
   // Fetch user settings
-  const user = await prisma.user.findUnique({
+  const user = (await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       calorieUnit: true,
       weightUnit: true,
       volumeUnit: true,
     },
-  });
+  })) as UserSettings;
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    weightUnit: (user?.weightUnit as AcceptedUnits) ?? "g",
+    weightUnit: (user?.weightUnit as AcceptedWeightedUnits) ?? "g",
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 

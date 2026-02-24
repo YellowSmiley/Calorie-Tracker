@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   convertCaloriesFromInput,
-  convertMacroFromInput,
+  convertWeightFromInput,
 } from "@/lib/unitConversions";
 import HelpButton from "../../../components/HelpButton";
 import NutritionLabelPhotoInput from "./NutritionLabelPhotoInput";
@@ -126,31 +126,31 @@ export default function CreateFoodSidebar({
         parseFloat(formData.calories) || 0,
         userSettings.calorieUnit,
       ),
-      protein: convertMacroFromInput(
+      protein: convertWeightFromInput(
         parseFloat(formData.protein) || 0,
         userSettings.weightUnit,
       ),
-      carbs: convertMacroFromInput(
+      carbs: convertWeightFromInput(
         parseFloat(formData.carbs) || 0,
         userSettings.weightUnit,
       ),
-      fat: convertMacroFromInput(
+      fat: convertWeightFromInput(
         parseFloat(formData.fat) || 0,
         userSettings.weightUnit,
       ),
-      saturates: convertMacroFromInput(
+      saturates: convertWeightFromInput(
         parseFloat(formData.saturates) || 0,
         userSettings.weightUnit,
       ),
-      sugars: convertMacroFromInput(
+      sugars: convertWeightFromInput(
         parseFloat(formData.sugars) || 0,
         userSettings.weightUnit,
       ),
-      fibre: convertMacroFromInput(
+      fibre: convertWeightFromInput(
         parseFloat(formData.fibre) || 0,
         userSettings.weightUnit,
       ),
-      salt: convertMacroFromInput(
+      salt: convertWeightFromInput(
         parseFloat(formData.salt) || 0,
         userSettings.weightUnit,
       ),

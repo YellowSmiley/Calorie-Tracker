@@ -2,14 +2,18 @@
 // These functions convert for display based on user preferences
 
 import { MeasurementType } from "@/app/diary/types";
-import { AcceptedUnits, UserSettings } from "@/app/settings/types";
+import {
+  AcceptedCalorieUnits,
+  AcceptedVolumeUnits,
+  AcceptedWeightedUnits,
+} from "@/app/settings/types";
 
 /**
  * Convert a kcal value stored in the database to the user's preferred display unit for calories
  */
 export function convertCaloriesForDisplay(
   kcalValue: number | null | undefined,
-  targetUnit: string | null | undefined,
+  targetUnit: AcceptedCalorieUnits | null | undefined,
 ): number {
   if (kcalValue === null || kcalValue === undefined || !targetUnit) {
     return 0;
@@ -28,7 +32,7 @@ export function convertCaloriesForDisplay(
  */
 export function convertCaloriesFromInput(
   inputValue: number | null | undefined,
-  inputUnit: string | null | undefined,
+  inputUnit: AcceptedCalorieUnits | null | undefined,
 ): number {
   if (inputValue === null || inputValue === undefined || !inputUnit) {
     return 0;
@@ -45,9 +49,9 @@ export function convertCaloriesFromInput(
 /**
  * Convert a grams value stored in the database to the user's preferred display unit for macros
  */
-export function convertMacroForDisplay(
+export function convertWeightForDisplay(
   gramsValue: number | null | undefined,
-  targetUnit: AcceptedUnits | null | undefined,
+  targetUnit: AcceptedWeightedUnits | null | undefined,
 ): number {
   if (gramsValue === null || gramsValue === undefined) {
     return 0;
@@ -70,9 +74,9 @@ export function convertMacroForDisplay(
 /**
  * Convert a user input value in their preferred unit back to grams for storage
  */
-export function convertMacroFromInput(
+export function convertWeightFromInput(
   inputValue: number | null | undefined,
-  inputUnit: AcceptedUnits | null | undefined,
+  inputUnit: AcceptedWeightedUnits | null | undefined,
 ): number {
   if (inputValue === null || inputValue === undefined) {
     return 0;
@@ -93,110 +97,106 @@ export function convertMacroFromInput(
 }
 
 /**
+ * Convert a user input value in their preferred unit (e.g cup) for volume back to millilitres for storage
+ */
+export function convertVolumeFromInput(
+  inputValue: number | null | undefined,
+  targetUnit: AcceptedVolumeUnits | null | undefined,
+): number {
+  if (inputValue === null || inputValue === undefined) {
+    return 0;
+  }
+
+  switch (targetUnit) {
+    case "cup":
+      return inputValue * 236.588236;
+    case "tbsp":
+      return inputValue * 14.7867648;
+    case "tsp":
+      return inputValue * 4.92892159;
+    case "L":
+      return inputValue * 1000;
+    case "ml":
+    default:
+      return inputValue;
+  }
+}
+
+/**
+ * Convert a millilitres value stored in the database to the user's preferred display unit (e.g. cup) for volume
+ */
+export function convertVolumeForDisplay(
+  mlValue: number | null | undefined,
+  inputUnit: AcceptedVolumeUnits | null | undefined,
+): number {
+  if (mlValue === null || mlValue === undefined) {
+    return 0;
+  }
+  switch (inputUnit) {
+    case "cup":
+      return mlValue / 236.588236;
+    case "tbsp":
+      return mlValue / 14.7867648;
+    case "tsp":
+      return mlValue / 4.92892159;
+    case "L":
+      return mlValue / 1000;
+    case "ml":
+    default:
+      return mlValue;
+  }
+}
+
+/**
  * Format a kcal value for display with the appropriate unit label based on user settings
  */
-export function formatCalories(
+export function getCalorieForDisplay(
   kcalValue: number | null | undefined,
-  settings: Omit<UserSettings, "weightUnit" | "volumeUnit">,
+  calorieUnit: AcceptedCalorieUnits | null,
 ): string {
-  const converted = convertCaloriesForDisplay(kcalValue, settings.calorieUnit);
-  return `${Math.round(converted)} ${settings.calorieUnit}`;
+  const converted = convertCaloriesForDisplay(kcalValue, calorieUnit);
+  return `${Math.round(converted)} ${calorieUnit}`;
 }
 
 /**
- * Format a grams value for display with the appropriate unit label based on user settings
+ * Convert a grams value stored in the database to the user's preferred display unit and format it with the appropriate unit label based on user settings (e.g. "100 g" or "3.5 oz")
  */
-export function formatMacro(
+export function getWeightForDisplay(
   gramsValue: number | null | undefined,
-  settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
+  weightUnit: AcceptedWeightedUnits | null,
+  decimalPlaces: number = 0,
 ): string {
-  const converted = convertMacroForDisplay(
+  const converted = convertWeightForDisplay(
     gramsValue,
-    settings.weightUnit as AcceptedUnits,
+    weightUnit as AcceptedWeightedUnits,
   );
-  const formatted =
-    settings.weightUnit === "mg"
-      ? Math.round(converted)
-      : Math.round(converted * 10) / 10;
-  return `${formatted}${settings.weightUnit}`;
+  const formatted = converted.toFixed(decimalPlaces);
+  return `${formatted}${weightUnit}`;
 }
 
+export function getMeasurementType(
+  unit: AcceptedVolumeUnits | AcceptedWeightedUnits | null | undefined,
+): MeasurementType {
+  const weightUnits: AcceptedWeightedUnits[] = ["g", "oz", "kg", "lbs", "mg"];
+  const volumeUnits: AcceptedVolumeUnits[] = ["ml", "cup", "tbsp", "tsp", "L"];
+
+  if (weightUnits.includes(unit as AcceptedWeightedUnits)) {
+    return "weight";
+  }
+  if (volumeUnits.includes(unit as AcceptedVolumeUnits)) {
+    return "volume";
+  }
+  throw new Error(`Unknown unit: ${unit}`);
+}
 /**
- * Format a salt value for display, ensuring that very small values are shown as 0 and using the appropriate unit label based on user settings
+ * Convert a millilitres value stored in the database to the user's preferred display unit and format it with the appropriate unit label based on user settings (e.g. "250 ml" or "1.5 cup")
  */
-export function formatSalt(
-  gramsValue: number | null | undefined,
-  settings: Omit<UserSettings, "calorieUnit" | "volumeUnit">,
+export function getVolumeForDisplay(
+  mlValue: number | null | undefined,
+  volumeUnit: AcceptedVolumeUnits | null | undefined,
+  decimalPlaces: number = 0,
 ): string {
-  if (gramsValue === null || gramsValue === undefined) {
-    return "0g";
-  }
-  const converted = convertMacroForDisplay(
-    gramsValue,
-    settings.weightUnit as AcceptedUnits,
-  );
-  const unit = settings.weightUnit || "g";
-  return `${Number(converted.toFixed(2))}${unit}`;
-}
-
-/**
- * Get the appropriate label and input unit for a measurement input based on the measurement type and user settings
- */
-export function getMeasurementInputLabel(
-  measurementType: MeasurementType | undefined,
-  settings: Omit<UserSettings, "calorieUnit">,
-): { label: string; inputUnit: string } {
-  if (measurementType === "weight") {
-    const unit = settings.weightUnit || "g";
-    return { label: `Weight (${unit})`, inputUnit: unit };
-  } else if (measurementType === "volume") {
-    const unit = settings.volumeUnit || "ml";
-    return { label: `Volume (${unit})`, inputUnit: unit };
-  } else {
-    return { label: "Measurement", inputUnit: "" };
-  }
-}
-
-/**
- * Convert a user input value in their preferred unit for calories or macros back to the standard unit for storage (kcal for calories, grams for macros
- */
-export function convertInputToStorageValue(
-  inputValue: number | null | undefined,
-  inputUnit: AcceptedUnits | null | undefined,
-  measurementType: (MeasurementType | "calorie") | undefined,
-): number {
-  if (inputValue === null || inputValue === undefined || !inputUnit) {
-    return 0;
-  }
-  if (measurementType === "weight") {
-    return convertMacroFromInput(inputValue, inputUnit);
-  } else if (measurementType === "volume") {
-    // For volume, we currently only support ml which is stored as is
-    return inputValue;
-  } else {
-    // Assume it's a calorie value
-    return convertCaloriesFromInput(inputValue, inputUnit);
-  }
-}
-
-/**
- * Convert a value stored in the database to the user's preferred display unit for calories or macros, based on the measurement type and user settings
- */
-export function convertStorageToDisplayValue(
-  storageValue: number | null | undefined,
-  inputUnit: AcceptedUnits | null | undefined,
-  measurementType: (MeasurementType | "calorie") | undefined,
-): number {
-  if (storageValue === null || storageValue === undefined || !inputUnit) {
-    return 0;
-  }
-  if (measurementType === "weight") {
-    return convertMacroForDisplay(storageValue, inputUnit);
-  } else if (measurementType === "volume") {
-    // For volume, we currently only support ml which is stored as is
-    return storageValue;
-  } else {
-    // Assume it's a calorie value
-    return convertCaloriesForDisplay(storageValue, inputUnit);
-  }
+  const converted = convertVolumeForDisplay(mlValue, volumeUnit);
+  const formatted = converted.toFixed(decimalPlaces);
+  return `${formatted} ${volumeUnit}`;
 }

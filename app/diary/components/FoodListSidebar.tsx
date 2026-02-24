@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItem, MeasurementType } from "../types";
 import {
-  formatCalories,
-  getMeasurementInputLabel,
+  getCalorieForDisplay,
+  getVolumeForDisplay,
+  getWeightForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
 import EditFoodSidebar from "./EditFoodSidebar";
@@ -150,29 +151,6 @@ export default function FoodListSidebar({
     setShowEditForm(true);
   };
 
-  const getServingDisplay = (
-    food: FoodItem,
-    userSettings: Omit<UserSettings, "calorieUnit">,
-  ) => {
-    const unit = getMeasurementInputLabel(food.measurementType, userSettings);
-
-    if (food.defaultServingAmount) {
-      const servingRatio = food.defaultServingAmount / food.measurementAmount;
-      const servingCals = Math.round(food.baseCalories * servingRatio);
-      const desc = food.defaultServingDescription
-        ? ` - ${food.defaultServingDescription}`
-        : "";
-      return {
-        line: `${food.defaultServingAmount}${unit.inputUnit}${desc}`,
-        calories: servingCals,
-      };
-    }
-    return {
-      line: `${food.measurementAmount}${unit.inputUnit}`,
-      calories: food.baseCalories,
-    };
-  };
-
   const applyServingChange = async (serving: number) => {
     if (!selectedFood) return;
     // 'serving' here is actually the number of base servings (e.g., 5), but DiaryClient expects total amount (e.g., 350g)
@@ -250,14 +228,26 @@ export default function FoodListSidebar({
                   {food.name}
                 </p>
                 {(() => {
-                  const serving = getServingDisplay(food, userSettings);
+                  const actualAmount = food.serving * food.measurementAmount;
+                  const amountStr =
+                    food.measurementType === "weight"
+                      ? getWeightForDisplay(
+                          actualAmount,
+                          userSettings.weightUnit,
+                          0,
+                        )
+                      : getVolumeForDisplay(
+                          actualAmount,
+                          userSettings.volumeUnit,
+                          0,
+                        );
                   return (
-                    <p
-                      className="text-sm text-zinc-500 dark:text-zinc-400"
-                      data-testid={`food-item-${food.id}-serving-info`}
-                    >
-                      {serving.line} -{" "}
-                      {formatCalories(serving.calories, userSettings)}
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {amountStr} -{" "}
+                      {getCalorieForDisplay(
+                        food.calories,
+                        userSettings.calorieUnit,
+                      )}
                     </p>
                   );
                 })()}

@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import {
+  getCalorieForDisplay,
+  getWeightForDisplay,
+} from "@/lib/unitConversions";
 import HelpButton from "@/app/components/HelpButton";
 import { UserSettings } from "../settings/types";
 
@@ -311,7 +314,10 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-calories"
                 >
-                  {formatCalories(totals.calories, userSettings)}
+                  {getCalorieForDisplay(
+                    totals.calories,
+                    userSettings.calorieUnit,
+                  )}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -323,9 +329,9 @@ export default function DashboardClient({
                     data-testid="avg-calories"
                   >
                     Avg:{" "}
-                    {formatCalories(
+                    {getCalorieForDisplay(
                       getDailyAverage(totals.calories),
-                      userSettings,
+                      userSettings.calorieUnit,
                     )}
                     /day
                   </p>
@@ -333,9 +339,9 @@ export default function DashboardClient({
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
                   <span data-testid="goal-calories">
-                    {formatCalories(
+                    {getCalorieForDisplay(
                       userGoals.calories * getGoalMultiplier(),
-                      userSettings,
+                      userSettings.calorieUnit,
                     )}
                   </span>
                 </p>
@@ -358,7 +364,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-protein"
                 >
-                  {formatMacro(totals.protein, userSettings)}
+                  {getWeightForDisplay(totals.protein, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -370,16 +376,19 @@ export default function DashboardClient({
                     data-testid="avg-protein"
                   >
                     Avg:{" "}
-                    {formatMacro(getDailyAverage(totals.protein), userSettings)}
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.protein),
+                      userSettings.weightUnit,
+                    )}
                     /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
                   <span data-testid="goal-protein">
-                    {formatMacro(
+                    {getWeightForDisplay(
                       userGoals.protein * getGoalMultiplier(),
-                      userSettings,
+                      userSettings.weightUnit,
                     )}
                   </span>
                 </p>
@@ -402,7 +411,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-carbs"
                 >
-                  {formatMacro(totals.carbs, userSettings)}
+                  {getWeightForDisplay(totals.carbs, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -414,16 +423,19 @@ export default function DashboardClient({
                     data-testid="avg-carbs"
                   >
                     Avg:{" "}
-                    {formatMacro(getDailyAverage(totals.carbs), userSettings)}
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.carbs),
+                      userSettings.weightUnit,
+                    )}
                     /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
                   <span data-testid="goal-carbs">
-                    {formatMacro(
+                    {getWeightForDisplay(
                       userGoals.carbs * getGoalMultiplier(),
-                      userSettings,
+                      userSettings.weightUnit,
                     )}
                   </span>
                 </p>
@@ -446,7 +458,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-fat"
                 >
-                  {formatMacro(totals.fat, userSettings)}
+                  {getWeightForDisplay(totals.fat, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -458,15 +470,19 @@ export default function DashboardClient({
                     data-testid="avg-fat"
                   >
                     Avg:{" "}
-                    {formatMacro(getDailyAverage(totals.fat), userSettings)}/day
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.fat),
+                      userSettings.weightUnit,
+                    )}
+                    /day
                   </p>
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Goal:{" "}
                   <span data-testid="goal-fat">
-                    {formatMacro(
+                    {getWeightForDisplay(
                       userGoals.fat * getGoalMultiplier(),
-                      userSettings,
+                      userSettings.weightUnit,
                     )}
                   </span>
                 </p>
@@ -489,7 +505,10 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-saturates"
                 >
-                  {formatMacro(totals.saturates, userSettings)}
+                  {getWeightForDisplay(
+                    totals.saturates,
+                    userSettings.weightUnit,
+                  )}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -501,18 +520,18 @@ export default function DashboardClient({
                     data-testid="avg-saturates"
                   >
                     Avg:{" "}
-                    {formatMacro(
+                    {getWeightForDisplay(
                       getDailyAverage(totals.saturates),
-                      userSettings,
+                      userSettings.weightUnit,
                     )}
                     /day
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
                     Goal:{" "}
                     <span data-testid="goal-saturates">
-                      {formatMacro(
+                      {getWeightForDisplay(
                         userGoals.saturates * getGoalMultiplier(),
-                        userSettings,
+                        userSettings.weightUnit,
                       )}
                     </span>
                   </p>
@@ -536,7 +555,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-sugars"
                 >
-                  {formatMacro(totals.sugars, userSettings)}
+                  {getWeightForDisplay(totals.sugars, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -548,15 +567,18 @@ export default function DashboardClient({
                     data-testid="avg-sugars"
                   >
                     Avg:{" "}
-                    {formatMacro(getDailyAverage(totals.sugars), userSettings)}
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.sugars),
+                      userSettings.weightUnit,
+                    )}
                     /day
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
                     Goal:{" "}
                     <span data-testid="goal-sugars">
-                      {formatMacro(
+                      {getWeightForDisplay(
                         userGoals.sugars * getGoalMultiplier(),
-                        userSettings,
+                        userSettings.weightUnit,
                       )}
                     </span>
                   </p>
@@ -581,7 +603,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-fibre"
                 >
-                  {formatMacro(totals.fibre, userSettings)}
+                  {getWeightForDisplay(totals.fibre, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -593,15 +615,18 @@ export default function DashboardClient({
                     data-testid="avg-fibre"
                   >
                     Avg:{" "}
-                    {formatMacro(getDailyAverage(totals.fibre), userSettings)}
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.fibre),
+                      userSettings.weightUnit,
+                    )}
                     /day
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
                     Goal:{" "}
                     <span data-testid="goal-fibre">
-                      {formatMacro(
+                      {getWeightForDisplay(
                         userGoals.fibre * getGoalMultiplier(),
-                        userSettings,
+                        userSettings.weightUnit,
                       )}
                     </span>
                   </p>
@@ -625,7 +650,7 @@ export default function DashboardClient({
                   className="text-2xl font-bold text-black dark:text-zinc-50"
                   data-testid="dashboard-total-salt"
                 >
-                  {formatSalt(totals.salt, userSettings)}
+                  {getWeightForDisplay(totals.salt, userSettings.weightUnit)}
                 </p>
                 <div className="overflow-hidden">
                   <p
@@ -637,14 +662,18 @@ export default function DashboardClient({
                     data-testid="avg-salt"
                   >
                     Avg:{" "}
-                    {formatSalt(getDailyAverage(totals.salt), userSettings)}/day
+                    {getWeightForDisplay(
+                      getDailyAverage(totals.salt),
+                      userSettings.weightUnit,
+                    )}
+                    /day
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
                     Goal:{" "}
                     <span data-testid="goal-salt">
-                      {formatSalt(
+                      {getWeightForDisplay(
                         userGoals.salt * getGoalMultiplier(),
-                        userSettings,
+                        userSettings.weightUnit,
                       )}
                     </span>
                   </p>

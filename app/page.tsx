@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "./components/DashboardClient";
-import { UserSettings } from "./settings/types";
+import { SettingsData, UserSettings } from "./settings/types";
 
 export default async function Home() {
   const session = await auth();
@@ -11,7 +11,7 @@ export default async function Home() {
   }
 
   // Fetch user settings and goals
-  const user = await prisma.user.findUnique({
+  const user = (await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       calorieGoal: true,
@@ -25,7 +25,7 @@ export default async function Home() {
       calorieUnit: true,
       weightUnit: true,
     },
-  });
+  })) as SettingsData;
 
   const userSettings: Omit<UserSettings, "volumeUnit"> = {
     calorieUnit: user?.calorieUnit ?? "kcal",

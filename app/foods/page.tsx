@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import UserFoodsClient from "./UserFoodsClient";
 import { Metadata } from "next";
-import { AcceptedUnits, UserSettings } from "../settings/types";
+import { AcceptedWeightedUnits, UserSettings } from "../settings/types";
 
 export const metadata: Metadata = {
   title: "My Foods - Calorie Tracker",
@@ -18,18 +18,18 @@ export default async function UserFoodsPage() {
   }
 
   // Fetch user settings
-  const user = await prisma.user.findUnique({
+  const user = (await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       calorieUnit: true,
       weightUnit: true,
       volumeUnit: true,
     },
-  });
+  })) as UserSettings;
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
-    weightUnit: (user?.weightUnit as AcceptedUnits) ?? "g",
+    weightUnit: (user?.weightUnit as AcceptedWeightedUnits) ?? "g",
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 

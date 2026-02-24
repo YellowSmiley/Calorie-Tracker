@@ -7,9 +7,11 @@ import CreateFoodSidebar, {
 } from "../diary/components/create-food-sidebar/CreateFoodSidebar";
 import { UserSettings } from "../settings/types";
 import { Food } from "@prisma/client";
-import { getMeasurementInputLabel } from "@/lib/unitConversions";
-import { MeasurementType } from "../diary/types";
 import { FoodWithCreator } from "../api/admin/foods/route";
+import {
+  convertVolumeForDisplay,
+  getWeightForDisplay,
+} from "@/lib/unitConversions";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -246,13 +248,15 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
                   {food.name}
                 </p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {food.measurementAmount}
-                  {
-                    getMeasurementInputLabel(
-                      food.measurementType as MeasurementType,
-                      userSettings,
-                    ).inputUnit
-                  }{" "}
+                  {food.measurementType === "weight"
+                    ? getWeightForDisplay(
+                        food.measurementAmount,
+                        userSettings.weightUnit,
+                      )
+                    : convertVolumeForDisplay(
+                        food.measurementAmount,
+                        userSettings.volumeUnit,
+                      )}{" "}
                   - {food.calories} kcal
                   {food.defaultServingDescription
                     ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`

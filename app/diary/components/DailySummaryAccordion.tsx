@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import {
+  getCalorieForDisplay,
+  getWeightForDisplay,
+} from "@/lib/unitConversions";
 import { UserSettings } from "../../settings/types";
 
 interface DailySummaryAccordionProps {
@@ -94,21 +97,27 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-calories"
                 >
-                  {formatCalories(totals.calories, userSettings)}
+                  {getCalorieForDisplay(
+                    totals.calories,
+                    userSettings.calorieUnit,
+                  )}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-calories"
                 >
-                  {formatCalories(goals.calories, userSettings)}
+                  {getCalorieForDisplay(
+                    goals.calories,
+                    userSettings.calorieUnit,
+                  )}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-calories"
                 >
-                  {formatCalories(
+                  {getCalorieForDisplay(
                     goals.calories - totals.calories,
-                    userSettings,
+                    userSettings.calorieUnit,
                   )}
                 </td>
               </tr>
@@ -120,19 +129,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-protein"
                 >
-                  {formatMacro(totals.protein, userSettings)}
+                  {getWeightForDisplay(totals.protein, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-protein"
                 >
-                  {formatMacro(goals.protein, userSettings)}
+                  {getWeightForDisplay(goals.protein, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-protein"
                 >
-                  {formatMacro(goals.protein - totals.protein, userSettings)}
+                  {getWeightForDisplay(
+                    goals.protein - totals.protein,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -143,19 +155,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-carbs"
                 >
-                  {formatMacro(totals.carbs, userSettings)}
+                  {getWeightForDisplay(totals.carbs, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-carbs"
                 >
-                  {formatMacro(goals.carbs, userSettings)}
+                  {getWeightForDisplay(goals.carbs, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-carbs"
                 >
-                  {formatMacro(goals.carbs - totals.carbs, userSettings)}
+                  {getWeightForDisplay(
+                    goals.carbs - totals.carbs,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -166,19 +181,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-fat"
                 >
-                  {formatMacro(totals.fat, userSettings)}
+                  {getWeightForDisplay(totals.fat, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-fat"
                 >
-                  {formatMacro(goals.fat, userSettings)}
+                  {getWeightForDisplay(goals.fat, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-fat"
                 >
-                  {formatMacro(goals.fat - totals.fat, userSettings)}
+                  {getWeightForDisplay(
+                    goals.fat - totals.fat,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -189,21 +207,27 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-saturates"
                 >
-                  {formatMacro(totals.saturates, userSettings)}
+                  {getWeightForDisplay(
+                    totals.saturates,
+                    userSettings.weightUnit,
+                  )}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-saturates"
                 >
-                  {formatMacro(goals.saturates, userSettings)}
+                  {getWeightForDisplay(
+                    goals.saturates,
+                    userSettings.weightUnit,
+                  )}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-saturates"
                 >
-                  {formatMacro(
+                  {getWeightForDisplay(
                     goals.saturates - totals.saturates,
-                    userSettings,
+                    userSettings.weightUnit,
                   )}
                 </td>
               </tr>
@@ -215,19 +239,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-sugars"
                 >
-                  {formatMacro(totals.sugars, userSettings)}
+                  {getWeightForDisplay(totals.sugars, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-sugars"
                 >
-                  {formatMacro(goals.sugars, userSettings)}
+                  {getWeightForDisplay(goals.sugars, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-sugars"
                 >
-                  {formatMacro(goals.sugars - totals.sugars, userSettings)}
+                  {getWeightForDisplay(
+                    goals.sugars - totals.sugars,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
@@ -238,19 +265,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-fibre"
                 >
-                  {formatMacro(totals.fibre, userSettings)}
+                  {getWeightForDisplay(totals.fibre, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-fibre"
                 >
-                  {formatMacro(goals.fibre, userSettings)}
+                  {getWeightForDisplay(goals.fibre, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-fibre"
                 >
-                  {formatMacro(goals.fibre - totals.fibre, userSettings)}
+                  {getWeightForDisplay(
+                    goals.fibre - totals.fibre,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
               <tr>
@@ -261,19 +291,22 @@ export default function DailySummaryAccordion({
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-total-salt"
                 >
-                  {formatSalt(totals.salt, userSettings)}
+                  {getWeightForDisplay(totals.salt, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-goal-salt"
                 >
-                  {formatSalt(goals.salt, userSettings)}
+                  {getWeightForDisplay(goals.salt, userSettings.weightUnit)}
                 </td>
                 <td
                   className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
                   data-testid="summary-left-salt"
                 >
-                  {formatSalt(goals.salt - totals.salt, userSettings)}
+                  {getWeightForDisplay(
+                    goals.salt - totals.salt,
+                    userSettings.weightUnit,
+                  )}
                 </td>
               </tr>
             </tbody>

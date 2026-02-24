@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DiaryClient from "./DiaryClient";
 import type { FoodItem, Meal } from "./types";
-import { UserSettings } from "../settings/types";
+import { SettingsData, UserSettings } from "../settings/types";
 
 const initialMeals: Meal[] = [
   { name: "Breakfast", items: [] },
@@ -37,7 +37,7 @@ export default async function DiaryPage({
   }
 
   // Fetch user settings for unit preferences
-  const user = await prisma.user.findUnique({
+  const user = (await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       calorieUnit: true,
@@ -52,7 +52,7 @@ export default async function DiaryPage({
       fibreGoal: true,
       saltGoal: true,
     },
-  });
+  })) as SettingsData;
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",

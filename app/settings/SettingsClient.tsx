@@ -7,11 +7,13 @@ import NutritionGoalsSection from "./components/NutritionGoalsSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
-import { AcceptedUnits, SettingsData, UserSettings } from "./types";
+import { SettingsData, UserSettings } from "./types";
 import { signOut } from "next-auth/react";
 import {
-  convertInputToStorageValue,
-  convertStorageToDisplayValue,
+  convertCaloriesForDisplay,
+  convertCaloriesFromInput,
+  convertWeightForDisplay,
+  convertWeightFromInput,
 } from "@/lib/unitConversions";
 
 interface SettingsClientProps {
@@ -51,46 +53,20 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
   const convertBackSettings = (data: SettingsData): SettingsData => {
     const convertedBackSettings: SettingsData = {
       ...data,
-      calorieGoal: convertStorageToDisplayValue(
+      calorieGoal: convertCaloriesForDisplay(
         data.calorieGoal,
-        data.calorieUnit as AcceptedUnits,
-        "calorie",
+        data.calorieUnit,
       ),
-      proteinGoal: convertStorageToDisplayValue(
-        data.proteinGoal,
-        data.weightUnit,
-        "weight",
-      ),
-      carbGoal: convertStorageToDisplayValue(
-        data.carbGoal,
-        data.weightUnit,
-        "weight",
-      ),
-      fatGoal: convertStorageToDisplayValue(
-        data.fatGoal,
-        data.weightUnit,
-        "weight",
-      ),
-      saturatesGoal: convertStorageToDisplayValue(
+      proteinGoal: convertWeightForDisplay(data.proteinGoal, data.weightUnit),
+      carbGoal: convertWeightForDisplay(data.carbGoal, data.weightUnit),
+      fatGoal: convertWeightForDisplay(data.fatGoal, data.weightUnit),
+      saturatesGoal: convertWeightForDisplay(
         data.saturatesGoal,
         data.weightUnit,
-        "weight",
       ),
-      sugarsGoal: convertStorageToDisplayValue(
-        data.sugarsGoal,
-        data.weightUnit,
-        "weight",
-      ),
-      fibreGoal: convertStorageToDisplayValue(
-        data.fibreGoal,
-        data.weightUnit,
-        "weight",
-      ),
-      saltGoal: convertStorageToDisplayValue(
-        data.saltGoal,
-        data.weightUnit,
-        "weight",
-      ),
+      sugarsGoal: convertWeightForDisplay(data.sugarsGoal, data.weightUnit),
+      fibreGoal: convertWeightForDisplay(data.fibreGoal, data.weightUnit),
+      saltGoal: convertWeightForDisplay(data.saltGoal, data.weightUnit),
     };
     return convertedBackSettings;
   };
@@ -120,46 +96,29 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
 
     const convertedSettings: SettingsData = {
       ...settings,
-      calorieGoal: convertInputToStorageValue(
+      calorieGoal: convertCaloriesFromInput(
         settings.calorieGoal,
-        settings.calorieUnit as AcceptedUnits,
-        "calorie",
+        settings.calorieUnit,
       ),
-      proteinGoal: convertInputToStorageValue(
+      proteinGoal: convertWeightFromInput(
         settings.proteinGoal,
         settings.weightUnit,
-        "weight",
       ),
-      carbGoal: convertInputToStorageValue(
-        settings.carbGoal,
-        settings.weightUnit,
-        "weight",
-      ),
-      fatGoal: convertInputToStorageValue(
-        settings.fatGoal,
-        settings.weightUnit,
-        "weight",
-      ),
-      saturatesGoal: convertInputToStorageValue(
+      carbGoal: convertWeightFromInput(settings.carbGoal, settings.weightUnit),
+      fatGoal: convertWeightFromInput(settings.fatGoal, settings.weightUnit),
+      saturatesGoal: convertWeightFromInput(
         settings.saturatesGoal,
         settings.weightUnit,
-        "weight",
       ),
-      sugarsGoal: convertInputToStorageValue(
+      sugarsGoal: convertWeightFromInput(
         settings.sugarsGoal,
         settings.weightUnit,
-        "weight",
       ),
-      fibreGoal: convertInputToStorageValue(
+      fibreGoal: convertWeightFromInput(
         settings.fibreGoal,
         settings.weightUnit,
-        "weight",
       ),
-      saltGoal: convertInputToStorageValue(
-        settings.saltGoal,
-        settings.weightUnit,
-        "weight",
-      ),
+      saltGoal: convertWeightFromInput(settings.saltGoal, settings.weightUnit),
     };
 
     try {

@@ -72,29 +72,65 @@ const fillFoodForm = async (
 ) => {
   const foodName = randomFoodName();
   await page.getByTestId("create-food-name").fill(overrides?.name || foodName);
+  await expect(page.getByTestId("create-food-name")).toHaveValue(
+    overrides?.name || foodName,
+  );
   await page
     .getByTestId("create-food-measurement-amount")
     .fill(overrides?.measurementAmount || "100");
+  await expect(page.getByTestId("create-food-measurement-amount")).toHaveValue(
+    overrides?.measurementAmount || "100",
+  );
   await page
     .getByTestId("create-food-calories")
     .fill(overrides?.calories || "100");
+  await expect(page.getByTestId("create-food-calories")).toHaveValue(
+    overrides?.calories || "100",
+  );
   await page
     .getByTestId("create-food-protein")
     .fill(overrides?.protein || "10");
+  await expect(page.getByTestId("create-food-protein")).toHaveValue(
+    overrides?.protein || "10",
+  );
   await page.getByTestId("create-food-carbs").fill(overrides?.carbs || "20");
+  await expect(page.getByTestId("create-food-carbs")).toHaveValue(
+    overrides?.carbs || "20",
+  );
   await page.getByTestId("create-food-fat").fill(overrides?.fat || "5");
+  await expect(page.getByTestId("create-food-fat")).toHaveValue(
+    overrides?.fat || "5",
+  );
   await page
     .getByTestId("create-food-saturates")
     .fill(overrides?.saturates || "2");
+  await expect(page.getByTestId("create-food-saturates")).toHaveValue(
+    overrides?.saturates || "2",
+  );
   await page.getByTestId("create-food-sugars").fill(overrides?.sugars || "3");
+  await expect(page.getByTestId("create-food-sugars")).toHaveValue(
+    overrides?.sugars || "3",
+  );
   await page.getByTestId("create-food-fibre").fill(overrides?.fibre || "1");
+  await expect(page.getByTestId("create-food-fibre")).toHaveValue(
+    overrides?.fibre || "1",
+  );
   await page.getByTestId("create-food-salt").fill(overrides?.salt || "0.5");
+  await expect(page.getByTestId("create-food-salt")).toHaveValue(
+    overrides?.salt || "0.5",
+  );
   await page
     .getByTestId("create-food-serving-description")
     .fill(overrides?.servingDescription || "1 thing");
+  await expect(page.getByTestId("create-food-serving-description")).toHaveValue(
+    overrides?.servingDescription || "1 thing",
+  );
   await page
     .getByTestId("create-food-serving-amount")
     .fill(overrides?.servingAmount || "50");
+  await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(
+    overrides?.servingAmount || "50",
+  );
   return foodName;
 };
 
@@ -120,15 +156,20 @@ export async function addFoodToMeal(
 ) {
   await page.getByTestId(`diary-add-food-button-${mealTestId}`).click();
   await page.getByTestId("food-search-input").fill(foodName);
+  await expect(page.getByTestId("food-search-input")).toHaveValue(foodName);
   await page
     .getByTestId(/food-item-/)
     .filter({ hasText: foodName })
     .click();
   if (servingSize) {
     await page.getByTestId("edit-food-serving-size").fill(servingSize);
+    await expect(page.getByTestId("edit-food-serving-size")).toHaveValue(
+      servingSize,
+    );
   }
   if (quantity) {
     await page.getByTestId("edit-food-quantity").fill(quantity);
+    await expect(page.getByTestId("edit-food-quantity")).toHaveValue(quantity);
   }
   await page.getByTestId("add-food-submit").click();
 }

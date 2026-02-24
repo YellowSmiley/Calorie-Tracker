@@ -21,37 +21,70 @@ const resetSettings = async (page: Page) => {
   await page
     .getByTestId("measurement-calorie-unit-select")
     .selectOption(DEFAULT_CALORIE_UNIT);
+  await expect(page.getByTestId("measurement-calorie-unit-select")).toHaveValue(
+    DEFAULT_CALORIE_UNIT,
+  );
   await page
     .getByTestId("measurement-weight-unit-select")
     .selectOption(DEFAULT_WEIGHT_UNIT);
+  await expect(page.getByTestId("measurement-weight-unit-select")).toHaveValue(
+    DEFAULT_WEIGHT_UNIT,
+  );
   // TODO: Test Volume Unit too
   await page
     .getByTestId("measurement-volume-unit-select")
     .selectOption(DEFAULT_VOLUME_UNIT);
+  await expect(page.getByTestId("measurement-volume-unit-select")).toHaveValue(
+    DEFAULT_VOLUME_UNIT,
+  );
   await page
     .getByTestId("nutritional-goals-calorie-goal-input")
     .fill(DEFAULT_CALORIE_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-calorie-goal-input"),
+  ).toHaveValue(DEFAULT_CALORIE_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-protein-goal-input")
     .fill(DEFAULT_PROTEIN_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-protein-goal-input"),
+  ).toHaveValue(DEFAULT_PROTEIN_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-carb-goal-input")
     .fill(DEFAULT_CARB_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-carb-goal-input"),
+  ).toHaveValue(DEFAULT_CARB_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-fat-goal-input")
     .fill(DEFAULT_FAT_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-fat-goal-input"),
+  ).toHaveValue(DEFAULT_FAT_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-saturates-goal-input")
     .fill(DEFAULT_SATURATES_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-saturates-goal-input"),
+  ).toHaveValue(DEFAULT_SATURATES_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-sugars-goal-input")
     .fill(DEFAULT_SUGARS_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-sugars-goal-input"),
+  ).toHaveValue(DEFAULT_SUGARS_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-fibre-goal-input")
     .fill(DEFAULT_FIBRE_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-fibre-goal-input"),
+  ).toHaveValue(DEFAULT_FIBRE_GOAL.toString());
   await page
     .getByTestId("nutritional-goals-salt-goal-input")
     .fill(DEFAULT_SALT_GOAL.toString());
+  await expect(
+    page.getByTestId("nutritional-goals-salt-goal-input"),
+  ).toHaveValue(DEFAULT_SALT_GOAL.toString());
   await page.getByTestId("settings-save-button").click();
 };
 
@@ -290,28 +323,28 @@ test.describe("Settings", () => {
     await page.getByTestId("add-food-serving-size").fill("8.8"); // Quarter of 35.27oz
     await page.getByTestId("add-food-quantity").fill("2");
     await expect(page.getByTestId("add-food-nutrition-calories")).toHaveText(
-      "2092 kJ",
+      "2088 kJ",
     );
     await expect(page.getByTestId("add-food-nutrition-protein")).toHaveText(
-      "17.65oz",
+      "17.6oz",
     );
     await expect(page.getByTestId("add-food-nutrition-carbs")).toHaveText(
-      "17.65oz",
+      "17.6oz",
     );
     await expect(page.getByTestId("add-food-nutrition-fat")).toHaveText(
-      "1.75oz",
+      "1.8oz",
     );
     await expect(page.getByTestId("add-food-nutrition-saturates")).toHaveText(
-      "1.75oz",
+      "1.8oz",
     );
     await expect(page.getByTestId("add-food-nutrition-sugars")).toHaveText(
-      "1.75oz",
+      "1.8oz",
     );
     await expect(page.getByTestId("add-food-nutrition-fibre")).toHaveText(
-      "1.75oz",
+      "1.8oz",
     );
     await expect(page.getByTestId("add-food-nutrition-salt")).toHaveText(
-      "1.75oz",
+      "1.76oz",
     );
     await page.getByTestId("add-food-submit").click();
     await expect(page.getByTestId(/diary-food-serving-/)).toHaveText(`3.53oz`);

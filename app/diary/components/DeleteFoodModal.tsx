@@ -1,6 +1,9 @@
 "use client";
 
-import { formatCalories, formatMacro, formatSalt } from "@/lib/unitConversions";
+import {
+  getCalorieForDisplay,
+  getWeightForDisplay,
+} from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
 import { UserSettings } from "../../settings/types";
 
@@ -107,7 +110,10 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-calories"
                 >
-                  {formatCalories(item.calories, userSettings)}
+                  {getCalorieForDisplay(
+                    item.calories,
+                    userSettings.calorieUnit,
+                  )}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -118,7 +124,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-protein"
                 >
-                  {formatMacro(item.protein, userSettings)}
+                  {getWeightForDisplay(item.protein, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -127,7 +133,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-carbs"
                 >
-                  {formatMacro(item.carbs, userSettings)}
+                  {getWeightForDisplay(item.carbs, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -136,7 +142,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-fat"
                 >
-                  {formatMacro(item.fat, userSettings)}
+                  {getWeightForDisplay(item.fat, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -147,7 +153,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-saturates"
                 >
-                  {formatMacro(item.saturates, userSettings)}
+                  {getWeightForDisplay(item.saturates, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -158,7 +164,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-sugars"
                 >
-                  {formatMacro(item.sugars, userSettings)}
+                  {getWeightForDisplay(item.sugars, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -167,7 +173,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-fibre"
                 >
-                  {formatMacro(item.fibre, userSettings)}
+                  {getWeightForDisplay(item.fibre, userSettings.weightUnit)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -176,7 +182,7 @@ export default function DeleteFoodModal({
                   className="font-medium text-black dark:text-zinc-50"
                   data-testid="delete-food-salt"
                 >
-                  {formatSalt(item.salt, userSettings)}
+                  {getWeightForDisplay(item.salt, userSettings.weightUnit)}
                 </span>
               </div>
             </div>

@@ -1,8 +1,14 @@
 import HelpButton from "@/app/components/HelpButton";
-import { AcceptedUnits, SettingsData } from "../types";
 import {
-  convertInputToStorageValue,
-  convertStorageToDisplayValue,
+  AcceptedCalorieUnits,
+  AcceptedWeightedUnits,
+  SettingsData,
+} from "../types";
+import {
+  convertCaloriesForDisplay,
+  convertCaloriesFromInput,
+  convertWeightForDisplay,
+  convertWeightFromInput,
 } from "@/lib/unitConversions";
 
 interface MeasurementUnitsSectionProps {
@@ -41,16 +47,14 @@ export default function MeasurementUnitsSection({
             value={settings.calorieUnit || "kcal"}
             onChange={(e) => {
               onChange("calorieUnit", e.target.value);
-              const convertedCalorieGoal = convertStorageToDisplayValue(
+              const convertedCalorieGoal = convertCaloriesForDisplay(
                 settings.calorieUnit === "kcal"
                   ? settings.calorieGoal
-                  : convertInputToStorageValue(
+                  : convertCaloriesFromInput(
                       settings.calorieGoal,
-                      settings.calorieUnit as AcceptedUnits,
-                      "calorie",
+                      settings.calorieUnit,
                     ),
-                e.target.value as AcceptedUnits,
-                "calorie",
+                e.target.value as AcceptedCalorieUnits,
               );
               onChange("calorieGoal", convertedCalorieGoal);
             }}
@@ -93,16 +97,14 @@ export default function MeasurementUnitsSection({
                 | "saltGoal"
               >)[];
               propsToUpdate.forEach((prop) => {
-                const convertedGoal = convertStorageToDisplayValue(
+                const convertedGoal = convertWeightForDisplay(
                   settings.weightUnit === "g"
                     ? settings[prop]
-                    : convertInputToStorageValue(
+                    : convertWeightFromInput(
                         settings[prop],
-                        settings.weightUnit as AcceptedUnits,
-                        "weight",
+                        settings.weightUnit as AcceptedWeightedUnits,
                       ),
-                  e.target.value as AcceptedUnits,
-                  "weight",
+                  e.target.value as AcceptedWeightedUnits,
                 );
                 onChange(prop, convertedGoal);
               });
@@ -149,16 +151,14 @@ export default function MeasurementUnitsSection({
                 | "saltGoal"
               >)[];
               propsToUpdate.forEach((prop) => {
-                const convertedGoal = convertStorageToDisplayValue(
+                const convertedGoal = convertWeightForDisplay(
                   settings.volumeUnit === "ml"
                     ? settings[prop]
-                    : convertInputToStorageValue(
+                    : convertWeightFromInput(
                         settings[prop],
-                        settings.volumeUnit as AcceptedUnits,
-                        "volume",
+                        settings.volumeUnit as AcceptedWeightedUnits,
                       ),
-                  e.target.value as AcceptedUnits,
-                  "volume",
+                  e.target.value as AcceptedWeightedUnits,
                 );
                 onChange(prop, convertedGoal);
               });

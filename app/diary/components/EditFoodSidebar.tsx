@@ -3,15 +3,14 @@
 import { useMemo, useState } from "react";
 import type { FoodItem } from "../types";
 import {
-  convertMacroForDisplay,
-  convertMacroFromInput,
-  formatCalories,
-  formatMacro,
-  formatSalt,
-  getMeasurementInputLabel,
+  convertWeightForDisplay,
+  convertWeightFromInput,
+  getCalorieForDisplay,
+  getVolumeForDisplay,
+  getWeightForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
-import { AcceptedUnits, UserSettings } from "../../settings/types";
+import { AcceptedWeightedUnits, UserSettings } from "../../settings/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -36,7 +35,10 @@ export default function EditFoodSidebar({
 
   const defaultServing =
     food?.defaultServingAmount ||
-    convertMacroForDisplay(100, userSettings.weightUnit as AcceptedUnits);
+    convertWeightForDisplay(
+      100,
+      userSettings.weightUnit as AcceptedWeightedUnits,
+    );
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -83,9 +85,9 @@ export default function EditFoodSidebar({
         fibre: 0,
         salt: 0,
       };
-    const convertedTotalAmount = convertMacroFromInput(
+    const convertedTotalAmount = convertWeightFromInput(
       totalAmount,
-      userSettings.weightUnit as AcceptedUnits,
+      userSettings.weightUnit as AcceptedWeightedUnits,
     );
     const serving = convertedTotalAmount / foodMeasurementAmount; // totalAmount is the amount in user units, foodMeasurementAmount in grams/ml
     return {
@@ -169,12 +171,17 @@ export default function EditFoodSidebar({
                 }
               >
                 Base Nutrition (Per{" "}
-                {convertMacroForDisplay(
-                  foodMeasurementAmount,
-                  userSettings.weightUnit,
-                ).toFixed(userSettings.weightUnit === "g" ? 0 : 2) || ""}
-                {getMeasurementInputLabel(food?.measurementType, userSettings)
-                  .inputUnit || ""}
+                {food?.measurementType === "weight"
+                  ? getWeightForDisplay(
+                      food?.measurementAmount,
+                      userSettings.weightUnit,
+                      0,
+                    )
+                  : getVolumeForDisplay(
+                      food?.measurementAmount,
+                      userSettings.volumeUnit,
+                      0,
+                    )}
                 )
               </h4>
               <div className="grid grid-cols-2 gap-3">
@@ -190,7 +197,10 @@ export default function EditFoodSidebar({
                         : "edit-food-base-calories"
                     }
                   >
-                    {formatCalories(food?.baseCalories || 0, userSettings)}
+                    {getCalorieForDisplay(
+                      food?.baseCalories || 0,
+                      userSettings.calorieUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -203,7 +213,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-protein" : "edit-food-base-protein"
                     }
                   >
-                    {formatMacro(food?.baseProtein || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseProtein || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -216,7 +229,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-carbs" : "edit-food-base-carbs"
                     }
                   >
-                    {formatMacro(food?.baseCarbs || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseCarbs || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -229,7 +245,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-fat" : "edit-food-base-fat"
                     }
                   >
-                    {formatMacro(food?.baseFat || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseFat || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -244,7 +263,10 @@ export default function EditFoodSidebar({
                         : "edit-food-base-saturates"
                     }
                   >
-                    {formatMacro(food?.baseSaturates || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseSaturates || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -257,7 +279,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-sugars" : "edit-food-base-sugars"
                     }
                   >
-                    {formatMacro(food?.baseSugars || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseSugars || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -270,7 +295,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-fibre" : "edit-food-base-fibre"
                     }
                   >
-                    {formatMacro(food?.baseFibre || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseFibre || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -283,7 +311,10 @@ export default function EditFoodSidebar({
                       isAdd ? "add-food-base-salt" : "edit-food-base-salt"
                     }
                   >
-                    {formatSalt(food?.baseSalt || 0, userSettings)}
+                    {getWeightForDisplay(
+                      food?.baseSalt || 0,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
               </div>
@@ -295,10 +326,9 @@ export default function EditFoodSidebar({
                 <div>
                   <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
                     Serving Size (
-                    {getMeasurementInputLabel(
-                      food?.measurementType,
-                      userSettings,
-                    ).inputUnit || ""}
+                    {food?.measurementType === "weight"
+                      ? userSettings.weightUnit
+                      : userSettings.volumeUnit}
                     )
                   </label>
                   <input
@@ -339,7 +369,7 @@ export default function EditFoodSidebar({
               </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center">
                 {totalAmount > 0
-                  ? `Total: ${Number(totalAmount.toFixed(2))}${getMeasurementInputLabel(food?.measurementType, userSettings).inputUnit || ""}`
+                  ? `Total: ${Number(totalAmount.toFixed(2))}${food?.measurementType === "weight" ? userSettings.weightUnit : userSettings.volumeUnit}`
                   : "Enter serving size and quantity"}
               </p>
             </div>
@@ -362,7 +392,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-calories"
                     }
                   >
-                    {formatCalories(calculatedNutrition.calories, userSettings)}
+                    {getCalorieForDisplay(
+                      calculatedNutrition.calories,
+                      userSettings.calorieUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -377,7 +410,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-protein"
                     }
                   >
-                    {formatMacro(calculatedNutrition.protein, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.protein,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -392,7 +428,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-carbs"
                     }
                   >
-                    {formatMacro(calculatedNutrition.carbs, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.carbs,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -407,7 +446,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-fat"
                     }
                   >
-                    {formatMacro(calculatedNutrition.fat, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.fat,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -422,7 +464,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-saturates"
                     }
                   >
-                    {formatMacro(calculatedNutrition.saturates, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.saturates,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -437,7 +482,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-sugars"
                     }
                   >
-                    {formatMacro(calculatedNutrition.sugars, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.sugars,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -452,7 +500,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-fibre"
                     }
                   >
-                    {formatMacro(calculatedNutrition.fibre, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.fibre,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
                 <div>
@@ -467,7 +518,10 @@ export default function EditFoodSidebar({
                         : "edit-food-nutrition-salt"
                     }
                   >
-                    {formatSalt(calculatedNutrition.salt, userSettings)}
+                    {getWeightForDisplay(
+                      calculatedNutrition.salt,
+                      userSettings.weightUnit,
+                    )}
                   </p>
                 </div>
               </div>

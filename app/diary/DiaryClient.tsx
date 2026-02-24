@@ -11,8 +11,9 @@ import DeleteFoodModal from "./components/DeleteFoodModal";
 import DailySummaryAccordion from "./components/DailySummaryAccordion";
 import HelpButton from "@/app/components/HelpButton";
 import {
-  formatCalories,
-  getMeasurementInputLabel,
+  getCalorieForDisplay,
+  getWeightForDisplay,
+  getVolumeForDisplay,
 } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "./types";
 import { UserSettings } from "../settings/types";
@@ -522,16 +523,20 @@ export default function DiaryClient({
                             data-testid={`diary-food-serving-${item.id}`}
                           >
                             {(() => {
-                              const actualAmount = Number(
-                                (item.serving * item.measurementAmount).toFixed(
-                                  2,
-                                ),
-                              );
-                              const parsed = getMeasurementInputLabel(
-                                item.measurementType,
-                                userSettings,
-                              );
-                              const amountStr = `${actualAmount}${parsed.inputUnit}`;
+                              const actualAmount =
+                                item.serving * item.measurementAmount;
+                              const amountStr =
+                                item.measurementType === "weight"
+                                  ? getWeightForDisplay(
+                                      actualAmount,
+                                      userSettings.weightUnit,
+                                      0,
+                                    )
+                                  : getVolumeForDisplay(
+                                      actualAmount,
+                                      userSettings.volumeUnit,
+                                      0,
+                                    );
                               if (
                                 item.defaultServingDescription &&
                                 item.defaultServingAmount
@@ -559,7 +564,10 @@ export default function DiaryClient({
                             className="text-sm text-zinc-500 dark:text-zinc-400"
                             data-testid={`diary-food-calorie-info-${item.id}`}
                           >
-                            {formatCalories(item.calories, userSettings)}
+                            {getCalorieForDisplay(
+                              item.calories,
+                              userSettings.calorieUnit,
+                            )}
                           </p>
                         </td>
                         <td className="px-4 py-3">
@@ -585,9 +593,9 @@ export default function DiaryClient({
                         Total
                       </td>
                       <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
-                        {formatCalories(
+                        {getCalorieForDisplay(
                           getMealTotals(mealIndex).calories,
-                          userSettings,
+                          userSettings.calorieUnit,
                         )}
                       </td>
                       <td className="px-4 py-3"></td>

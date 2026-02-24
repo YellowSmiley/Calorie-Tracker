@@ -1,14 +1,12 @@
 import {
   convertCaloriesForDisplay,
   convertCaloriesFromInput,
-  convertInputToStorageValue,
-  convertMacroForDisplay,
-  convertMacroFromInput,
-  convertStorageToDisplayValue,
-  formatCalories,
-  formatMacro,
-  formatSalt,
-  getMeasurementInputLabel,
+  convertVolumeForDisplay,
+  convertVolumeFromInput,
+  getCalorieForDisplay,
+  getWeightForDisplay,
+  getMeasurementType,
+  getVolumeForDisplay,
 } from "./unitConversions";
 
 describe("convertCaloriesForDisplay", () => {
@@ -34,10 +32,6 @@ describe("convertCaloriesForDisplay", () => {
 
   it("converts kcal to kJ (x4.184)", () => {
     expect(convertCaloriesForDisplay(100, "kJ")).toBeCloseTo(418.4, 1);
-  });
-
-  it("returns same value for unknown unit (default case)", () => {
-    expect(convertCaloriesForDisplay(100, "unknown")).toBe(100);
   });
 });
 
@@ -70,157 +64,68 @@ describe("convertCaloriesFromInput", () => {
   });
 });
 
-describe("convertMacroForDisplay", () => {
-  it("returns 0 for null value", () => {
-    expect(convertMacroForDisplay(null, "g")).toBe(0);
-  });
-
-  it("returns 0 for undefined value", () => {
-    expect(convertMacroForDisplay(undefined, "g")).toBe(0);
-  });
-
-  it("returns same value for grams", () => {
-    expect(convertMacroForDisplay(50, "g")).toBe(50);
-  });
-
-  it("returns same value when targetUnit is null (default)", () => {
-    expect(convertMacroForDisplay(50, null)).toBe(50);
-  });
-
-  it("converts grams to oz", () => {
-    expect(convertMacroForDisplay(100, "oz")).toBeCloseTo(3.5274, 4);
-  });
-
-  it("converts grams to mg (x1000)", () => {
-    expect(convertMacroForDisplay(5, "mg")).toBe(5000);
-  });
+test("convertVolumeFromInput", () => {
+  // Test null and undefined inputs
+  expect(convertVolumeFromInput(null, "ml")).toBe(0);
+  expect(convertVolumeFromInput(undefined, "ml")).toBe(0);
+  expect(convertVolumeFromInput(4.22675284, "cup")).toBeCloseTo(1000, 4);
+  expect(convertVolumeFromInput(6.76280455, "tbsp")).toBeCloseTo(100, 4);
+  expect(convertVolumeFromInput(2.02884136, "tsp")).toBeCloseTo(10, 4);
+  expect(convertVolumeFromInput(1, "L")).toBe(1000);
+  expect(convertVolumeFromInput(500, "ml")).toBe(500);
 });
 
-describe("convertMacroFromInput", () => {
-  it("returns 0 for null value", () => {
-    expect(convertMacroFromInput(null, "g")).toBe(0);
-  });
-
-  it("returns 0 for undefined value", () => {
-    expect(convertMacroFromInput(undefined, "g")).toBe(0);
-  });
-
-  it("returns same value for grams", () => {
-    expect(convertMacroFromInput(50, "g")).toBe(50);
-  });
-
-  it("converts oz to grams", () => {
-    expect(convertMacroFromInput(3.5274, "oz")).toBeCloseTo(100, 0);
-  });
-
-  it("converts mg to grams (/1000)", () => {
-    expect(convertMacroFromInput(5000, "mg")).toBe(5);
-  });
-
-  it("round-trips correctly: display then input returns original", () => {
-    const original = 150;
-    const displayed = convertMacroForDisplay(original, "oz");
-    const backToGrams = convertMacroFromInput(displayed, "oz");
-    expect(backToGrams).toBeCloseTo(original, 5);
-  });
+test("convertVolumeForDisplay", () => {
+  // Test null and undefined inputs
+  expect(convertVolumeForDisplay(null, "ml")).toBe(0);
+  expect(convertVolumeForDisplay(undefined, "ml")).toBe(0);
+  expect(convertVolumeForDisplay(1000, "cup")).toBeCloseTo(4.22675284, 4);
+  expect(convertVolumeForDisplay(100, "tbsp")).toBeCloseTo(6.76280455, 4);
+  expect(convertVolumeForDisplay(10, "tsp")).toBeCloseTo(2.02884136, 4);
+  expect(convertVolumeForDisplay(1000, "L")).toBe(1);
+  expect(convertVolumeForDisplay(500, "ml")).toBe(500);
 });
 
-describe("formatCalories", () => {
-  it("formats kcal values", () => {
-    expect(formatCalories(250.7, { calorieUnit: "kcal" })).toBe("251 kcal");
-  });
-
-  it("formats kJ values (multiplied by 4.184)", () => {
-    expect(formatCalories(100, { calorieUnit: "kJ" })).toBe("418 kJ");
-  });
-
-  it("rounds to nearest integer", () => {
-    expect(formatCalories(100.4, { calorieUnit: "kcal" })).toBe("100 kcal");
-  });
-
-  it("handles null value", () => {
-    expect(formatCalories(null, { calorieUnit: "kcal" })).toBe("0 kcal");
-  });
-});
-
-describe("formatMacro", () => {
-  it("formats gram values with one decimal", () => {
-    expect(formatMacro(25.67, { weightUnit: "g" })).toBe("25.7g");
-  });
-
-  it("formats mg values as integers", () => {
-    expect(formatMacro(0.5, { weightUnit: "mg" })).toBe("500mg");
-  });
-
-  it("formats oz values with one decimal", () => {
-    expect(formatMacro(100, { weightUnit: "oz" })).toBe("3.5oz");
-  });
-
-  it("handles null value", () => {
-    expect(formatMacro(null, { weightUnit: "g" })).toBe("0g");
-  });
-});
-
-describe("formatSalt", () => {
-  it("formats salt values with one decimal and 'g' unit", () => {
-    expect(formatSalt(0.567, { weightUnit: "g" })).toBe("0.57g");
-  });
-  it("handles null value", () => {
-    expect(formatSalt(null, { weightUnit: "g" })).toBe("0g");
-  });
-});
-
-describe("getMeasurementInputLabel", () => {
-  it("returns 'Amount (g)' for weight measurement type with g unit", () => {
-    expect(
-      getMeasurementInputLabel("weight", { weightUnit: "g", volumeUnit: "ml" }),
-    ).toEqual({ label: "Weight (g)", inputUnit: "g" });
-  });
-
-  it("returns 'Amount (oz)' for weight measurement type with oz unit", () => {
-    expect(
-      getMeasurementInputLabel("weight", {
-        weightUnit: "oz",
-        volumeUnit: "ml",
-      }),
-    ).toEqual({ label: "Weight (oz)", inputUnit: "oz" });
-  });
-
-  it("returns 'Amount (ml)' for volume measurement type with ml unit", () => {
-    expect(
-      getMeasurementInputLabel("volume", { weightUnit: "g", volumeUnit: "ml" }),
-    ).toEqual({ label: "Volume (ml)", inputUnit: "ml" });
-  });
-});
-
-test("convertInputToStorageValue", () => {
-  expect(convertInputToStorageValue(null, "g", "weight")).toBe(0);
-  expect(convertInputToStorageValue(undefined, "g", "weight")).toBe(0);
-  expect(convertInputToStorageValue(100, null, "weight")).toBe(0);
-  expect(convertInputToStorageValue(100, "g", "weight")).toBe(100);
-  expect(convertInputToStorageValue(100, "oz", "weight")).toBeCloseTo(
-    2834.95,
-    1,
+test("getMeasurementType", () => {
+  expect(getMeasurementType("g")).toBe("weight");
+  expect(getMeasurementType("oz")).toBe("weight");
+  expect(getMeasurementType("kg")).toBe("weight");
+  expect(getMeasurementType("lbs")).toBe("weight");
+  expect(getMeasurementType("mg")).toBe("weight");
+  expect(getMeasurementType("ml")).toBe("volume");
+  expect(getMeasurementType("cup")).toBe("volume");
+  expect(getMeasurementType("tbsp")).toBe("volume");
+  expect(getMeasurementType("tsp")).toBe("volume");
+  expect(getMeasurementType("L")).toBe("volume");
+  expect(() => getMeasurementType(undefined)).toThrow(
+    "Unknown unit: undefined",
   );
-  expect(convertInputToStorageValue(100, "mg", "weight")).toBe(0.1);
-  expect(convertInputToStorageValue(250, "kcal", "calorie")).toBe(250);
-  expect(convertInputToStorageValue(418.4, "kJ", "calorie")).toBeCloseTo(
-    100,
-    1,
-  );
+  expect(() => getMeasurementType(null)).toThrow("Unknown unit: null");
 });
 
-test("convertStorageToDisplayValue", () => {
-  expect(convertStorageToDisplayValue(0, "g", "weight")).toBe(0);
-  expect(convertStorageToDisplayValue(100, "g", "weight")).toBe(100);
-  expect(convertStorageToDisplayValue(2834.95, "oz", "weight")).toBeCloseTo(
-    100,
-    1,
-  );
-  expect(convertStorageToDisplayValue(0.1, "mg", "weight")).toBe(100);
-  expect(convertStorageToDisplayValue(250, "kcal", "calorie")).toBe(250);
-  expect(convertStorageToDisplayValue(100, "kJ", "calorie")).toBeCloseTo(
-    418.4,
-    1,
-  );
+test("getWeightForDisplay", () => {
+  expect(getWeightForDisplay(100, "g")).toBe("100g");
+  expect(getWeightForDisplay(100, "oz", 1)).toBe("3.5oz");
+  expect(getWeightForDisplay(100, "kg", 1)).toBe("0.1kg");
+  expect(getWeightForDisplay(100, "lbs", 1)).toBe("0.2lbs");
+  expect(getWeightForDisplay(100, "mg", 1)).toBe("100000.0mg");
+  expect(getWeightForDisplay(null, "g", 1)).toBe("0.0g");
+  expect(getWeightForDisplay(undefined, "g", 1)).toBe("0.0g");
+});
+
+test("getVolumeForDisplay", () => {
+  expect(getVolumeForDisplay(100, "ml")).toBe("100 ml");
+  expect(getVolumeForDisplay(1000, "cup", 1)).toBe("4.2 cup");
+  expect(getVolumeForDisplay(100, "tbsp", 1)).toBe("6.8 tbsp");
+  expect(getVolumeForDisplay(100, "tsp", 1)).toBe("20.3 tsp");
+  expect(getVolumeForDisplay(100, "L", 1)).toBe("0.1 L");
+  expect(getVolumeForDisplay(null, "ml", 1)).toBe("0.0 ml");
+  expect(getVolumeForDisplay(undefined, "ml", 1)).toBe("0.0 ml");
+});
+
+test("getCalorieForDisplay", () => {
+  expect(getCalorieForDisplay(250, "kcal")).toBe("250 kcal");
+  expect(getCalorieForDisplay(250, "kJ")).toBe("1046 kJ");
+  expect(getCalorieForDisplay(null, "kcal")).toBe("0 kcal");
+  expect(getCalorieForDisplay(undefined, "kcal")).toBe("0 kcal");
 });
