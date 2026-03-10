@@ -60,7 +60,7 @@ const fillFoodForm = async (page: Page, overrides?: Partial<FoodItem>) => {
     overrides?.name || foodName,
   );
   await page
-    .getByTestId("create-food-measurement-unit")
+    .getByTestId("create-food-measurement-type")
     .selectOption(overrides?.measurementType || "weight");
   await page
     .getByTestId("create-food-measurement-amount")
@@ -118,10 +118,8 @@ const fillFoodForm = async (page: Page, overrides?: Partial<FoodItem>) => {
   await expect(page.getByTestId("create-food-serving-description")).toHaveValue(
     "1 thing",
   );
-  await page.getByTestId("create-food-serving-amount").fill(`${"50"}`);
-  await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(
-    `${"50"}`,
-  );
+  await page.getByTestId("create-food-serving-amount").fill(`4`);
+  await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(`4`);
   return foodName;
 };
 

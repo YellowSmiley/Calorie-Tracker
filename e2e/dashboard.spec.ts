@@ -21,9 +21,16 @@ test.describe("Dashboard", () => {
     await resetFoodItems(page);
     // Create food with 100 kcal per 100g, serving 50g
     const foodName = await createTestFood(page, {
-      calories: "100",
-      measurementAmount: "100",
-      servingAmount: "50",
+      calories: 100,
+      measurementAmount: 100,
+      carbs: 20,
+      protein: 10,
+      fat: 5,
+      saturates: 2,
+      sugars: 3,
+      fibre: 1,
+      salt: 0.5,
+      defaultServingAmount: 50,
     });
     await page.getByTestId("nav-diary").click();
     await expect(page.getByRole("heading", { name: "Diary" })).toBeVisible();

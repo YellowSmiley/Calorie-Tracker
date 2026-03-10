@@ -5,12 +5,18 @@ import type { FoodItem } from "../types";
 import {
   convertWeightForDisplay,
   convertWeightFromInput,
+  convertVolumeForDisplay,
+  convertVolumeFromInput,
   getCalorieForDisplay,
   getVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
-import { AcceptedWeightedUnits, UserSettings } from "../../settings/types";
+import {
+  AcceptedWeightedUnits,
+  AcceptedVolumeUnits,
+  UserSettings,
+} from "../../settings/types";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -33,12 +39,20 @@ export default function EditFoodSidebar({
 }: EditFoodSidebarProps) {
   const foodMeasurementAmount = food?.measurementAmount || 100;
 
-  const defaultServing =
-    food?.defaultServingAmount ||
-    convertWeightForDisplay(
-      100,
-      userSettings.weightUnit as AcceptedWeightedUnits,
-    );
+  const defaultServing = food?.defaultServingAmount
+    ? food.measurementType === "weight"
+      ? convertWeightForDisplay(
+          food.defaultServingAmount,
+          userSettings.weightUnit as AcceptedWeightedUnits,
+        )
+      : convertVolumeForDisplay(
+          food.defaultServingAmount,
+          userSettings.volumeUnit as AcceptedVolumeUnits,
+        )
+    : convertWeightForDisplay(
+        100,
+        userSettings.weightUnit as AcceptedWeightedUnits,
+      );
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -50,12 +64,12 @@ export default function EditFoodSidebar({
   if (currentKey !== prevKey && food && isOpen) {
     setPrevKey(currentKey);
     if (isAdd) {
-      setServingSize(String(defaultServing));
+      setServingSize(String(defaultServing.toFixed(2)));
       setQuantity("1");
     } else {
       const totalAmount = food.serving * foodMeasurementAmount;
       const qty = Number((totalAmount / defaultServing).toFixed(2));
-      setServingSize(String(defaultServing));
+      setServingSize(String(defaultServing.toFixed(2)));
       setQuantity(String(qty));
     }
   }
@@ -85,10 +99,16 @@ export default function EditFoodSidebar({
         fibre: 0,
         salt: 0,
       };
-    const convertedTotalAmount = convertWeightFromInput(
-      totalAmount,
-      userSettings.weightUnit as AcceptedWeightedUnits,
-    );
+    const convertedTotalAmount =
+      food.measurementType === "weight"
+        ? convertWeightFromInput(
+            totalAmount,
+            userSettings.weightUnit as AcceptedWeightedUnits,
+          )
+        : convertVolumeFromInput(
+            totalAmount,
+            userSettings.volumeUnit as AcceptedVolumeUnits,
+          );
     const serving = convertedTotalAmount / foodMeasurementAmount; // totalAmount is the amount in user units, foodMeasurementAmount in grams/ml
     return {
       calories: food.baseCalories * serving,
@@ -104,7 +124,17 @@ export default function EditFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const serving = totalAmount / foodMeasurementAmount;
+    const convertedTotalAmount =
+      food?.measurementType === "weight"
+        ? convertWeightFromInput(
+            totalAmount,
+            userSettings.weightUnit as AcceptedWeightedUnits,
+          )
+        : convertVolumeFromInput(
+            totalAmount,
+            userSettings.volumeUnit as AcceptedVolumeUnits,
+          );
+    const serving = convertedTotalAmount / foodMeasurementAmount;
     onSubmit(serving);
   };
 
