@@ -155,6 +155,7 @@ export default function DashboardClient({
               title="Dashboard Overview"
               content="Your Dashboard provides a snapshot of your nutrition intake. Use the View Period selector to switch between daily, weekly, and monthly views. Each card shows your current intake vs. your goals, with progress bars to visualize how close you are to reaching them. Adjust your goals in Settings to see changes reflected here."
               ariaLabel="Help: Dashboard overview"
+              data-testid="dashboard-help"
             />
           </div>
         </div>

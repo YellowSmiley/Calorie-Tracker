@@ -49,6 +49,12 @@ test.describe("Dashboard", () => {
   test("Test all the dashboard functionality", async ({ page }) => {
     await expect(page.getByText("Nutrition Summary")).toBeVisible();
 
+    // Test dashboard-help button opens and closes modal
+    await page.getByTestId("dashboard-help").click();
+    await expect(page.getByTestId("dashboard-help-modal")).toBeVisible();
+    await page.getByTestId("dashboard-help-footer-button").click();
+    await expect(page.getByTestId("dashboard-help-modal")).not.toBeVisible();
+
     // Helper to get goal text by data-testid
     const getGoal = async (testid: string) =>
       (await page.getByTestId(testid).textContent())?.trim();
