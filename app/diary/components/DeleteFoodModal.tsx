@@ -7,10 +7,23 @@ import {
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
 import { UserSettings } from "../../settings/types";
-import { FoodItem } from "../types";
+
+type DeleteFoodModalItem = {
+  name: string;
+  measurementType: string;
+  measurementAmount: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  saturates: number;
+  sugars: number;
+  fibre: number;
+  salt: number;
+};
 
 interface DeleteFoodModalProps {
-  item: FoodItem | null;
+  item: DeleteFoodModalItem | null;
   mealName: string;
   isOpen: boolean;
   isLoading?: boolean;

@@ -45,10 +45,7 @@ export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Allow static files
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon.ico")
-  ) {
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon.ico")) {
     return NextResponse.next();
   }
 
@@ -78,13 +75,15 @@ export function proxy(request: NextRequest) {
   const isResetPasswordPage = pathname === "/reset-password";
   const isPrivacyPage = pathname === "/privacy";
   const isTermsPage = pathname === "/terms";
-  const isPublicPage = isLoginPage || isRegisterPage || isVerifyPage || isResetPasswordPage || isPrivacyPage || isTermsPage;
+  const isAuthPage =
+    isLoginPage || isRegisterPage || isVerifyPage || isResetPasswordPage;
+  const isPublicPage = isAuthPage || isPrivacyPage || isTermsPage;
 
   if (!sessionToken && !isPublicPage) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (sessionToken && isPublicPage) {
+  if (sessionToken && isAuthPage) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

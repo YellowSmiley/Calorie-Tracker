@@ -11,7 +11,6 @@ import { FoodWithCreator } from "../api/admin/foods/route";
 import {
   convertVolumeForDisplay,
   getWeightForDisplay,
-  getVolumeForDisplay,
 } from "@/lib/unitConversions";
 
 interface FoodTableProps {
@@ -254,10 +253,9 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
                         food.measurementAmount,
                         userSettings.weightUnit,
                       )
-                    : getVolumeForDisplay(
+                    : convertVolumeForDisplay(
                         food.measurementAmount,
                         userSettings.volumeUnit,
-                        0,
                       )}{" "}
                   - {food.calories} kcal
                   {food.defaultServingDescription

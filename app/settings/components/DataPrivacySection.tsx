@@ -86,10 +86,18 @@ export default function DataPrivacySection({
         )}
 
         <div className="pt-2 flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <Link href="/privacy" className="underline hover:no-underline">
+          <Link
+            href="/privacy"
+            className="underline hover:no-underline"
+            data-testid="privacy-policy-link"
+          >
             Privacy Policy
           </Link>
-          <Link href="/terms" className="underline hover:no-underline">
+          <Link
+            href="/terms"
+            className="underline hover:no-underline"
+            data-testid="terms-of-service-link"
+          >
             Terms of Service
           </Link>
         </div>

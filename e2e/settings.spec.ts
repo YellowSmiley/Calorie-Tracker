@@ -393,5 +393,34 @@ test.describe("Settings", () => {
       "1980 kJ",
     );
     await page.getByTestId("delete-food-cancel").click();
+
+    // Test export-data-button prompts to download file with correct name with today's date (YYYY-MM-DD) prefix with export-
+    await page.getByTestId("nav-settings").click();
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByTestId("export-data-button").click(),
+    ]);
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    const fileName = download.suggestedFilename();
+    const today = new Date().toISOString().split("T")[0];
+    expect(fileName).toMatch(new RegExp(`^export-${today}.*\\.json$`));
+
+    // Test clicking privacy-policy-link takes user to correct page
+    await page.getByTestId("privacy-policy-link").click();
+    await expect(
+      page.getByRole("heading", { name: "Privacy Policy" }),
+    ).toBeVisible();
+    await page.getByTestId("nav-settings").click();
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+
+    // Test clicking terms-of-service-link takes user to correct page
+    await page.getByTestId("terms-of-service-link").click();
+    await expect(
+      page.getByRole("heading", { name: "Terms of Service" }),
+    ).toBeVisible();
+    await page.getByTestId("nav-settings").click();
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
   });
 });
