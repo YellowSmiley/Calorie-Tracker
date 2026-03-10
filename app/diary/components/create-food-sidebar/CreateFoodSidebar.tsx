@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   convertCaloriesFromInput,
   convertWeightFromInput,
+  convertVolumeFromInput,
+  convertWeightForDisplay,
+  convertVolumeForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../../components/HelpButton";
 import NutritionLabelPhotoInput from "./NutritionLabelPhotoInput";
@@ -69,9 +72,21 @@ export default function CreateFoodSidebar({
       if (hasInitialized.current !== foodKey) {
         hasInitialized.current = foodKey;
 
+        // Convert measurement amount from base storage unit to user's preferred unit
+        const measurementAmountInUserUnit =
+          editingFood.measurementType === "weight"
+            ? convertWeightForDisplay(
+                editingFood.measurementAmount,
+                userSettings.weightUnit,
+              )
+            : convertVolumeForDisplay(
+                editingFood.measurementAmount,
+                userSettings.volumeUnit,
+              );
+
         setFormData({
           name: editingFood.name,
-          measurementAmount: String(editingFood.measurementAmount),
+          measurementAmount: String(measurementAmountInUserUnit),
           measurementType: editingFood.measurementType as MeasurementType,
           calories: String(editingFood.calories),
           protein: String(editingFood.protein),
@@ -116,11 +131,23 @@ export default function CreateFoodSidebar({
       return;
     }
 
+    // Convert measurement amount from user's input unit to base storage unit (ml for volume, g for weight)
+    const measurementAmountInBaseUnit =
+      formData.measurementType === "weight"
+        ? convertWeightFromInput(
+            parseFloat(formData.measurementAmount) || 100,
+            userSettings.weightUnit,
+          )
+        : convertVolumeFromInput(
+            parseFloat(formData.measurementAmount) || 100,
+            userSettings.volumeUnit,
+          );
+
     // Convert from user's input units to database storage units (kcal, grams)
     const servingAmount = parseFloat(formData.defaultServingAmount);
     onSubmit({
       name: formData.name,
-      measurementAmount: parseFloat(formData.measurementAmount) || 100,
+      measurementAmount: measurementAmountInBaseUnit,
       measurementType: formData.measurementType,
       calories: convertCaloriesFromInput(
         parseFloat(formData.calories) || 0,

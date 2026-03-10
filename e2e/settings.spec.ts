@@ -339,8 +339,6 @@ test.describe("Settings", () => {
     await expect(page.getByTestId("avg-fibre")).toHaveText("Avg: 0.03oz/day");
     await expect(page.getByTestId("avg-salt")).toHaveText("Avg: 0.03oz/day");
 
-    await resetFoodItems(page);
-
     // Add a volume-based food item and verify volume unit behaviour
     // Note the app is currently in a OZ/CUP configuration
     const volumeFoodName = await createTestFood(page, {

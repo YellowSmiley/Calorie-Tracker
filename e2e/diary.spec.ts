@@ -114,12 +114,18 @@ const fillFoodForm = async (page: Page, overrides?: Partial<FoodItem>) => {
   await expect(page.getByTestId("create-food-salt")).toHaveValue(
     `${overrides?.salt || "0.5"}`,
   );
-  await page.getByTestId("create-food-serving-description").fill("1 thing");
+  await page
+    .getByTestId("create-food-serving-description")
+    .fill(`${overrides?.defaultServingDescription || "1 thing"}`);
   await expect(page.getByTestId("create-food-serving-description")).toHaveValue(
-    "1 thing",
+    `${overrides?.defaultServingDescription || "1 thing"}`,
   );
-  await page.getByTestId("create-food-serving-amount").fill(`4`);
-  await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(`4`);
+  await page
+    .getByTestId("create-food-serving-amount")
+    .fill(`${overrides?.defaultServingAmount || "50"}`);
+  await expect(page.getByTestId("create-food-serving-amount")).toHaveValue(
+    `${overrides?.defaultServingAmount || "50"}`,
+  );
   return foodName;
 };
 
