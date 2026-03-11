@@ -43,9 +43,19 @@ function checkCsrf(request: NextRequest): NextResponse | null {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const isStaticAsset = /\.[a-zA-Z0-9]+$/.test(pathname);
+  const isPwaAsset =
+    pathname === "/manifest.json" ||
+    pathname === "/sw.js" ||
+    pathname.startsWith("/icon-");
 
-  // Allow static files
-  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon.ico")) {
+  // Allow static and PWA assets through without auth redirects.
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico") ||
+    isStaticAsset ||
+    isPwaAsset
+  ) {
     return NextResponse.next();
   }
 

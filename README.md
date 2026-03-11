@@ -24,7 +24,9 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 - ⚙️ **Customizable Settings** - Set personal nutrition goals and preferred measurement units
 - 🔄 **Unit Conversions** - Support for kcal/cal/Cal, g/mg/oz, g/kg/lbs, ml/cup/tbsp/tsp/L
 - 🍔 **Food Management** - Create, edit, and delete custom foods with full CRUD support
-- 🔐 **Authentication** - Google OAuth and email/password credentials with email verification
+- � **Progressive Web App** - Install on any device, works offline, full-screen experience
+- 📲 **Mobile Ready** - Installable from browser, native app builds via Capacitor
+- �🔐 **Authentication** - Google OAuth and email/password credentials with email verification
 - 🛡️ **Admin Panel** - User management and global food database administration
 - 💾 **PostgreSQL Database** - Persistent storage with Prisma ORM
 - ⚡ **Server Components** - Fast initial page loads with Next.js App Router
@@ -40,6 +42,8 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 - **Authentication:** NextAuth v5 (beta) with Google OAuth & Credentials
 - **Styling:** Tailwind CSS 4
 - **Runtime:** React 19
+- **PWA:** Service Workers, Web Manifest, offline support
+- **Mobile:** Capacitor for iOS/Android native apps
 - **Unit Testing:** Jest + React Testing Library
 - **E2E Testing:** Playwright
 - **Email:** SMTP (for email verification)
@@ -145,7 +149,8 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 │   │   ├── FoodListSidebar.tsx    # Food selection sliding panel
 │   │   ├── FoodTable.tsx          # Reusable food CRUD table
 │   │   ├── MyFoodsSidebar.tsx     # User's custom foods panel
-│   │   └── Navigation.tsx         # Bottom navigation bar
+│   │   ├── Navigation.tsx         # Bottom navigation bar
+│   │   └── PWAInstallPrompt.tsx   # Optional PWA install banner
 │   ├── diary/
 │   │   ├── page.tsx              # Diary server component (data loading)
 │   │   ├── DiaryClient.tsx       # Diary client component (UI logic)
@@ -160,7 +165,7 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 │   │   ├── page.tsx              # Settings server component
 │   │   └── SettingsClient.tsx    # Goals, units, and actions
 │   ├── DashboardClient.tsx       # Dashboard with time range selector
-│   ├── layout.tsx                # Root layout with providers
+│   ├── layout.tsx                # Root layout with providers & PWA setup
 │   ├── page.tsx                  # Home/Dashboard server component
 │   └── providers.tsx             # Session provider wrapper
 ├── e2e/                          # Playwright end-to-end tests
@@ -170,14 +175,23 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 ├── prisma/
 │   ├── schema.prisma             # Database schema
 │   ├── migrations/               # Database migrations
+├── public/
+│   ├── manifest.json             # PWA manifest
+│   ├── sw.js                     # Service worker for offline support
+│   ├── icon-192.png              # PWA app icon (192x192)
+│   └── icon-512.png              # PWA app icon (512x512)
 ├── types/
 │   └── next-auth.d.ts            # Extended NextAuth types
 ├── auth.ts                       # NextAuth v5 configuration
 ├── proxy.ts                      # Route protection proxy (auth guard)
+├── capacitor.config.ts           # Capacitor native app configuration
 ├── prisma.config.ts              # Prisma configuration
 ├── jest.config.ts                # Jest configuration
 ├── jest.setup.ts                 # Jest setup (testing-library/jest-dom)
-└── playwright.config.ts          # Playwright configuration
+├── playwright.config.ts          # Playwright configuration
+├── MOBILE_APP_SETUP.md           # Complete mobile/PWA setup guide
+├── QUICK_START_MOBILE.md         # Quick mobile testing guide
+└── IMPLEMENTATION_SUMMARY.md     # Mobile implementation details
 ```
 
 ## Database Schema
@@ -240,7 +254,89 @@ npm run test:e2e:ui      # Run Playwright tests with UI
 npm run test:e2e:debug   # Run Playwright tests in debug mode
 npx prisma studio        # Open Prisma Studio (database GUI)
 npx prisma migrate dev   # Run database migrations
+
+# Mobile App (Capacitor)
+npm run cap:add:android  # Add Android platform
+npm run cap:add:ios      # Add iOS platform (macOS only)
+npm run cap:sync         # Sync web build to native projects
+npm run cap:open:android # Open Android Studio
+npm run cap:open:ios     # Open Xcode
+npm run cap:run:android  # Build and run on Android device/emulator
+npm run cap:run:ios      # Build and run on iOS device/simulator
 ```
+
+## Mobile App & PWA
+
+### Progressive Web App (PWA)
+
+The app is a fully functional PWA that can be installed directly from the browser:
+
+**Installation:**
+
+- **Android (Chrome):** Menu (⋮) → "Install app" or "Add to Home screen"
+- **iOS (Safari):** Share button → "Add to Home Screen"
+- **Desktop (Chrome/Edge):** Install icon in address bar
+
+**Features:**
+
+- ✅ Offline support with service worker caching
+- ✅ Full-screen standalone mode (no browser UI)
+- ✅ App icon on home screen
+- ✅ Fast loading with caching strategies
+- ✅ Works on localhost and HTTPS
+
+**Testing PWA:**
+
+```bash
+npm run build
+npm start
+# Open http://localhost:3000 and install from browser
+```
+
+### Native Mobile Apps (iOS/Android)
+
+For app store distribution, use Capacitor to build native apps:
+
+**Quick Setup:**
+
+```bash
+# Install Capacitor dependencies
+npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
+
+# Add platforms
+npm run cap:add:android
+npm run cap:add:ios
+
+# Build and sync
+npm run cap:sync
+
+# Open in native IDEs
+npm run cap:open:android  # Android Studio
+npm run cap:open:ios      # Xcode (macOS only)
+```
+
+**Build Options:**
+
+1. **Static Export** (simpler, no SSR):
+   - Change `next.config.ts`: `output: "export"`
+   - App works 100% offline
+   - No server-side features (API routes disabled)
+
+2. **Connected App** (keeps SSR):
+   - Deploy app to production (Vercel, AWS, etc.)
+   - Point Capacitor to your hosted URL
+   - Requires internet connection
+
+**Publishing:**
+
+- **Google Play Store:** $25 one-time fee
+- **Apple App Store:** $99/year
+
+**Detailed Documentation:**
+
+- **Setup Guide:** See `MOBILE_APP_SETUP.md` for complete instructions
+- **Quick Start:** See `QUICK_START_MOBILE.md` for testing
+- **Summary:** See `IMPLEMENTATION_SUMMARY.md` for what was implemented
 
 ## Deployment
 

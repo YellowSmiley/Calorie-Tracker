@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
+const outputMode =
+  process.env.NEXT_OUTPUT === "export" ? "export" : "standalone";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: outputMode,
   typescript: {
     tsconfigPath: "./tsconfig.json",
   },
@@ -43,9 +46,22 @@ const nextConfig: NextConfig = {
               "frame-src https://googleads.g.doubleclick.net https://tesseract.projectnaptha.com",
               "img-src 'self' data: blob: https://pagead2.googlesyndication.com",
               "worker-src 'self' blob:",
+              "manifest-src 'self'",
             ].join("; "),
           },
         ],
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/sw.js",
+        destination: "/sw.js",
+      },
+      {
+        source: "/manifest.json",
+        destination: "/manifest.json",
       },
     ];
   },
