@@ -229,8 +229,6 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
               settings={settings}
               onChange={handleChange}
             />
-
-            {/* Message */}
             {message && (
               <div
                 className={`rounded-lg p-4 ${
@@ -281,6 +279,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         isOpen={showMyFoods}
         onClose={() => setShowMyFoods(false)}
         userSettings={userSettings}
+        isAdmin={session?.user?.isAdmin || false}
       />
     </div>
   );

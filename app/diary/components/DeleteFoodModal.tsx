@@ -90,7 +90,7 @@ export default function DeleteFoodModal({
 
           {/* Item Details */}
           <div
-            className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3"
+            className="rounded-lg bg-zinc-50 dark:bg-black p-4 space-y-3 border border-zinc-200 dark:border-zinc-800"
             data-testid="delete-food-details"
           >
             <div className="flex justify-between items-start">

@@ -1,39 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
-
-/**
- * PWA Install Prompt Component
- *
- * Optional: Add this to your layout or any page to show an install button.
- * Users can install the PWA directly from the browser, but this provides
- * a more prominent call-to-action.
- *
- * Usage in layout.tsx or page.tsx:
- * import PWAInstallPrompt from "./components/PWAInstallPrompt";
- *
- * Then add: <PWAInstallPrompt />
- */
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const CONSENT_KEY = "pwa-install-consent";
+const ACKNOWLEDGED_VALUE = "acknowledged";
+const CONSENT_EVENT = "pwa-install-consent-changed";
+
+function getConsentSnapshot() {
+  return localStorage.getItem(CONSENT_KEY);
+}
+
+function getConsentServerSnapshot() {
+  return ACKNOWLEDGED_VALUE;
+}
+
+function subscribeConsent(callback: () => void) {
+  const onStorage = () => callback();
+  const onInternalConsentChange = () => callback();
+
+  window.addEventListener("storage", onStorage);
+  window.addEventListener(CONSENT_EVENT, onInternalConsentChange);
+
+  return () => {
+    window.removeEventListener("storage", onStorage);
+    window.removeEventListener(CONSENT_EVENT, onInternalConsentChange);
+  };
+}
+
+function acknowledgeInstallPrompt() {
+  localStorage.setItem(CONSENT_KEY, ACKNOWLEDGED_VALUE);
+  window.dispatchEvent(new Event(CONSENT_EVENT));
+}
+
+function isInstallPromptAcknowledged() {
+  return localStorage.getItem(CONSENT_KEY) === ACKNOWLEDGED_VALUE;
+}
+
 export default function PWAInstallPrompt() {
+  const consent = useSyncExternalStore(
+    subscribeConsent,
+    getConsentSnapshot,
+    getConsentServerSnapshot,
+  );
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showManualInstallHint, setShowManualInstallHint] = useState(false);
 
   useEffect(() => {
-    const DISMISS_KEY = "pwa-install-dismissed-until";
-
-    // Respect a temporary dismissal window instead of hiding forever.
-    const dismissedUntilRaw = localStorage.getItem(DISMISS_KEY);
-    const dismissedUntil = dismissedUntilRaw ? Number(dismissedUntilRaw) : 0;
-    if (dismissedUntil && Date.now() < dismissedUntil) {
+    // Mirror cookie banner behavior: once actioned, do not show again.
+    if (consent === ACKNOWLEDGED_VALUE || isInstallPromptAcknowledged()) {
       return;
     }
 
@@ -46,6 +68,9 @@ export default function PWAInstallPrompt() {
 
     // Listen for beforeinstallprompt event
     const handler = (e: Event) => {
+      if (isInstallPromptAcknowledged()) {
+        return;
+      }
       e.preventDefault();
       installEventFired = true;
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -58,7 +83,7 @@ export default function PWAInstallPrompt() {
     // Edge/Chromium may not emit beforeinstallprompt immediately.
     // Show a lightweight manual-install hint as fallback.
     const fallbackTimer = window.setTimeout(() => {
-      if (!installEventFired) {
+      if (!installEventFired && !isInstallPromptAcknowledged()) {
         setShowManualInstallHint(true);
         setShowPrompt(true);
       }
@@ -68,7 +93,7 @@ export default function PWAInstallPrompt() {
       window.clearTimeout(fallbackTimer);
       window.removeEventListener("beforeinstallprompt", handler);
     };
-  }, []);
+  }, [consent]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -76,20 +101,22 @@ export default function PWAInstallPrompt() {
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
+    // Treat any completed install flow as actioned so prompt doesn't reappear.
+    if (outcome === "accepted" || outcome === "dismissed") {
+      acknowledgeInstallPrompt();
       setDeferredPrompt(null);
       setShowPrompt(false);
     }
   };
 
   const handleDismiss = () => {
+    acknowledgeInstallPrompt();
+    setDeferredPrompt(null);
+    setShowManualInstallHint(false);
     setShowPrompt(false);
-    const DISMISS_KEY = "pwa-install-dismissed-until";
-    const DISMISS_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-    localStorage.setItem(DISMISS_KEY, String(Date.now() + DISMISS_DURATION_MS));
   };
 
-  if (!showPrompt || !deferredPrompt) return null;
+  if (consent === ACKNOWLEDGED_VALUE) return null;
   if (!showPrompt) return null;
 
   return (
@@ -119,6 +146,7 @@ export default function PWAInstallPrompt() {
                 <button
                   onClick={handleInstall}
                   className="flex-1 rounded-lg bg-black dark:bg-zinc-50 text-white dark:text-black px-3 py-2 text-xs font-medium hover:bg-zinc-800 dark:hover:bg-zinc-300 transition-colors"
+                  data-testid="install-prompt-install-button"
                 >
                   Install
                 </button>
@@ -126,6 +154,7 @@ export default function PWAInstallPrompt() {
               <button
                 onClick={handleDismiss}
                 className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2 text-xs font-medium text-black dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                data-testid="install-prompt-dismiss-button"
               >
                 Not now
               </button>

@@ -95,7 +95,7 @@ export default function NutritionLabelPhotoInput({
       <div className="w-full">
         <button
           type="button"
-          className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50 mb-2"
+          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-black dark:text-zinc-50 mb-2 transition-colors"
           onClick={handleTakePhoto}
           disabled={loading}
         >

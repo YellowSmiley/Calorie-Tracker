@@ -19,7 +19,7 @@ export default function ActionsSection({
         </h2>
         <HelpButton
           title="Actions"
-          content="Quick access to other functions. 'My Foods' shows all your custom food entries that you've created. 'Admin Panel' is available if you're an admin user. 'Sign Out' securely logs you out of your account."
+          content="Quick access to other functions. 'My Foods' lets you manage your food entries, and admins can see and manage all foods there. 'Admin Panel' is for user management only. 'Sign Out' securely logs you out of your account."
           ariaLabel="Help: Actions explained"
         />
       </div>
@@ -39,7 +39,7 @@ export default function ActionsSection({
             className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
             data-testid="admin-panel-link"
           >
-            Admin Panel
+            User Management
           </Link>
         )}
         <button

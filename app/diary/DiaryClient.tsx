@@ -376,58 +376,60 @@ export default function DiaryClient({
       </div>
 
       {/* Date Navigation */}
-      <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
+      <div className="bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={handlePreviousDay}
-              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
-              aria-label="Previous day"
-              data-testid="previous-day-button"
-            >
-              <svg
-                className="w-5 h-5 text-black dark:text-zinc-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+            <div className="flex items-center justify-center gap-4">
+              <button
+                onClick={handlePreviousDay}
+                className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
+                aria-label="Previous day"
+                data-testid="previous-day-button"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5 text-black dark:text-zinc-50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
 
-            <input
-              type="date"
-              value={currentDate}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer scheme-light dark:scheme-dark"
-              style={{ minWidth: "160px" }}
-            />
+              <input
+                type="date"
+                value={currentDate}
+                onChange={(e) => handleDateChange(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer scheme-light dark:scheme-dark"
+                style={{ minWidth: "160px" }}
+              />
 
-            <button
-              onClick={handleNextDay}
-              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
-              aria-label="Next day"
-              data-testid="next-day-button"
-            >
-              <svg
-                className="w-5 h-5 text-black dark:text-zinc-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <button
+                onClick={handleNextDay}
+                className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
+                aria-label="Next day"
+                data-testid="next-day-button"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5 text-black dark:text-zinc-50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -457,169 +459,171 @@ export default function DiaryClient({
 
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-6">
           <DailySummaryAccordion
             totals={totals}
             goals={goals}
             userSettings={userSettings}
           />
-          <div className="mb-6 flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-              Meals
-            </h2>
-            <HelpButton
-              title="How to Use"
-              content="Click 'Add Food' at the bottom of each meal section to log foods. Click on any food item to adjust the serving size. Click the 'Remove' button to delete a food from your diary. Your daily totals are calculated automatically and displayed at the top."
-              ariaLabel="Help: How to add and manage foods"
-            />
-          </div>
-          {meals.map((meal, mealIndex) => (
-            <div
-              key={meal.name}
-              className="mb-8"
-              data-testid={`diary-meal-${meal.name.toLowerCase()}`}
-            >
-              <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
-                {meal.name}
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
+            <div className="mb-6 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+                Meals
               </h2>
-              <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-                <table className="w-full border-collapse bg-white dark:bg-zinc-950">
-                  <thead>
-                    <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                        Food Item
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                        Calories
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {meal.items.map((item) => (
+              <HelpButton
+                title="How to Use"
+                content="Click 'Add Food' at the bottom of each meal section to log foods. Click on any food item to adjust the serving size. Click the 'Remove' button to delete a food from your diary. Your daily totals are calculated automatically and displayed at the top."
+                ariaLabel="Help: How to add and manage foods"
+              />
+            </div>
+            {meals.map((meal, mealIndex) => (
+              <div
+                key={meal.name}
+                className="mb-8 last:mb-0"
+                data-testid={`diary-meal-${meal.name.toLowerCase()}`}
+              >
+                <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
+                  {meal.name}
+                </h2>
+                <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+                  <table className="w-full border-collapse bg-white dark:bg-black">
+                    <thead>
+                      <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                          Food Item
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                          Calories
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {meal.items.map((item) => (
+                        <tr
+                          key={item.id}
+                          data-testid={`diary-food-row-${item.id}`}
+                          onClick={() => {
+                            setEditTarget({
+                              mealIndex,
+                              itemId: item.id,
+                            });
+                            setShowEditForm(true);
+                          }}
+                          className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                        >
+                          <td
+                            className="px-4 py-3"
+                            data-testid={`diary-food-name-${item.id}`}
+                          >
+                            <p className="text-black dark:text-zinc-50 font-medium">
+                              {item.name}
+                            </p>
+                            <p
+                              className="text-sm text-zinc-500 dark:text-zinc-400"
+                              data-testid={`diary-food-serving-${item.id}`}
+                            >
+                              {(() => {
+                                const actualAmount =
+                                  item.serving * item.measurementAmount;
+                                const amountStr =
+                                  item.measurementType === "weight"
+                                    ? getWeightForDisplay(
+                                        actualAmount,
+                                        userSettings.weightUnit,
+                                      )
+                                    : getVolumeForDisplay(
+                                        actualAmount,
+                                        userSettings.volumeUnit,
+                                      );
+                                if (
+                                  item.defaultServingDescription &&
+                                  item.defaultServingAmount
+                                ) {
+                                  const servingQty = Number(
+                                    (
+                                      actualAmount / item.defaultServingAmount
+                                    ).toFixed(1),
+                                  );
+                                  const qtyStr =
+                                    servingQty === 1
+                                      ? item.defaultServingDescription
+                                      : `${servingQty} × ${item.defaultServingDescription}`;
+                                  return `${amountStr} (${qtyStr})`;
+                                }
+                                return amountStr;
+                              })()}
+                            </p>
+                          </td>
+                          <td
+                            className="px-4 py-3"
+                            data-testid={`diary-food-calories-${item.id}`}
+                          >
+                            <p
+                              className="text-sm text-zinc-500 dark:text-zinc-400"
+                              data-testid={`diary-food-calorie-info-${item.id}`}
+                            >
+                              {getCalorieForDisplay(
+                                item.calories,
+                                userSettings.calorieUnit,
+                              )}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                showDeleteModal(mealIndex, item.id);
+                              }}
+                              className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                              data-testid={`diary-food-remove-${item.id}`}
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {/* Totals Row */}
                       <tr
-                        key={item.id}
-                        data-testid={`diary-food-row-${item.id}`}
-                        onClick={() => {
-                          setEditTarget({
-                            mealIndex,
-                            itemId: item.id,
-                          });
-                          setShowEditForm(true);
-                        }}
-                        className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                        className="border-b border-zinc-200 dark:border-zinc-800"
+                        data-testid={`diary-meal-total-${meal.name.toLowerCase()}`}
                       >
-                        <td
-                          className="px-4 py-3"
-                          data-testid={`diary-food-name-${item.id}`}
-                        >
-                          <p className="text-black dark:text-zinc-50 font-medium">
-                            {item.name}
-                          </p>
-                          <p
-                            className="text-sm text-zinc-500 dark:text-zinc-400"
-                            data-testid={`diary-food-serving-${item.id}`}
-                          >
-                            {(() => {
-                              const actualAmount =
-                                item.serving * item.measurementAmount;
-                              const amountStr =
-                                item.measurementType === "weight"
-                                  ? getWeightForDisplay(
-                                      actualAmount,
-                                      userSettings.weightUnit,
-                                    )
-                                  : getVolumeForDisplay(
-                                      actualAmount,
-                                      userSettings.volumeUnit,
-                                    );
-                              if (
-                                item.defaultServingDescription &&
-                                item.defaultServingAmount
-                              ) {
-                                const servingQty = Number(
-                                  (
-                                    actualAmount / item.defaultServingAmount
-                                  ).toFixed(1),
-                                );
-                                const qtyStr =
-                                  servingQty === 1
-                                    ? item.defaultServingDescription
-                                    : `${servingQty} × ${item.defaultServingDescription}`;
-                                return `${amountStr} (${qtyStr})`;
-                              }
-                              return amountStr;
-                            })()}
-                          </p>
+                        <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
+                          Total
                         </td>
-                        <td
-                          className="px-4 py-3"
-                          data-testid={`diary-food-calories-${item.id}`}
-                        >
-                          <p
-                            className="text-sm text-zinc-500 dark:text-zinc-400"
-                            data-testid={`diary-food-calorie-info-${item.id}`}
-                          >
-                            {getCalorieForDisplay(
-                              item.calories,
-                              userSettings.calorieUnit,
-                            )}
-                          </p>
+                        <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
+                          {getCalorieForDisplay(
+                            getMealTotals(mealIndex).calories,
+                            userSettings.calorieUnit,
+                          )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3"></td>
+                      </tr>
+                      <tr
+                        data-testid={`diary-add-food-${meal.name.toLowerCase()}`}
+                        onClick={() => {
+                          setSelectedMealIndex(mealIndex);
+                          setShowFoodList(true);
+                        }}
+                      >
+                        <td colSpan={3} className="px-4 py-3 text-center">
                           <button
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              showDeleteModal(mealIndex, item.id);
-                            }}
-                            className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                            data-testid={`diary-food-remove-${item.id}`}
+                            type="button"
+                            className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-center text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                            data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
                           >
-                            Remove
+                            Add Food
                           </button>
                         </td>
                       </tr>
-                    ))}
-                    {/* Totals Row */}
-                    <tr
-                      className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900"
-                      data-testid={`diary-meal-total-${meal.name.toLowerCase()}`}
-                    >
-                      <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
-                        Total
-                      </td>
-                      <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
-                        {getCalorieForDisplay(
-                          getMealTotals(mealIndex).calories,
-                          userSettings.calorieUnit,
-                        )}
-                      </td>
-                      <td className="px-4 py-3"></td>
-                    </tr>
-                    <tr
-                      className="hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                      data-testid={`diary-add-food-${meal.name.toLowerCase()}`}
-                      onClick={() => {
-                        setSelectedMealIndex(mealIndex);
-                        setShowFoodList(true);
-                      }}
-                    >
-                      <td colSpan={3} className="px-4 py-3">
-                        <p
-                          className="w-full text-left text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors font-medium"
-                          data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
-                        >
-                          Add Food
-                        </p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 

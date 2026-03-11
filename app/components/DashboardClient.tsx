@@ -196,7 +196,7 @@ export default function DashboardClient({
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     timeRange === "day"
                       ? "bg-foreground text-background"
-                      : "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                      : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 text-black dark:text-zinc-50 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
                   }`}
                 >
                   Day
@@ -206,7 +206,7 @@ export default function DashboardClient({
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     timeRange === "week"
                       ? "bg-foreground text-background"
-                      : "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                      : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 text-black dark:text-zinc-50 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
                   }`}
                 >
                   Week
@@ -216,7 +216,7 @@ export default function DashboardClient({
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     timeRange === "month"
                       ? "bg-foreground text-background"
-                      : "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                      : "border border-solid border-black/8 hover:border-transparent hover:bg-black/4 text-black dark:text-zinc-50 dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
                   }`}
                 >
                   Month
@@ -307,7 +307,7 @@ export default function DashboardClient({
             </div>
             <div className="grid grid-cols-2 gap-4">
               {/* Calories */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Calories
                 </p>
@@ -357,7 +357,7 @@ export default function DashboardClient({
               </div>
 
               {/* Protein */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Protein
                 </p>
@@ -404,7 +404,7 @@ export default function DashboardClient({
               </div>
 
               {/* Carbs */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Carbohydrates
                 </p>
@@ -451,7 +451,7 @@ export default function DashboardClient({
               </div>
 
               {/* Fat */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Fat
                 </p>
@@ -498,7 +498,7 @@ export default function DashboardClient({
               </div>
 
               {/* Saturates */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Saturates
                 </p>
@@ -548,7 +548,7 @@ export default function DashboardClient({
               </div>
 
               {/* Sugars */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Sugars
                 </p>
@@ -596,7 +596,7 @@ export default function DashboardClient({
               </div>
 
               {/* Fibre */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Fibre
                 </p>
@@ -643,7 +643,7 @@ export default function DashboardClient({
               </div>
 
               {/* Salt */}
-              <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <div className="p-4 rounded-lg bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                   Salt
                 </p>

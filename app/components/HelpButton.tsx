@@ -97,7 +97,7 @@ export default function HelpButton({
               <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="w-full rounded-lg bg-zinc-100 px-4 py-2 font-medium text-black hover:bg-zinc-200 transition-colors dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800"
+                  className="w-full rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-opacity hover:opacity-90"
                   data-testid={
                     dataTestId ? `${dataTestId}-footer-button` : undefined
                   }

@@ -64,7 +64,6 @@ export default function CreateFoodSidebar({
 
   const hasInitialized = useRef<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (editingFood && isOpen) {
       const foodKey = `edit-${editingFood.id}`;
@@ -255,20 +254,16 @@ export default function CreateFoodSidebar({
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
-          <div className="mx-auto w-full max-w-6xl">
+          <div className="mx-auto w-full max-w-6xl rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Wrapping in isOpen to clear on close */}
               {isOpen && (
-                <div className="md:col-span-3 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-                  {/* Barcode input sits in front of NutritionLabelPhotoInput */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <BarcodeInput onExtract={handleExtractedLabel} />
-                    <NutritionLabelPhotoInput
-                      onExtract={handleExtractedLabel}
-                    />
-                  </div>
-                </div>
+                <>
+                  <BarcodeInput onExtract={handleExtractedLabel} />
+                  <NutritionLabelPhotoInput onExtract={handleExtractedLabel} />
+                </>
               )}
+              <div />
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
                   Food Name *
@@ -298,18 +293,18 @@ export default function CreateFoodSidebar({
                       measurementType: e.target.value as MeasurementType,
                     })
                   }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-zinc-50"
+                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-white dark:bg-black text-black dark:text-zinc-50"
                   data-testid="create-food-measurement-type"
                 >
                   <option
                     value="weight"
-                    className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
+                    className="bg-white text-black dark:bg-black dark:text-zinc-50"
                   >
                     Weight ({userSettings.weightUnit})
                   </option>
                   <option
                     value="volume"
-                    className="bg-white text-black dark:bg-zinc-900 dark:text-zinc-50"
+                    className="bg-white text-black dark:bg-black dark:text-zinc-50"
                   >
                     Volume ({userSettings.volumeUnit})
                   </option>

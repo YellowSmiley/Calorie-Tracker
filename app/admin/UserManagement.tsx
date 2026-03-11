@@ -112,10 +112,10 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search Box */}
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto w-full max-w-3xl">
+    <div className="flex flex-col h-full p-4">
+      <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        {/* Search Box */}
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
           <input
             type="text"
             placeholder="Search users..."
@@ -124,131 +124,135 @@ export default function UserManagement() {
             className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
           />
         </div>
-      </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="px-4 pt-4">
-          <div className="mx-auto w-full max-w-3xl rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-900 dark:text-zinc-200">
-                {error}
-              </p>
-              <button
-                onClick={() => setError(null)}
-                className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* User List */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
-      >
-        <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
-          {users.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 cursor-pointer"
-              onClick={
-                user.provider === "credentials"
-                  ? () => {
-                      setEditUser(user);
-                      setEditError(null);
-                    }
-                  : undefined
-              }
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
-                  {user.name || "No name"}
-                  {user.provider === "credentials" && (
-                    <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
-                      Our User
-                    </span>
-                  )}
+        {/* Error Message */}
+        {error && (
+          <div className="px-4 pt-4">
+            <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                  {error}
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {user.email || "No email"}
-                  {user.isAdmin ? " - Admin" : ""}
-                </p>
-              </div>
-              <div className="shrink-0">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteUser(user);
-                    setDeleteError(null);
-                  }}
-                  className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
+                  onClick={() => setError(null)}
+                  className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
                 >
-                  Delete
+                  ×
                 </button>
               </div>
             </div>
-          ))}
-          {/* Edit User Sidebar */}
-          <EditUserSidebar
-            key={editUser?.id}
-            user={editUser}
-            isOpen={!!editUser}
-            onClose={() => setEditUser(null)}
-            isSaving={isSaving}
-            error={editError}
-            onSave={async (name, email, password) => {
-              setIsSaving(true);
-              setEditError(null);
-              try {
-                const response = await fetch(
-                  `/api/admin/users/${editUser?.id}`,
-                  {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, email, password }),
-                  },
-                );
-                if (response.ok) {
-                  setUsers((prev) =>
-                    prev.map((u) =>
-                      u.id === editUser?.id ? { ...u, name, email } : u,
-                    ),
-                  );
-                  setEditUser(null);
-                } else {
-                  const data = (await response.json()) as { error?: string };
-                  setEditError(data.error || "Failed to update user");
+          </div>
+        )}
+
+        {/* User List */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto"
+        >
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {users.map((user) => (
+              <div
+                key={user.id}
+                className={`flex items-center gap-3 px-4 py-3 ${
+                  user.provider === "credentials"
+                    ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                    : ""
+                }`}
+                onClick={
+                  user.provider === "credentials"
+                    ? () => {
+                        setEditUser(user);
+                        setEditError(null);
+                      }
+                    : undefined
                 }
-              } catch (err) {
-                setEditError("Error updating user");
-              } finally {
-                setIsSaving(false);
-              }
-            }}
-          />
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
+                    {user.name || "No name"}
+                    {user.provider === "credentials" && (
+                      <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
+                        Our User
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {user.email || "No email"}
+                    {user.isAdmin ? " - Admin" : ""}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteUser(user);
+                      setDeleteError(null);
+                    }}
+                    className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {/* Edit User Sidebar */}
+            <EditUserSidebar
+              key={editUser?.id}
+              user={editUser}
+              isOpen={!!editUser}
+              onClose={() => setEditUser(null)}
+              isSaving={isSaving}
+              error={editError}
+              onSave={async (name, email, password) => {
+                setIsSaving(true);
+                setEditError(null);
+                try {
+                  const response = await fetch(
+                    `/api/admin/users/${editUser?.id}`,
+                    {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ name, email, password }),
+                    },
+                  );
+                  if (response.ok) {
+                    setUsers((prev) =>
+                      prev.map((u) =>
+                        u.id === editUser?.id ? { ...u, name, email } : u,
+                      ),
+                    );
+                    setEditUser(null);
+                  } else {
+                    const data = (await response.json()) as { error?: string };
+                    setEditError(data.error || "Failed to update user");
+                  }
+                } catch (err) {
+                  setEditError("Error updating user");
+                } finally {
+                  setIsSaving(false);
+                }
+              }}
+            />
 
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              Loading...
-            </div>
-          )}
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Loading...
+              </div>
+            )}
 
-          {/* No results */}
-          {!isLoading && users.length === 0 && (
-            <div className="px-4 py-6 text-center">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {searchQuery
-                  ? `No users found for "${searchQuery}"`
-                  : "No users found"}
-              </p>
-            </div>
-          )}
+            {/* No results */}
+            {!isLoading && users.length === 0 && (
+              <div className="px-4 py-6 text-center">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {searchQuery
+                    ? `No users found for "${searchQuery}"`
+                    : "No users found"}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -279,7 +283,7 @@ export default function UserManagement() {
               )}
 
               {/* User Details */}
-              <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3">
+              <div className="rounded-lg bg-zinc-50 dark:bg-black p-4 space-y-3 border border-zinc-200 dark:border-zinc-800">
                 <div>
                   <p className="font-medium text-black dark:text-zinc-50">
                     {deleteUser.name || "No name"}

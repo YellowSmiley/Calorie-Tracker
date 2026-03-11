@@ -7,12 +7,14 @@ interface MyFoodsSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   userSettings: UserSettings;
+  isAdmin: boolean;
 }
 
 export default function MyFoodsSidebar({
   isOpen,
   onClose,
   userSettings,
+  isAdmin,
 }: MyFoodsSidebarProps) {
   return (
     <div
@@ -29,13 +31,13 @@ export default function MyFoodsSidebar({
           Back
         </button>
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-          My Foods
+          {isAdmin ? "Food Library" : "My Foods"}
         </h2>
         <div className="w-12" />
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <FoodTable userSettings={userSettings} />
+      <div className="overflow-hidden">
+        <FoodTable userSettings={userSettings} isAdmin={isAdmin} />
       </div>
     </div>
   );

@@ -53,7 +53,7 @@ export default function DataPrivacySection({
             type="button"
             data-testid="delete-account-button"
             onClick={onDeleteClick}
-            className="w-full rounded-lg border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 px-6 py-3 font-medium transition-colors text-red-600 dark:text-red-400"
+            className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
           >
             Delete My Account
           </button>

@@ -178,7 +178,7 @@ export default function EditFoodSidebar({
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
-          <div className="mx-auto w-full max-w-3xl space-y-6">
+          <div className="mx-auto w-full max-w-3xl rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 space-y-6">
             {/* Food Name - Centered */}
             <div className="text-center">
               <h3 className="text-2xl font-bold text-black dark:text-zinc-50 mb-1">

@@ -20,7 +20,10 @@ interface FoodTableProps {
 
 const PAGE_SIZE = 50;
 
-export default function FoodTable({ userSettings }: FoodTableProps) {
+export default function FoodTable({
+  userSettings,
+  isAdmin = false,
+}: FoodTableProps) {
   // For admin API, foods may have createdByName
   const [foods, setFoods] = useState<FoodWithCreator[]>([]);
   const [total, setTotal] = useState(0);
@@ -195,10 +198,10 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search Box */}
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto w-full max-w-3xl">
+    <div className="flex flex-col h-full p-4">
+      <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        {/* Search Box */}
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
           <input
             type="text"
             placeholder="Search foods..."
@@ -208,121 +211,123 @@ export default function FoodTable({ userSettings }: FoodTableProps) {
             data-testid="food-search-input"
           />
         </div>
-      </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="px-4 pt-4" data-testid="food-table-error">
-          <div className="mx-auto w-full max-w-3xl rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-900 dark:text-zinc-200">
-                {error}
-              </p>
-              <button
-                onClick={() => setError(null)}
-                className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Food List */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
-      >
-        <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-w-3xl mx-auto">
-          {foods.map((food, i) => (
-            <div
-              key={food.id}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900"
-              onClick={() => startEditing(food)}
-              data-testid={`food-search-result-${food.id}`}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-black dark:text-zinc-50">
-                  {food.name}
+        {/* Error Message */}
+        {error && (
+          <div className="px-4 pt-4" data-testid="food-table-error">
+            <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-900 dark:text-zinc-200">
+                  {error}
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {food.measurementType === "weight"
-                    ? getWeightForDisplay(
-                        food.measurementAmount,
-                        userSettings.weightUnit,
-                      )
-                    : convertVolumeForDisplay(
-                        food.measurementAmount,
-                        userSettings.volumeUnit,
-                      )}{" "}
-                  - {food.calories} kcal
-                  {food.defaultServingDescription
-                    ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
-                    : ""}
-                  {` - ${food.createdByName || food.createdBy || "Unknown"}`}
-                </p>
-              </div>
-              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                 <button
-                  onClick={() => {
-                    setDeleteTarget(food);
-                    setShowDeleteModal(true);
-                  }}
-                  className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300 text-sm font-medium"
-                  data-testid={`delete-food-button-${i}`}
+                  onClick={() => setError(null)}
+                  className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
                 >
-                  Delete
+                  ×
                 </button>
               </div>
-              {/* Delete Food Modal */}
             </div>
-          ))}
+          </div>
+        )}
 
-          {/* Loading indicator */}
-          {isLoading && (
-            <div
-              className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400"
-              data-testid="loading-foods"
-            >
-              Loading...
-            </div>
-          )}
+        {/* Food List */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto"
+        >
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {foods.map((food, i) => (
+              <div
+                key={food.id}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                onClick={() => startEditing(food)}
+                data-testid={`food-search-result-${food.id}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-black dark:text-zinc-50">
+                    {food.name}
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {food.measurementType === "weight"
+                      ? getWeightForDisplay(
+                          food.measurementAmount,
+                          userSettings.weightUnit,
+                        )
+                      : convertVolumeForDisplay(
+                          food.measurementAmount,
+                          userSettings.volumeUnit,
+                        )}{" "}
+                    - {food.calories} kcal
+                    {food.defaultServingDescription
+                      ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
+                      : ""}
+                    {` - ${food.createdByName || food.createdBy || "Unknown"}`}
+                  </p>
+                </div>
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setDeleteTarget(food);
+                      setShowDeleteModal(true);
+                    }}
+                    className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                    data-testid={`delete-food-button-${i}`}
+                  >
+                    Delete
+                  </button>
+                </div>
+                {/* Delete Food Modal */}
+              </div>
+            ))}
 
-          {/* No results */}
-          {!isLoading && foods.length === 0 && (
-            <div className="px-4 py-6 text-center">
-              <p
-                className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
-                data-testid="no-foods-found"
+            {/* Loading indicator */}
+            {isLoading && (
+              <div
+                className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400"
+                data-testid="loading-foods"
               >
-                {searchQuery
-                  ? `No foods found for "${searchQuery}"`
-                  : "You haven't created any foods yet. Click 'Create Food' to get started."}
-              </p>
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                data-testid="create-food-button"
-              >
-                Create Food
-              </button>
-            </div>
-          )}
+                Loading...
+              </div>
+            )}
 
-          {/* Create button at end of list */}
-          {!isLoading && foods.length > 0 && foods.length >= total && (
-            <div className="px-4 py-4 text-center">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                data-testid="create-food-button"
-              >
-                Create Food
-              </button>
-            </div>
-          )}
+            {/* No results */}
+            {!isLoading && foods.length === 0 && (
+              <div className="px-4 py-6 text-center">
+                <p
+                  className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
+                  data-testid="no-foods-found"
+                >
+                  {searchQuery
+                    ? `No foods found for "${searchQuery}"`
+                    : isAdmin
+                      ? "No foods found. Click 'Create Food' to add one."
+                      : "You haven't created any foods yet. Click 'Create Food' to get started."}
+                </p>
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  data-testid="create-food-button"
+                >
+                  Create Food
+                </button>
+              </div>
+            )}
+
+            {/* Create button at end of list */}
+            {!isLoading && foods.length > 0 && foods.length >= total && (
+              <div className="px-4 py-4 text-center">
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  data-testid="create-food-button"
+                >
+                  Create Food
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

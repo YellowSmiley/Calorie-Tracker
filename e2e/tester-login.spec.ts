@@ -12,6 +12,11 @@ export const login = async (page: Page) => {
     page.getByTestId("sign-in-button").click(),
   ]);
   await page.getByTestId("cookie-banner-button").click();
+  await expect(page.getByTestId("cookie-banner-button")).not.toBeVisible();
+  await page.getByTestId("install-prompt-dismiss-button").click();
+  await expect(
+    page.getByTestId("install-prompt-dismiss-button"),
+  ).not.toBeVisible();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 };
 

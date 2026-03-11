@@ -42,7 +42,7 @@ export default function DailySummaryAccordion({
     <div className="mb-8">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+        className="w-full flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
         data-testid="daily-summary-accordion-button"
       >
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
@@ -71,7 +71,7 @@ export default function DailySummaryAccordion({
         }`}
       >
         <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full border-collapse bg-white dark:bg-zinc-950">
+          <table className="w-full border-collapse bg-white dark:bg-black">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800">
                 <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
@@ -94,7 +94,7 @@ export default function DailySummaryAccordion({
                   Calories
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-calories"
                 >
                   {getCalorieForDisplay(
@@ -103,7 +103,7 @@ export default function DailySummaryAccordion({
                   )}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-calories"
                 >
                   {getCalorieForDisplay(
@@ -112,7 +112,7 @@ export default function DailySummaryAccordion({
                   )}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-calories"
                 >
                   {getCalorieForDisplay(
@@ -126,19 +126,19 @@ export default function DailySummaryAccordion({
                   Protein
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-protein"
                 >
                   {getWeightForDisplay(totals.protein, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-protein"
                 >
                   {getWeightForDisplay(goals.protein, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-protein"
                 >
                   {getWeightForDisplay(
@@ -152,19 +152,19 @@ export default function DailySummaryAccordion({
                   Carbohydrates
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-carbs"
                 >
                   {getWeightForDisplay(totals.carbs, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-carbs"
                 >
                   {getWeightForDisplay(goals.carbs, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-carbs"
                 >
                   {getWeightForDisplay(
@@ -178,19 +178,19 @@ export default function DailySummaryAccordion({
                   Fat
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-fat"
                 >
                   {getWeightForDisplay(totals.fat, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-fat"
                 >
                   {getWeightForDisplay(goals.fat, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-fat"
                 >
                   {getWeightForDisplay(
@@ -204,7 +204,7 @@ export default function DailySummaryAccordion({
                   Saturates
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-saturates"
                 >
                   {getWeightForDisplay(
@@ -213,7 +213,7 @@ export default function DailySummaryAccordion({
                   )}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-saturates"
                 >
                   {getWeightForDisplay(
@@ -222,7 +222,7 @@ export default function DailySummaryAccordion({
                   )}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-saturates"
                 >
                   {getWeightForDisplay(
@@ -236,19 +236,19 @@ export default function DailySummaryAccordion({
                   Sugars
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-sugars"
                 >
                   {getWeightForDisplay(totals.sugars, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-sugars"
                 >
                   {getWeightForDisplay(goals.sugars, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-sugars"
                 >
                   {getWeightForDisplay(
@@ -262,19 +262,19 @@ export default function DailySummaryAccordion({
                   Fibre
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-fibre"
                 >
                   {getWeightForDisplay(totals.fibre, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-fibre"
                 >
                   {getWeightForDisplay(goals.fibre, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-fibre"
                 >
                   {getWeightForDisplay(
@@ -288,19 +288,19 @@ export default function DailySummaryAccordion({
                   Salt
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-total-salt"
                 >
                   {getWeightForDisplay(totals.salt, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-goal-salt"
                 >
                   {getWeightForDisplay(goals.salt, userSettings.weightUnit)}
                 </td>
                 <td
-                  className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-3 text-sm text-black dark:text-zinc-50"
                   data-testid="summary-left-salt"
                 >
                   {getWeightForDisplay(
