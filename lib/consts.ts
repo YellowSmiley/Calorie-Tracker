@@ -8,4 +8,5 @@ export const DEFAULT_FIBRE_GOAL = 30;
 export const DEFAULT_SALT_GOAL = 6;
 export const DEFAULT_CALORIE_UNIT = "kcal";
 export const DEFAULT_WEIGHT_UNIT = "g";
+export const DEFAULT_BODY_WEIGHT_UNIT = "kg";
 export const DEFAULT_VOLUME_UNIT = "ml";

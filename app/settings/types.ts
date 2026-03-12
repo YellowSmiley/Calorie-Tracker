@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 
 export type AcceptedWeightedUnits = "g" | "oz" | "kg" | "lbs" | "mg";
+export type AcceptedBodyWeightUnits = "kg" | "lbs";
 export type AcceptedVolumeUnits = "ml" | "cup" | "tbsp" | "tsp" | "L";
 export type AcceptedCalorieUnits = "kcal" | "kJ";
 
@@ -16,6 +17,7 @@ export type SettingsData = Pick<
   | "saltGoal"
 > & {
   weightUnit: AcceptedWeightedUnits;
+  bodyWeightUnit: AcceptedBodyWeightUnits;
   volumeUnit: AcceptedVolumeUnits;
   calorieUnit: AcceptedCalorieUnits;
 };
@@ -23,4 +25,6 @@ export type SettingsData = Pick<
 export type UserSettings = Pick<
   SettingsData,
   "calorieUnit" | "volumeUnit" | "weightUnit"
->;
+> & {
+  bodyWeightUnit?: AcceptedBodyWeightUnits;
+};

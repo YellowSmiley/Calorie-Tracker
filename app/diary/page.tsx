@@ -42,6 +42,7 @@ export default async function DiaryPage({
     select: {
       calorieUnit: true,
       weightUnit: true,
+      bodyWeightUnit: true,
       volumeUnit: true,
       calorieGoal: true,
       proteinGoal: true,
@@ -57,6 +58,7 @@ export default async function DiaryPage({
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     weightUnit: user?.weightUnit ?? "g",
+    bodyWeightUnit: user?.bodyWeightUnit ?? "kg",
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 
@@ -72,6 +74,16 @@ export default async function DiaryPage({
   };
 
   const { start, end } = getDateRange(activeDate);
+  const bodyWeightEntry = await prisma.weightEntry.findUnique({
+    where: {
+      userId_date: {
+        userId: session.user.id,
+        date: start,
+      },
+    },
+    select: { weight: true },
+  });
+
   const entries = await prisma.mealEntry.findMany({
     where: {
       userId: session.user.id,
@@ -119,6 +131,7 @@ export default async function DiaryPage({
     <DiaryClient
       initialMeals={meals.length ? meals : initialMeals}
       activeDate={activeDate}
+      initialBodyWeightKg={bodyWeightEntry?.weight ?? null}
       userSettings={userSettings}
       userGoals={userGoals}
     />

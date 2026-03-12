@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { addFoodToMeal, createTestFood, resetFoodItems } from "./diary.spec";
-import { login } from "./tester-login.spec";
-import { resetSettings } from "./settings.spec";
+import { addFoodToMeal, createTestFood, resetFoodItems } from "./helpers";
+import { login } from "./auth";
+import { resetSettings } from "./helpers";
 
 const goals = {
   calories: 3000,
@@ -211,6 +211,6 @@ test.describe("Dashboard", () => {
       `Avg: ${round2dp(0.25 / (await getDaysInMonth()))}g/day`,
     );
 
-    await resetFoodItems(page);
+    // TODO: Test Calorie Trend graphs etc
   });
 });

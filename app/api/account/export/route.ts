@@ -33,6 +33,7 @@ export async function GET() {
         saltGoal: true,
         calorieUnit: true,
         weightUnit: true,
+        bodyWeightUnit: true,
         volumeUnit: true,
       },
     });
@@ -99,6 +100,17 @@ export async function GET() {
       },
     });
 
+    const weightEntries = await prisma.weightEntry.findMany({
+      where: { userId },
+      select: {
+        date: true,
+        weight: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { date: "desc" },
+    });
+
     const exportData = {
       exportedAt: new Date().toISOString(),
       profile: user,
@@ -123,6 +135,7 @@ export async function GET() {
         salt: entry.salt,
         createdAt: entry.createdAt,
       })),
+      weightEntries,
       createdFoods,
     };
 

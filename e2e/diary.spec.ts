@@ -9,8 +9,8 @@ test.afterEach(async ({ page }, testInfo) => {
     });
   }
 });
-import { login } from "./tester-login.spec";
-import { resetSettings } from "./settings.spec";
+import { login } from "./auth";
+import { resetSettings } from "./helpers";
 import { FoodItem } from "@/app/diary/types";
 
 function randomFoodName() {
@@ -426,6 +426,6 @@ test.describe("Diary Feature", () => {
     await modal.getByTestId("delete-food-confirm").click();
     await expect(foodRow).not.toBeVisible();
 
-    await resetFoodItems(page);
+    // TODO: Test body weight across multiple days
   });
 });

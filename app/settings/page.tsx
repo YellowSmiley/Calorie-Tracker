@@ -2,7 +2,11 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SettingsClient from "./SettingsClient";
 import { prisma } from "@/lib/prisma";
-import { AcceptedWeightedUnits, UserSettings } from "./types";
+import {
+  AcceptedBodyWeightUnits,
+  AcceptedWeightedUnits,
+  UserSettings,
+} from "./types";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -17,6 +21,7 @@ export default async function SettingsPage() {
     select: {
       calorieUnit: true,
       weightUnit: true,
+      bodyWeightUnit: true,
       volumeUnit: true,
     },
   })) as UserSettings;
@@ -24,6 +29,7 @@ export default async function SettingsPage() {
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     weightUnit: (user?.weightUnit as AcceptedWeightedUnits) ?? "g",
+    bodyWeightUnit: (user?.bodyWeightUnit as AcceptedBodyWeightUnits) ?? "kg",
     volumeUnit: user?.volumeUnit ?? "ml",
   };
 

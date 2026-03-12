@@ -33,6 +33,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     saltGoal: 6,
     calorieUnit: "kcal",
     weightUnit: "g",
+    bodyWeightUnit: userSettings.bodyWeightUnit ?? "kg",
     volumeUnit: "ml",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +49,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
 
   useEffect(() => {
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const convertBackSettings = (data: SettingsData): SettingsData => {

@@ -1,5 +1,6 @@
 import HelpButton from "@/app/components/HelpButton";
 import {
+  AcceptedBodyWeightUnits,
   AcceptedCalorieUnits,
   AcceptedWeightedUnits,
   SettingsData,
@@ -28,7 +29,7 @@ export default function MeasurementUnitsSection({
         </h2>
         <HelpButton
           title="Measurement Units"
-          content="Choose how you want nutrition information displayed. You can display calories in kcal or kJ, and macronutrients in grams, ounces, or milligrams. Your preference applies throughout the app on dashboards and food logs."
+          content="Choose how you want nutrition information displayed. You can display calories in kcal or kJ, food and nutrition weights in grams, ounces, kilograms, pounds, or milligrams, and body weight in kilograms or pounds. Your preferences apply throughout the app on dashboards and food logs."
           ariaLabel="Help: Measurement units explained"
         />
       </div>
@@ -116,6 +117,30 @@ export default function MeasurementUnitsSection({
             <option value="kg">Kilograms (kg)</option>
             <option value="lbs">Pounds (lbs)</option>
             <option value="mg">Milligrams (mg)</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="bodyWeightUnit"
+            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          >
+            Body Weight Unit
+          </label>
+          <select
+            id="bodyWeightUnit"
+            data-testid="measurement-body-weight-unit-select"
+            value={settings.bodyWeightUnit || "kg"}
+            onChange={(e) => {
+              onChange(
+                "bodyWeightUnit",
+                e.target.value as AcceptedBodyWeightUnits,
+              );
+            }}
+            className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          >
+            <option value="kg">Kilograms (kg)</option>
+            <option value="lbs">Pounds (lbs)</option>
           </select>
         </div>
 

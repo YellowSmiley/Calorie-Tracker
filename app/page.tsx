@@ -24,12 +24,14 @@ export default async function Home() {
       saltGoal: true,
       calorieUnit: true,
       weightUnit: true,
+      bodyWeightUnit: true,
     },
   })) as SettingsData;
 
   const userSettings: Omit<UserSettings, "volumeUnit"> = {
     calorieUnit: user?.calorieUnit ?? "kcal",
     weightUnit: user?.weightUnit ?? "g",
+    bodyWeightUnit: user?.bodyWeightUnit ?? "kg",
   };
 
   const userGoals = {

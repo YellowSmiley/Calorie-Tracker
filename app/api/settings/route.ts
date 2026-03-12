@@ -25,6 +25,7 @@ export async function GET() {
         saltGoal: true,
         calorieUnit: true,
         weightUnit: true,
+        bodyWeightUnit: true,
         volumeUnit: true,
       },
     });
@@ -64,6 +65,7 @@ export async function PUT(request: NextRequest) {
       saltGoal,
       calorieUnit,
       weightUnit,
+      bodyWeightUnit,
       volumeUnit,
     } = body;
 
@@ -118,7 +120,8 @@ export async function PUT(request: NextRequest) {
 
     // Validate unit enum values
     const VALID_CALORIE_UNITS = ["kcal", "kJ"];
-    const VALID_WEIGHT_UNITS = ["g", "kg", "oz", "lbs"];
+    const VALID_WEIGHT_UNITS = ["g", "kg", "oz", "lbs", "mg"];
+    const VALID_BODY_WEIGHT_UNITS = ["kg", "lbs"];
     const VALID_VOLUME_UNITS = ["ml", "cup", "tbsp", "tsp", "L"];
 
     if (calorieUnit && !VALID_CALORIE_UNITS.includes(calorieUnit)) {
@@ -130,6 +133,12 @@ export async function PUT(request: NextRequest) {
     if (weightUnit && !VALID_WEIGHT_UNITS.includes(weightUnit)) {
       return NextResponse.json(
         { error: "Invalid weight unit" },
+        { status: 400 },
+      );
+    }
+    if (bodyWeightUnit && !VALID_BODY_WEIGHT_UNITS.includes(bodyWeightUnit)) {
+      return NextResponse.json(
+        { error: "Invalid body weight unit" },
         { status: 400 },
       );
     }
@@ -190,6 +199,7 @@ export async function PUT(request: NextRequest) {
         saltGoal: saltGoal !== undefined ? parseFloat(saltGoal) : undefined,
         calorieUnit: calorieUnit ?? "kcal",
         weightUnit: weightUnit ?? "g",
+        bodyWeightUnit: bodyWeightUnit ?? "kg",
         volumeUnit: volumeUnit ?? "ml",
       },
       select: {
@@ -203,6 +213,7 @@ export async function PUT(request: NextRequest) {
         saltGoal: true,
         calorieUnit: true,
         weightUnit: true,
+        bodyWeightUnit: true,
         volumeUnit: true,
       },
     });

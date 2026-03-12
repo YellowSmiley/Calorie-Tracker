@@ -3,6 +3,7 @@
 
 import { MeasurementType } from "@/app/diary/types";
 import {
+  AcceptedBodyWeightUnits,
   AcceptedCalorieUnits,
   AcceptedVolumeUnits,
   AcceptedWeightedUnits,
@@ -172,6 +173,50 @@ export function getWeightForDisplay(
   );
   const formatted = Number(converted.toFixed(decimalPlaces));
   return `${formatted}${weightUnit}`;
+}
+
+export function convertBodyWeightForDisplay(
+  kgValue: number | null | undefined,
+  targetUnit: AcceptedBodyWeightUnits | null | undefined,
+): number {
+  if (kgValue === null || kgValue === undefined) {
+    return 0;
+  }
+
+  switch (targetUnit) {
+    case "lbs":
+      return kgValue * 2.20462;
+    case "kg":
+    default:
+      return kgValue;
+  }
+}
+
+export function convertBodyWeightFromInput(
+  inputValue: number | null | undefined,
+  inputUnit: AcceptedBodyWeightUnits | null | undefined,
+): number {
+  if (inputValue === null || inputValue === undefined) {
+    return 0;
+  }
+
+  switch (inputUnit) {
+    case "lbs":
+      return inputValue / 2.20462;
+    case "kg":
+    default:
+      return inputValue;
+  }
+}
+
+export function getBodyWeightForDisplay(
+  kgValue: number | null | undefined,
+  bodyWeightUnit: AcceptedBodyWeightUnits | null | undefined,
+  decimalPlaces: number = 1,
+): string {
+  const converted = convertBodyWeightForDisplay(kgValue, bodyWeightUnit);
+  const formatted = Number(converted.toFixed(decimalPlaces));
+  return `${formatted}${bodyWeightUnit ? ` ${bodyWeightUnit}` : ""}`;
 }
 
 export function getMeasurementType(

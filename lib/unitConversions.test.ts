@@ -7,6 +7,9 @@ import {
   getWeightForDisplay,
   getMeasurementType,
   getVolumeForDisplay,
+  convertBodyWeightForDisplay,
+  getBodyWeightForDisplay,
+  convertBodyWeightFromInput,
 } from "./unitConversions";
 
 describe("convertCaloriesForDisplay", () => {
@@ -128,4 +131,31 @@ test("getCalorieForDisplay", () => {
   expect(getCalorieForDisplay(250, "kJ")).toBe("1046 kJ");
   expect(getCalorieForDisplay(null, "kcal")).toBe("0 kcal");
   expect(getCalorieForDisplay(undefined, "kcal")).toBe("0 kcal");
+});
+
+test("convertBodyWeightForDisplay", () => {
+  expect(convertBodyWeightForDisplay(70, "kg")).toBe(70);
+  expect(convertBodyWeightForDisplay(70, "lbs")).toBeCloseTo(154.3234, 3);
+  expect(convertBodyWeightForDisplay(null, "kg")).toBe(0);
+  expect(convertBodyWeightForDisplay(undefined, "kg")).toBe(0);
+  expect(convertBodyWeightForDisplay(70, null)).toBe(70);
+  expect(convertBodyWeightForDisplay(70, undefined)).toBe(70);
+});
+
+test("convertBodyWeightFromInput", () => {
+  expect(convertBodyWeightFromInput(70, "kg")).toBe(70);
+  expect(convertBodyWeightFromInput(154.3234, "lbs")).toBeCloseTo(70, 3);
+  expect(convertBodyWeightFromInput(null, "kg")).toBe(0);
+  expect(convertBodyWeightFromInput(undefined, "kg")).toBe(0);
+  expect(convertBodyWeightFromInput(70, null)).toBe(70);
+  expect(convertBodyWeightFromInput(70, undefined)).toBe(70);
+});
+
+test("getBodyWeightForDisplay", () => {
+  expect(getBodyWeightForDisplay(70, "kg")).toBe("70 kg");
+  expect(getBodyWeightForDisplay(70, "lbs")).toBe("154.3 lbs");
+  expect(getBodyWeightForDisplay(null, "kg")).toBe("0 kg");
+  expect(getBodyWeightForDisplay(undefined, "kg")).toBe("0 kg");
+  expect(getBodyWeightForDisplay(70, null)).toBe("70");
+  expect(getBodyWeightForDisplay(70, undefined)).toBe("70");
 });

@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   mealEntries   MealEntry[]
+  weightEntries WeightEntry[]
   createdFoods  Food[]
   provider      String?    @default("credentials") // 'google', 'credentials', etc.
   
@@ -43,6 +44,7 @@ model User {
   calorieUnit   String?    @default("kcal")
   // macroUnit removed; use weightUnit instead
   weightUnit    String?    @default("g")
+  bodyWeightUnit String?   @default("kg")
   volumeUnit    String?    @default("ml")
 }
 
@@ -126,5 +128,19 @@ model MealEntry {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
 
+  @@index([userId, date])
+}
+
+model WeightEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  weight    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
   @@index([userId, date])
 }

@@ -1,9 +1,13 @@
 import { test, expect, Page } from "@playwright/test";
-import { login } from "./tester-login.spec";
-import { resetFoodItems, createTestFood, addFoodToMeal } from "./diary.spec";
+import { login } from "./auth";
+import {
+  addFoodToMeal,
+  createTestFood,
+  resetFoodItems,
+  resetSettings,
+} from "./helpers";
 import {
   DEFAULT_CALORIE_GOAL,
-  DEFAULT_CALORIE_UNIT,
   DEFAULT_CARB_GOAL,
   DEFAULT_FAT_GOAL,
   DEFAULT_FIBRE_GOAL,
@@ -11,8 +15,6 @@ import {
   DEFAULT_SALT_GOAL,
   DEFAULT_SATURATES_GOAL,
   DEFAULT_SUGARS_GOAL,
-  DEFAULT_VOLUME_UNIT,
-  DEFAULT_WEIGHT_UNIT,
 } from "@/lib/consts";
 
 const fillInputs = async (page: Page, values: Record<string, string>) => {
@@ -65,33 +67,6 @@ const customGoalInputValues: Record<string, string> = {
   "nutritional-goals-sugars-goal-input": "3.2",
   "nutritional-goals-fibre-goal-input": "1.1",
   "nutritional-goals-salt-goal-input": "0.2",
-};
-
-export const resetSettings = async (page: Page) => {
-  // Go back to settings and reset the values back to default
-  await page.getByTestId("nav-settings").click();
-  while (
-    (await page.getByTestId("measurement-calorie-unit-select").inputValue()) !==
-    DEFAULT_CALORIE_UNIT
-  ) {
-    await page
-      .getByTestId("measurement-calorie-unit-select")
-      .selectOption(DEFAULT_CALORIE_UNIT);
-  }
-  await expect(page.getByTestId("measurement-calorie-unit-select")).toHaveValue(
-    DEFAULT_CALORIE_UNIT,
-  );
-  await selectOptions(page, {
-    "measurement-weight-unit-select": DEFAULT_WEIGHT_UNIT,
-    "measurement-volume-unit-select": DEFAULT_VOLUME_UNIT,
-  });
-  await expectSelectValues(page, {
-    "measurement-weight-unit-select": DEFAULT_WEIGHT_UNIT,
-    "measurement-volume-unit-select": DEFAULT_VOLUME_UNIT,
-  });
-  await fillInputs(page, defaultGoalInputValues);
-  await expectInputValues(page, defaultGoalInputValues);
-  await page.getByTestId("settings-save-button").click();
 };
 
 const setGoals = async (page: Page) => {
@@ -422,5 +397,7 @@ test.describe("Settings", () => {
     ).toBeVisible();
     await page.getByTestId("nav-settings").click();
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+
+    // TODO: Check body weight unit changes and converts correctly and shows correctly on diary and dashboard
   });
 });
