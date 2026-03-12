@@ -172,7 +172,7 @@ export default function UserManagement() {
                   <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
                     {user.name || "No name"}
                     {user.provider === "credentials" && (
-                      <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
+                      <span className="inline-block px-2 py-0.5 text-xs rounded bg-black text-white dark:bg-zinc-50 dark:text-black">
                         Our User
                       </span>
                     )}
@@ -227,7 +227,7 @@ export default function UserManagement() {
                     const data = (await response.json()) as { error?: string };
                     setEditError(data.error || "Failed to update user");
                   }
-                } catch (err) {
+                } catch {
                   setEditError("Error updating user");
                 } finally {
                   setIsSaving(false);
