@@ -3,6 +3,8 @@
 import { User } from "@prisma/client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import EditUserSidebar from "./components/EditUserSidebar";
+import SearchInput from "../components/SearchInput";
+import DataTableShell from "../components/DataTableShell";
 
 const PAGE_SIZE = 50;
 
@@ -11,6 +13,7 @@ export default function UserManagement() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
@@ -36,10 +39,17 @@ export default function UserManagement() {
           setError("Failed to fetch users");
           return;
         }
-        const data = await res.json();
+        const data = (await res.json()) as {
+          users: User[];
+          total: number;
+          suggestions?: string[];
+        };
         const fetched: User[] = data.users || [];
         setUsers((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
+        if (!append) {
+          setSuggestions(data.suggestions ?? []);
+        }
       } catch (err) {
         if (process.env.NODE_ENV === "development")
           console.error("Error fetching users:", err);
@@ -59,7 +69,11 @@ export default function UserManagement() {
   // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!searchQuery) return; // Don't search if input is empty
+    if (!searchQuery) {
+      setSuggestions([]);
+      fetchUsers("", 0, false);
+      return;
+    }
     debounceRef.current = setTimeout(() => {
       fetchUsers(searchQuery, 0, false);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -114,16 +128,17 @@ export default function UserManagement() {
   return (
     <div className="flex flex-col h-full p-4">
       <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
-        {/* Search Box */}
-        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search users..."
+          inputTestId="user-search-input"
+          showSuggestions={!isLoading && users.length === 0 && !!searchQuery}
+          suggestions={suggestions}
+          onSuggestionClick={setSearchQuery}
+          suggestionsTestId="user-search-suggestions"
+          suggestionButtonTestIdPrefix="user-search-suggestion"
+        />
 
         {/* Error Message */}
         {error && (
@@ -144,106 +159,18 @@ export default function UserManagement() {
           </div>
         )}
 
-        {/* User List */}
-        <div
-          ref={scrollRef}
+        <DataTableShell
+          scrollRef={scrollRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto"
-        >
-          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {users.map((user) => (
-              <div
-                key={user.id}
-                className={`flex items-center gap-3 px-4 py-3 ${
-                  user.provider === "credentials"
-                    ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-                    : ""
-                }`}
-                onClick={
-                  user.provider === "credentials"
-                    ? () => {
-                        setEditUser(user);
-                        setEditError(null);
-                      }
-                    : undefined
-                }
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
-                    {user.name || "No name"}
-                    {user.provider === "credentials" && (
-                      <span className="inline-block px-2 py-0.5 text-xs rounded bg-black text-white dark:bg-zinc-50 dark:text-black">
-                        Our User
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {user.email || "No email"}
-                    {user.isAdmin ? " - Admin" : ""}
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteUser(user);
-                      setDeleteError(null);
-                    }}
-                    className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-            {/* Edit User Sidebar */}
-            <EditUserSidebar
-              key={editUser?.id}
-              user={editUser}
-              isOpen={!!editUser}
-              onClose={() => setEditUser(null)}
-              isSaving={isSaving}
-              error={editError}
-              onSave={async (name, email, password) => {
-                setIsSaving(true);
-                setEditError(null);
-                try {
-                  const response = await fetch(
-                    `/api/admin/users/${editUser?.id}`,
-                    {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ name, email, password }),
-                    },
-                  );
-                  if (response.ok) {
-                    setUsers((prev) =>
-                      prev.map((u) =>
-                        u.id === editUser?.id ? { ...u, name, email } : u,
-                      ),
-                    );
-                    setEditUser(null);
-                  } else {
-                    const data = (await response.json()) as { error?: string };
-                    setEditError(data.error || "Failed to update user");
-                  }
-                } catch {
-                  setEditError("Error updating user");
-                } finally {
-                  setIsSaving(false);
-                }
-              }}
-            />
-
-            {/* Loading indicator */}
-            {isLoading && (
+          loadingNode={
+            isLoading ? (
               <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Loading...
               </div>
-            )}
-
-            {/* No results */}
-            {!isLoading && users.length === 0 && (
+            ) : undefined
+          }
+          emptyNode={
+            !isLoading && users.length === 0 ? (
               <div className="px-4 py-6 text-center">
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {searchQuery
@@ -251,9 +178,91 @@ export default function UserManagement() {
                     : "No users found"}
                 </p>
               </div>
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        >
+          {users.map((user) => (
+            <div
+              key={user.id}
+              className={`flex items-center gap-3 px-4 py-3 ${
+                user.provider === "credentials"
+                  ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                  : ""
+              }`}
+              onClick={
+                user.provider === "credentials"
+                  ? () => {
+                      setEditUser(user);
+                      setEditError(null);
+                    }
+                  : undefined
+              }
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-black dark:text-zinc-50 flex items-center gap-2">
+                  {user.name || "No name"}
+                  {user.provider === "credentials" && (
+                    <span className="inline-block px-2 py-0.5 text-xs rounded bg-black text-white dark:bg-zinc-50 dark:text-black">
+                      Our User
+                    </span>
+                  )}
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {user.email || "No email"}
+                  {user.isAdmin ? " - Admin" : ""}
+                </p>
+              </div>
+              <div className="shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteUser(user);
+                    setDeleteError(null);
+                  }}
+                  className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </DataTableShell>
+
+        {/* Edit User Sidebar */}
+        <EditUserSidebar
+          key={editUser?.id}
+          user={editUser}
+          isOpen={!!editUser}
+          onClose={() => setEditUser(null)}
+          isSaving={isSaving}
+          error={editError}
+          onSave={async (name, email, password) => {
+            setIsSaving(true);
+            setEditError(null);
+            try {
+              const response = await fetch(`/api/admin/users/${editUser?.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+              });
+              if (response.ok) {
+                setUsers((prev) =>
+                  prev.map((u) =>
+                    u.id === editUser?.id ? { ...u, name, email } : u,
+                  ),
+                );
+                setEditUser(null);
+              } else {
+                const data = (await response.json()) as { error?: string };
+                setEditError(data.error || "Failed to update user");
+              }
+            } catch {
+              setEditError("Error updating user");
+            } finally {
+              setIsSaving(false);
+            }
+          }}
+        />
       </div>
 
       {/* Delete User Modal */}

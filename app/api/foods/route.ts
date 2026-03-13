@@ -1,6 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  findCloseFoodSuggestions,
+  sortByRelevanceAndUsage,
+} from "../../../lib/foodSearchSuggestions";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -21,15 +25,42 @@ export async function GET(request: NextRequest) {
       : {}),
   };
 
-  const [foods, total] = await Promise.all([
-    prisma.food.findMany({
-      where,
-      orderBy: { name: "asc" },
-      take,
-      skip,
-    }),
-    prisma.food.count({ where }),
-  ]);
+  const matchingFoods = await prisma.food.findMany({
+    where,
+    include: {
+      _count: {
+        select: { entries: true },
+      },
+    },
+  });
 
-  return NextResponse.json({ foods, total, take, skip });
+  const sortedFoods = sortByRelevanceAndUsage(
+    matchingFoods.map((food) => ({
+      ...food,
+      usageCount: food._count.entries,
+    })),
+    search,
+  );
+
+  const total = sortedFoods.length;
+  const foods = sortedFoods
+    .slice(skip, skip + take)
+    .map(({ _count, usageCount, ...food }) => food);
+
+  let suggestions: string[] = [];
+
+  if (search && total === 0) {
+    const suggestionCandidates = await prisma.food.findMany({
+      select: { name: true },
+      orderBy: { name: "asc" },
+      take: 1000,
+    });
+
+    suggestions = findCloseFoodSuggestions(
+      search,
+      suggestionCandidates.map((food) => food.name),
+    );
+  }
+
+  return NextResponse.json({ foods, total, take, skip, suggestions });
 }

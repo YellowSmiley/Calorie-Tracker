@@ -12,6 +12,8 @@ import {
   convertVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
+import SearchInput from "./SearchInput";
+import DataTableShell from "./DataTableShell";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -29,6 +31,7 @@ export default function FoodTable({
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [editingFood, setEditingFood] = useState<Food | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FoodWithCreator | null>(
     null,
@@ -58,10 +61,14 @@ export default function FoodTable({
         const data = (await res.json()) as {
           foods: FoodWithCreator[];
           total: number;
+          suggestions?: string[];
         };
         const fetched = data.foods || [];
         setFoods((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
+        if (!append) {
+          setSuggestions(data.suggestions ?? []);
+        }
         setIsLoading(false);
       } catch (err) {
         if (process.env.NODE_ENV === "development")
@@ -74,15 +81,14 @@ export default function FoodTable({
     [],
   );
 
-  // Fetch on mount
-  useEffect(() => {
-    fetchFoods("", 0, false);
-  }, [fetchFoods]);
-
   // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!searchQuery) return; // Don't search if input is empty
+    if (!searchQuery) {
+      setSuggestions([]);
+      fetchFoods("", 0, false);
+      return;
+    }
     debounceRef.current = setTimeout(() => {
       fetchFoods(searchQuery, 0, false);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -200,17 +206,13 @@ export default function FoodTable({
   return (
     <div className="flex flex-col h-full p-4">
       <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
-        {/* Search Box */}
-        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-          <input
-            type="text"
-            placeholder="Search foods..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
-            data-testid="food-search-input"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          showSuggestions={!isLoading && foods.length === 0 && !!searchQuery}
+          suggestions={suggestions}
+          onSuggestionClick={setSearchQuery}
+        />
 
         {/* Error Message */}
         {error && (
@@ -231,69 +233,21 @@ export default function FoodTable({
           </div>
         )}
 
-        {/* Food List */}
-        <div
-          ref={scrollRef}
+        <DataTableShell
+          scrollRef={scrollRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto"
-        >
-          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {foods.map((food, i) => (
-              <div
-                key={food.id}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-                onClick={() => startEditing(food)}
-                data-testid={`food-search-result-${food.id}`}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-black dark:text-zinc-50">
-                    {food.name}
-                  </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {food.measurementType === "weight"
-                      ? getWeightForDisplay(
-                          food.measurementAmount,
-                          userSettings.weightUnit,
-                        )
-                      : convertVolumeForDisplay(
-                          food.measurementAmount,
-                          userSettings.volumeUnit,
-                        )}{" "}
-                    - {food.calories} kcal
-                    {food.defaultServingDescription
-                      ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
-                      : ""}
-                    {` - ${food.createdByName || food.createdBy || "Unknown"}`}
-                  </p>
-                </div>
-                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => {
-                      setDeleteTarget(food);
-                      setShowDeleteModal(true);
-                    }}
-                    className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                    data-testid={`delete-food-button-${i}`}
-                  >
-                    Delete
-                  </button>
-                </div>
-                {/* Delete Food Modal */}
-              </div>
-            ))}
-
-            {/* Loading indicator */}
-            {isLoading && (
+          loadingNode={
+            isLoading ? (
               <div
                 className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400"
                 data-testid="loading-foods"
               >
                 Loading...
               </div>
-            )}
-
-            {/* No results */}
-            {!isLoading && foods.length === 0 && (
+            ) : undefined
+          }
+          emptyNode={
+            !isLoading && foods.length === 0 ? (
               <div className="px-4 py-6 text-center">
                 <p
                   className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
@@ -313,10 +267,10 @@ export default function FoodTable({
                   Create Food
                 </button>
               </div>
-            )}
-
-            {/* Create button at end of list */}
-            {!isLoading && foods.length > 0 && foods.length >= total && (
+            ) : undefined
+          }
+          footerNode={
+            !isLoading && foods.length > 0 && foods.length >= total ? (
               <div className="px-4 py-4 text-center">
                 <button
                   onClick={() => setShowCreateForm(true)}
@@ -326,9 +280,52 @@ export default function FoodTable({
                   Create Food
                 </button>
               </div>
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        >
+          {foods.map((food, i) => (
+            <div
+              key={food.id}
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+              onClick={() => startEditing(food)}
+              data-testid={`food-search-result-${food.id}`}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-black dark:text-zinc-50">
+                  {food.name}
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {food.measurementType === "weight"
+                    ? getWeightForDisplay(
+                        food.measurementAmount,
+                        userSettings.weightUnit,
+                      )
+                    : convertVolumeForDisplay(
+                        food.measurementAmount,
+                        userSettings.volumeUnit,
+                      )}{" "}
+                  - {food.calories} kcal
+                  {food.defaultServingDescription
+                    ? ` - ${food.defaultServingDescription}${food.defaultServingAmount ? ` (${food.defaultServingAmount})` : ""}`
+                    : ""}
+                  {` - ${food.createdByName || food.createdBy || "Unknown"}`}
+                </p>
+              </div>
+              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => {
+                    setDeleteTarget(food);
+                    setShowDeleteModal(true);
+                  }}
+                  className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  data-testid={`delete-food-button-${i}`}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </DataTableShell>
       </div>
 
       <CreateFoodSidebar

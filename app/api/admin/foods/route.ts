@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
 import { Food } from "@prisma/client";
 import { FoodItem } from "@/app/diary/types";
+import {
+  findCloseFoodSuggestions,
+  sortByRelevanceAndUsage,
+} from "../../../../lib/foodSearchSuggestions";
 
 export type FoodWithCreator = Food & { createdByName?: string };
 
@@ -32,33 +36,61 @@ export async function GET(request: NextRequest) {
       ...(!session.user.isAdmin ? { createdBy: session.user.id } : {}),
     };
 
-    const [foods, total] = await Promise.all([
-      prisma.food.findMany({
-        where,
-        orderBy: { name: "asc" },
-        take,
-        skip,
-      }),
-      prisma.food.count({ where }),
-    ]);
+    const matchingFoods = await prisma.food.findMany({
+      where,
+      include: {
+        creator: {
+          select: { name: true },
+        },
+        _count: {
+          select: { entries: true },
+        },
+      },
+    });
 
-    // Fetch creator names separately
-    const foodsWithCreator: FoodWithCreator[] = await Promise.all(
-      foods.map(async (food) => {
-        const creator = food.createdBy
-          ? await prisma.user.findUnique({
-              where: { id: food.createdBy },
-              select: { name: true },
-            })
-          : null;
-        return {
-          ...food,
-          createdByName: creator?.name || "Unknown",
-        };
-      }),
+    const sortedFoods = sortByRelevanceAndUsage(
+      matchingFoods.map((food) => ({
+        ...food,
+        usageCount: food._count.entries,
+      })),
+      search,
     );
 
-    return NextResponse.json({ foods: foodsWithCreator, total, take, skip });
+    const total = sortedFoods.length;
+    const foodsWithCreator: FoodWithCreator[] = sortedFoods
+      .slice(skip, skip + take)
+      .map(({ creator, ...food }) => ({
+        ...food,
+        createdByName: creator?.name || "Unknown",
+      }));
+
+    let suggestions: string[] = [];
+
+    if (search && total === 0) {
+      const suggestionWhere = {
+        ...(!session.user.isAdmin ? { createdBy: session.user.id } : {}),
+      };
+
+      const suggestionCandidates = await prisma.food.findMany({
+        where: suggestionWhere,
+        select: { name: true },
+        orderBy: { name: "asc" },
+        take: 1000,
+      });
+
+      suggestions = findCloseFoodSuggestions(
+        search,
+        suggestionCandidates.map((food) => food.name),
+      );
+    }
+
+    return NextResponse.json({
+      foods: foodsWithCreator,
+      total,
+      take,
+      skip,
+      suggestions,
+    });
   } catch (error) {
     logError("admin/foods/GET", error);
     return NextResponse.json(

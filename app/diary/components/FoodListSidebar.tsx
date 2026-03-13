@@ -8,6 +8,8 @@ import {
   getWeightForDisplay,
 } from "@/lib/unitConversions";
 import HelpButton from "../../components/HelpButton";
+import SearchInput from "../../components/SearchInput";
+import DataTableShell from "../../components/DataTableShell";
 import EditFoodSidebar from "./EditFoodSidebar";
 import { UserSettings } from "../../settings/types";
 import { Food } from "@prisma/client";
@@ -60,6 +62,7 @@ export default function FoodListSidebar({
   userSettings,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [total, setTotal] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
@@ -88,10 +91,14 @@ export default function FoodListSidebar({
         const data = (await res.json()) as {
           foods: Food[];
           total: number;
+          suggestions?: string[];
         };
         const mapped = (data.foods || []).map(mapFood);
         setFoods((prev) => (append ? [...prev, ...mapped] : mapped));
         setTotal(data.total ?? 0);
+        if (!append) {
+          setSuggestions(data.suggestions ?? []);
+        }
         setHasLoaded(true);
       } catch (err) {
         if (process.env.NODE_ENV === "development")
@@ -140,6 +147,7 @@ export default function FoodListSidebar({
 
   const handleClose = () => {
     setSearchQuery("");
+    setSuggestions([]);
     setFoods([]);
     setTotal(0);
     setHasLoaded(false);
@@ -190,81 +198,38 @@ export default function FoodListSidebar({
 
       <div className="p-4 overflow-hidden">
         <div className="mx-auto w-full max-w-3xl h-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
-          {/* Search Box */}
-          <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-            <input
-              type="text"
-              placeholder="Search foods..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-600"
-              data-testid="food-search-input"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            showSuggestions={
+              !isFetching && hasLoaded && foods.length === 0 && !!searchQuery
+            }
+            suggestions={suggestions}
+            onSuggestionClick={setSearchQuery}
+          />
 
-          {/* Food List */}
-          <div
-            ref={scrollRef}
+          <DataTableShell
+            scrollRef={scrollRef}
             onScroll={handleScroll}
-            className="overflow-y-auto relative"
-          >
-            {isLoading && (
-              <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
-                <div className="text-sm text-zinc-700 dark:text-zinc-300">
-                  Adding food...
-                </div>
-              </div>
-            )}
-            <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {foods.map((food) => (
-                <div
-                  key={food.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-                  onClick={() => handleSelectFood(food)}
-                  data-testid={`food-item-${food.id}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-black dark:text-zinc-50">
-                      {food.name}
-                    </p>
-                    {(() => {
-                      const actualAmount =
-                        food.serving * food.measurementAmount;
-                      const amountStr =
-                        food.measurementType === "weight"
-                          ? getWeightForDisplay(
-                              actualAmount,
-                              userSettings.weightUnit,
-                              0,
-                            )
-                          : getVolumeForDisplay(
-                              actualAmount,
-                              userSettings.volumeUnit,
-                              0,
-                            );
-                      return (
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                          {amountStr} -{" "}
-                          {getCalorieForDisplay(
-                            food.calories,
-                            userSettings.calorieUnit,
-                          )}
-                        </p>
-                      );
-                    })()}
+            containerClassName="overflow-y-auto relative"
+            overlay={
+              isLoading ? (
+                <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300">
+                    Adding food...
                   </div>
                 </div>
-              ))}
-
-              {/* Loading indicator */}
-              {isFetching && (
+              ) : undefined
+            }
+            loadingNode={
+              isFetching ? (
                 <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
                   Loading...
                 </div>
-              )}
-
-              {/* No results */}
-              {!isFetching && hasLoaded && foods.length === 0 && (
+              ) : undefined
+            }
+            emptyNode={
+              !isFetching && hasLoaded && foods.length === 0 ? (
                 <div className="px-4 py-6 text-center">
                   <p
                     className="text-sm text-zinc-500 dark:text-zinc-400 mb-3"
@@ -280,10 +245,10 @@ export default function FoodListSidebar({
                     Create Food
                   </button>
                 </div>
-              )}
-
-              {/* Create button at end of list */}
-              {!isFetching && foods.length > 0 && foods.length >= total && (
+              ) : undefined
+            }
+            footerNode={
+              !isFetching && foods.length > 0 && foods.length >= total ? (
                 <div className="px-4 py-4 text-center">
                   <button
                     onClick={onOpenCreateForm}
@@ -293,9 +258,48 @@ export default function FoodListSidebar({
                     Create Food
                   </button>
                 </div>
-              )}
-            </div>
-          </div>
+              ) : undefined
+            }
+          >
+            {foods.map((food) => (
+              <div
+                key={food.id}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                onClick={() => handleSelectFood(food)}
+                data-testid={`food-item-${food.id}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-black dark:text-zinc-50">
+                    {food.name}
+                  </p>
+                  {(() => {
+                    const actualAmount = food.serving * food.measurementAmount;
+                    const amountStr =
+                      food.measurementType === "weight"
+                        ? getWeightForDisplay(
+                            actualAmount,
+                            userSettings.weightUnit,
+                            0,
+                          )
+                        : getVolumeForDisplay(
+                            actualAmount,
+                            userSettings.volumeUnit,
+                            0,
+                          );
+                    return (
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                        {amountStr} -{" "}
+                        {getCalorieForDisplay(
+                          food.calories,
+                          userSettings.calorieUnit,
+                        )}
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
+            ))}
+          </DataTableShell>
         </div>
       </div>
       <EditFoodSidebar

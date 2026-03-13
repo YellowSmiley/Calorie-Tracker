@@ -6,16 +6,6 @@ import {
   resetFoodItems,
   resetSettings,
 } from "./helpers";
-import {
-  DEFAULT_CALORIE_GOAL,
-  DEFAULT_CARB_GOAL,
-  DEFAULT_FAT_GOAL,
-  DEFAULT_FIBRE_GOAL,
-  DEFAULT_PROTEIN_GOAL,
-  DEFAULT_SALT_GOAL,
-  DEFAULT_SATURATES_GOAL,
-  DEFAULT_SUGARS_GOAL,
-} from "@/lib/consts";
 
 const fillInputs = async (page: Page, values: Record<string, string>) => {
   for (const [testId, value] of Object.entries(values)) {
@@ -32,12 +22,6 @@ const expectInputValues = async (
   }
 };
 
-const selectOptions = async (page: Page, values: Record<string, string>) => {
-  for (const [testId, value] of Object.entries(values)) {
-    await page.getByTestId(testId).selectOption(value);
-  }
-};
-
 const expectSelectValues = async (
   page: Page,
   values: Record<string, string>,
@@ -45,17 +29,6 @@ const expectSelectValues = async (
   for (const [testId, value] of Object.entries(values)) {
     await expect(page.getByTestId(testId)).toHaveValue(value);
   }
-};
-
-const defaultGoalInputValues: Record<string, string> = {
-  "nutritional-goals-calorie-goal-input": DEFAULT_CALORIE_GOAL.toString(),
-  "nutritional-goals-protein-goal-input": DEFAULT_PROTEIN_GOAL.toString(),
-  "nutritional-goals-carb-goal-input": DEFAULT_CARB_GOAL.toString(),
-  "nutritional-goals-fat-goal-input": DEFAULT_FAT_GOAL.toString(),
-  "nutritional-goals-saturates-goal-input": DEFAULT_SATURATES_GOAL.toString(),
-  "nutritional-goals-sugars-goal-input": DEFAULT_SUGARS_GOAL.toString(),
-  "nutritional-goals-fibre-goal-input": DEFAULT_FIBRE_GOAL.toString(),
-  "nutritional-goals-salt-goal-input": DEFAULT_SALT_GOAL.toString(),
 };
 
 const customGoalInputValues: Record<string, string> = {
@@ -399,5 +372,7 @@ test.describe("Settings", () => {
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 
     // TODO: Check body weight unit changes and converts correctly and shows correctly on diary and dashboard
+
+    // TODO: Add tests for user management and search suggestions
   });
 });

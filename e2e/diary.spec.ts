@@ -426,6 +426,9 @@ test.describe("Diary Feature", () => {
     await modal.getByTestId("delete-food-confirm").click();
     await expect(foodRow).not.toBeVisible();
 
-    // TODO: Test body weight across multiple days
+    // TODO: Test body weight across multiple days.
+
+    // TODO: Add test for search suggestions on select food and my food
+    // Should order by most used
   });
 });

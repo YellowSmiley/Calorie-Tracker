@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
+import { findCloseFoodSuggestions } from "../../../../lib/foodSearchSuggestions";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -45,7 +46,27 @@ export async function GET(request: NextRequest) {
       prisma.user.count({ where }),
     ]);
 
-    return NextResponse.json({ users, total, take, skip });
+    let suggestions: string[] = [];
+
+    if (search && users.length === 0) {
+      const suggestionCandidates = await prisma.user.findMany({
+        select: { name: true, email: true },
+        orderBy: { email: "asc" },
+        take: 1000,
+      });
+
+      const candidateValues = Array.from(
+        new Set(
+          suggestionCandidates
+            .flatMap((user) => [user.name, user.email])
+            .filter((value): value is string => !!value),
+        ),
+      );
+
+      suggestions = findCloseFoodSuggestions(search, candidateValues);
+    }
+
+    return NextResponse.json({ users, total, take, skip, suggestions });
   } catch (error) {
     logError("admin/users/GET", error);
     return NextResponse.json(
