@@ -62,7 +62,9 @@ export default function RegisterPage() {
       confirmPassword: validateConfirmPassword(confirmPassword, password),
     };
     setFieldErrors(nextErrors);
-    return !nextErrors.email && !nextErrors.password && !nextErrors.confirmPassword;
+    return (
+      !nextErrors.email && !nextErrors.password && !nextErrors.confirmPassword
+    );
   };
 
   const handleGoogleSignIn = async () => {
@@ -88,7 +90,11 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
 
       const data = await res.json();
@@ -210,7 +216,11 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <form onSubmit={handleRegister} noValidate className="space-y-3">
+                <form
+                  onSubmit={handleRegister}
+                  noValidate
+                  className="space-y-3"
+                >
                   <div className="grid gap-2 text-left">
                     <ValidatedTextField
                       id="name"
