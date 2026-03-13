@@ -17,6 +17,7 @@ import {
   AcceptedVolumeUnits,
   UserSettings,
 } from "../../settings/types";
+import ValidatedNumberField from "./ValidatedNumberField";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -37,6 +38,11 @@ export default function EditFoodSidebar({
   isLoading = false,
   isAdd = false,
 }: EditFoodSidebarProps) {
+  type FieldErrors = {
+    servingSize?: string;
+    quantity?: string;
+  };
+
   const foodMeasurementAmount = food?.measurementAmount || 100;
 
   const defaultServing = food?.defaultServingAmount
@@ -56,6 +62,25 @@ export default function EditFoodSidebar({
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const validateServingSize = (value: string) => {
+    if (!value.trim()) return "Serving size is required.";
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      return "Serving size must be greater than 0.";
+    }
+    return undefined;
+  };
+
+  const validateQuantity = (value: string) => {
+    if (!value.trim()) return "Quantity is required.";
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      return "Quantity must be greater than 0.";
+    }
+    return undefined;
+  };
 
   // Initialise when food / sidebar opens (adjust state during render)
   const [prevKey, setPrevKey] = useState("");
@@ -124,6 +149,17 @@ export default function EditFoodSidebar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const nextErrors: FieldErrors = {
+      servingSize: validateServingSize(servingSize),
+      quantity: validateQuantity(quantity),
+    };
+    setFieldErrors(nextErrors);
+
+    if (nextErrors.servingSize || nextErrors.quantity) {
+      return;
+    }
+
     const convertedTotalAmount =
       food?.measurementType === "weight"
         ? convertWeightFromInput(
@@ -352,49 +388,52 @@ export default function EditFoodSidebar({
             {/* Serving Size + Quantity Inputs */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2">
-                    Serving Size (
-                    {food?.measurementType === "weight"
-                      ? userSettings.weightUnit
-                      : userSettings.volumeUnit}
-                    )
-                  </label>
-                  <input
-                    id="serving-size-input"
-                    type="number"
-                    step="any"
-                    min="0"
-                    value={servingSize}
-                    onChange={(e) => setServingSize(e.target.value)}
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
-                    placeholder={String(defaultServing)}
-                    data-testid={
-                      isAdd ? "add-food-serving-size" : "edit-food-serving-size"
-                    }
-                  />
-                </div>
-                <div>
-                  <label
-                    className="block text-sm font-semibold text-black dark:text-zinc-50 mb-2"
-                    htmlFor="quantity-input"
-                  >
-                    Quantity
-                  </label>
-                  <input
-                    id="quantity-input"
-                    type="number"
-                    step="any"
-                    min="0"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 bg-transparent text-black dark:text-zinc-50 text-lg font-medium text-center"
-                    placeholder="1"
-                    data-testid={
-                      isAdd ? "add-food-quantity" : "edit-food-quantity"
-                    }
-                  />
-                </div>
+                <ValidatedNumberField
+                  id="serving-size-input"
+                  label={`Serving Size (${food?.measurementType === "weight" ? userSettings.weightUnit : userSettings.volumeUnit})`}
+                  value={servingSize}
+                  onChange={(nextServingSize) => {
+                    setServingSize(nextServingSize);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      servingSize: validateServingSize(nextServingSize),
+                    }));
+                  }}
+                  onBlur={() => {
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      servingSize: validateServingSize(servingSize),
+                    }));
+                  }}
+                  placeholder={String(defaultServing)}
+                  dataTestId={
+                    isAdd ? "add-food-serving-size" : "edit-food-serving-size"
+                  }
+                  error={fieldErrors.servingSize}
+                />
+                <ValidatedNumberField
+                  id="quantity-input"
+                  label="Quantity"
+                  value={quantity}
+                  onChange={(nextQuantity) => {
+                    setQuantity(nextQuantity);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      quantity: validateQuantity(nextQuantity),
+                    }));
+                  }}
+                  onBlur={() => {
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      quantity: validateQuantity(quantity),
+                    }));
+                  }}
+                  placeholder="1"
+                  dataTestId={
+                    isAdd ? "add-food-quantity" : "edit-food-quantity"
+                  }
+                  error={fieldErrors.quantity}
+                />
               </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center">
                 {totalAmount > 0
@@ -563,7 +602,12 @@ export default function EditFoodSidebar({
           <div className="mx-auto w-full max-w-3xl">
             <button
               type="submit"
-              disabled={isLoading || totalAmount <= 0}
+              disabled={
+                isLoading ||
+                totalAmount <= 0 ||
+                Boolean(fieldErrors.servingSize) ||
+                Boolean(fieldErrors.quantity)
+              }
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid={isAdd ? "add-food-submit" : "edit-food-submit"}
             >

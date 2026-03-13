@@ -20,6 +20,18 @@ interface SettingsClientProps {
   userSettings: UserSettings;
 }
 
+type NutritionGoalField =
+  | "calorieGoal"
+  | "proteinGoal"
+  | "carbGoal"
+  | "fatGoal"
+  | "saturatesGoal"
+  | "sugarsGoal"
+  | "fibreGoal"
+  | "saltGoal";
+
+type NutritionGoalErrors = Partial<Record<NutritionGoalField, string>>;
+
 export default function SettingsClient({ userSettings }: SettingsClientProps) {
   const { data: session } = useSession();
   const [settings, setSettings] = useState<SettingsData>({
@@ -46,6 +58,66 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     text: string;
   } | null>(null);
   const [showMyFoods, setShowMyFoods] = useState(false);
+  const [nutritionGoalErrors, setNutritionGoalErrors] =
+    useState<NutritionGoalErrors>({});
+
+  const nutritionGoalFields: NutritionGoalField[] = [
+    "calorieGoal",
+    "proteinGoal",
+    "carbGoal",
+    "fatGoal",
+    "saturatesGoal",
+    "sugarsGoal",
+    "fibreGoal",
+    "saltGoal",
+  ];
+
+  const goalLabels: Record<NutritionGoalField, string> = {
+    calorieGoal: "Calories",
+    proteinGoal: "Protein",
+    carbGoal: "Carbohydrates",
+    fatGoal: "Fat",
+    saturatesGoal: "Saturates",
+    sugarsGoal: "Sugars",
+    fibreGoal: "Fibre",
+    saltGoal: "Salt",
+  };
+
+  const isNutritionGoalField = (
+    field: keyof SettingsData,
+  ): field is NutritionGoalField =>
+    nutritionGoalFields.includes(field as NutritionGoalField);
+
+  const validateNutritionGoalField = (
+    field: NutritionGoalField,
+    value: number | null,
+  ) => {
+    if (!Number.isFinite(value) || value === null) {
+      return `${goalLabels[field]} is required.`;
+    }
+    if (value < 0) {
+      return `${goalLabels[field]} must be at least 0.`;
+    }
+    return undefined;
+  };
+
+  const validateAllNutritionGoals = () => {
+    const nextErrors: NutritionGoalErrors = {};
+
+    for (const field of nutritionGoalFields) {
+      nextErrors[field] = validateNutritionGoalField(field, settings[field]);
+    }
+
+    setNutritionGoalErrors(nextErrors);
+    return !Object.values(nextErrors).some(Boolean);
+  };
+
+  const handleNutritionFieldBlur = (field: NutritionGoalField) => {
+    setNutritionGoalErrors((prev) => ({
+      ...prev,
+      [field]: validateNutritionGoalField(field, settings[field]),
+    }));
+  };
 
   useEffect(() => {
     fetchSettings();
@@ -91,6 +163,15 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateAllNutritionGoals()) {
+      setMessage({
+        type: "error",
+        text: "Please fix the highlighted nutritional goals.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     setMessage(null);
 
@@ -152,6 +233,14 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
 
   const handleChange = (field: keyof SettingsData, value: string | number) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
+
+    if (isNutritionGoalField(field)) {
+      const numericValue = typeof value === "number" ? value : Number(value);
+      setNutritionGoalErrors((prev) => ({
+        ...prev,
+        [field]: validateNutritionGoalField(field, numericValue),
+      }));
+    }
   };
 
   const handleExportData = async () => {
@@ -220,11 +309,12 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <NutritionGoalsSection
               settings={settings}
               onChange={handleChange}
-              userSettings={userSettings}
+              fieldErrors={nutritionGoalErrors}
+              onFieldBlur={handleNutritionFieldBlur}
             />
 
             <MeasurementUnitsSection

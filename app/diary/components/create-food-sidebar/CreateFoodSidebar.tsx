@@ -13,6 +13,8 @@ import { FoodItem, MeasurementType } from "../../types";
 import { UserSettings } from "../../../settings/types";
 import { Food } from "@prisma/client";
 import BarcodeInput from "./BarcodeInput";
+import ValidatedNumberField from "../ValidatedNumberField";
+import ValidatedTextField from "../../../components/ValidatedTextField";
 
 export type CreateFoodSidebarOnSubmitData = Omit<
   FoodItem,
@@ -45,6 +47,19 @@ export default function CreateFoodSidebar({
   isLoading = false,
   editingFood = null,
 }: CreateFoodSidebarProps) {
+  type FormErrors = Partial<Record<keyof typeof initialFormData, string>>;
+
+  const requiredNumberFields: Array<keyof typeof initialFormData> = [
+    "calories",
+    "protein",
+    "carbs",
+    "fat",
+    "saturates",
+    "sugars",
+    "fibre",
+    "salt",
+  ];
+
   const initialFormData = {
     name: "",
     measurementAmount: "",
@@ -61,6 +76,120 @@ export default function CreateFoodSidebar({
     defaultServingDescription: "",
   };
   const [formData, setFormData] = useState(initialFormData);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+
+  const validateTextRequired = (value: string, label: string) => {
+    if (!value.trim()) return `${label} is required.`;
+    return undefined;
+  };
+
+  const validateNumberField = (
+    value: string,
+    label: string,
+    options?: { required?: boolean; min?: number },
+  ) => {
+    const required = options?.required ?? false;
+    const min = options?.min ?? 0;
+
+    if (!value.trim()) {
+      return required ? `${label} is required.` : undefined;
+    }
+
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      return `${label} must be a valid number.`;
+    }
+    if (parsed < min) {
+      return `${label} must be at least ${min}.`;
+    }
+    return undefined;
+  };
+
+  const validateField = (
+    field: keyof typeof initialFormData,
+    value: string,
+  ): string | undefined => {
+    switch (field) {
+      case "name":
+        return validateTextRequired(value, "Food name");
+      case "calories":
+        return validateNumberField(value, "Calories", {
+          required: true,
+          min: 0,
+        });
+      case "protein":
+        return validateNumberField(value, "Protein", {
+          required: true,
+          min: 0,
+        });
+      case "carbs":
+        return validateNumberField(value, "Carbs", { required: true, min: 0 });
+      case "fat":
+        return validateNumberField(value, "Fat", { required: true, min: 0 });
+      case "saturates":
+        return validateNumberField(value, "Saturates", {
+          required: true,
+          min: 0,
+        });
+      case "sugars":
+        return validateNumberField(value, "Sugars", { required: true, min: 0 });
+      case "fibre":
+        return validateNumberField(value, "Fibre", { required: true, min: 0 });
+      case "salt":
+        return validateNumberField(value, "Salt", { required: true, min: 0 });
+      case "measurementAmount":
+        return validateNumberField(value, "Measurement value", {
+          required: false,
+          min: 0,
+        });
+      case "defaultServingAmount":
+        return validateNumberField(value, "Serving amount", {
+          required: false,
+          min: 0,
+        });
+      default:
+        return undefined;
+    }
+  };
+
+  const updateField = (field: keyof typeof initialFormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const updateAndValidateField = (
+    field: keyof typeof initialFormData,
+    value: string,
+  ) => {
+    updateField(field, value);
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: validateField(field, value),
+    }));
+  };
+
+  const validateAllFields = () => {
+    const nextErrors: FormErrors = {
+      name: validateField("name", formData.name),
+      measurementAmount: validateField(
+        "measurementAmount",
+        formData.measurementAmount,
+      ),
+      defaultServingAmount: validateField(
+        "defaultServingAmount",
+        formData.defaultServingAmount,
+      ),
+    };
+
+    for (const field of requiredNumberFields) {
+      nextErrors[field] = validateField(field, formData[field]);
+    }
+
+    setFieldErrors(nextErrors);
+    return !Object.values(nextErrors).some(Boolean);
+  };
 
   const hasInitialized = useRef<string | null>(null);
 
@@ -101,6 +230,7 @@ export default function CreateFoodSidebar({
           defaultServingDescription:
             editingFood.defaultServingDescription ?? "",
         });
+        setFieldErrors({});
       }
     } else if (!editingFood && isOpen) {
       const foodKey = "create-new";
@@ -109,6 +239,7 @@ export default function CreateFoodSidebar({
         hasInitialized.current = foodKey;
 
         setFormData(initialFormData);
+        setFieldErrors({});
       }
     } else if (!isOpen) {
       hasInitialized.current = null;
@@ -119,14 +250,7 @@ export default function CreateFoodSidebar({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validate required nutrition fields
-    if (
-      formData.saturates.trim() === "" ||
-      formData.sugars.trim() === "" ||
-      formData.fibre.trim() === "" ||
-      formData.salt.trim() === ""
-    ) {
-      alert("Saturates, Sugars, Fibre, and Salt are required.");
+    if (!validateAllFields()) {
       return;
     }
 
@@ -202,6 +326,7 @@ export default function CreateFoodSidebar({
       defaultServingAmount: "",
       defaultServingDescription: "",
     });
+    setFieldErrors({});
     onClose();
   };
 
@@ -251,6 +376,7 @@ export default function CreateFoodSidebar({
       {/* Form */}
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
@@ -264,22 +390,22 @@ export default function CreateFoodSidebar({
                 </>
               )}
               <div />
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Food Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="e.g., Chicken Breast"
-                  required
-                  data-testid="create-food-name"
-                />
-              </div>
+              <ValidatedTextField
+                id="create-food-name-input"
+                label="Food Name *"
+                value={formData.name}
+                onChange={(value) => updateAndValidateField("name", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    name: validateField("name", formData.name),
+                  }));
+                }}
+                placeholder="e.g., Chicken Breast"
+                required
+                dataTestId="create-food-name"
+                error={fieldErrors.name}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
@@ -311,172 +437,188 @@ export default function CreateFoodSidebar({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Measurement Value (
-                  {formData.measurementType === "weight"
-                    ? userSettings.weightUnit
-                    : userSettings.volumeUnit}
-                  )
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.measurementAmount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      measurementAmount: e.target.value,
-                    })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="100"
-                  data-testid="create-food-measurement-amount"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-measurement-amount-input"
+                label={`Measurement Value (${formData.measurementType === "weight" ? userSettings.weightUnit : userSettings.volumeUnit})`}
+                value={formData.measurementAmount}
+                onChange={(value) =>
+                  updateAndValidateField("measurementAmount", value)
+                }
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    measurementAmount: validateField(
+                      "measurementAmount",
+                      formData.measurementAmount,
+                    ),
+                  }));
+                }}
+                step="0.1"
+                placeholder="100"
+                dataTestId="create-food-measurement-amount"
+                error={fieldErrors.measurementAmount}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Calories ({userSettings.calorieUnit}) *
-                </label>
-                <input
-                  type="number"
-                  value={formData.calories}
-                  onChange={(e) =>
-                    setFormData({ ...formData, calories: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-calories"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-calories-input"
+                label={`Calories (${userSettings.calorieUnit}) *`}
+                value={formData.calories}
+                onChange={(value) => updateAndValidateField("calories", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    calories: validateField("calories", formData.calories),
+                  }));
+                }}
+                placeholder="0"
+                required
+                dataTestId="create-food-calories"
+                error={fieldErrors.calories}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Protein ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.protein}
-                  onChange={(e) =>
-                    setFormData({ ...formData, protein: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-protein"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-protein-input"
+                label={`Protein (${userSettings.weightUnit}) *`}
+                value={formData.protein}
+                onChange={(value) => updateAndValidateField("protein", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    protein: validateField("protein", formData.protein),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-protein"
+                error={fieldErrors.protein}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Carbs ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.carbs}
-                  onChange={(e) =>
-                    setFormData({ ...formData, carbs: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-carbs"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-carbs-input"
+                label={`Carbs (${userSettings.weightUnit}) *`}
+                value={formData.carbs}
+                onChange={(value) => updateAndValidateField("carbs", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    carbs: validateField("carbs", formData.carbs),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-carbs"
+                error={fieldErrors.carbs}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fat ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.fat}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fat: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-fat"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-fat-input"
+                label={`Fat (${userSettings.weightUnit}) *`}
+                value={formData.fat}
+                onChange={(value) => updateAndValidateField("fat", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    fat: validateField("fat", formData.fat),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-fat"
+                error={fieldErrors.fat}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Saturates ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.saturates}
-                  onChange={(e) =>
-                    setFormData({ ...formData, saturates: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-saturates"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-saturates-input"
+                label={`Saturates (${userSettings.weightUnit}) *`}
+                value={formData.saturates}
+                onChange={(value) => updateAndValidateField("saturates", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    saturates: validateField("saturates", formData.saturates),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-saturates"
+                error={fieldErrors.saturates}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Sugars ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.sugars}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sugars: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-sugars"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-sugars-input"
+                label={`Sugars (${userSettings.weightUnit}) *`}
+                value={formData.sugars}
+                onChange={(value) => updateAndValidateField("sugars", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    sugars: validateField("sugars", formData.sugars),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-sugars"
+                error={fieldErrors.sugars}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Fibre ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.fibre}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fibre: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-fibre"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-fibre-input"
+                label={`Fibre (${userSettings.weightUnit}) *`}
+                value={formData.fibre}
+                onChange={(value) => updateAndValidateField("fibre", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    fibre: validateField("fibre", formData.fibre),
+                  }));
+                }}
+                step="0.1"
+                placeholder="0"
+                required
+                dataTestId="create-food-fibre"
+                error={fieldErrors.fibre}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Salt ({userSettings.weightUnit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.salt}
-                  onChange={(e) =>
-                    setFormData({ ...formData, salt: e.target.value })
-                  }
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="0"
-                  required
-                  data-testid="create-food-salt"
-                />
-              </div>
+              <ValidatedNumberField
+                id="create-food-salt-input"
+                label={`Salt (${userSettings.weightUnit}) *`}
+                value={formData.salt}
+                onChange={(value) => updateAndValidateField("salt", value)}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    salt: validateField("salt", formData.salt),
+                  }));
+                }}
+                step="0.01"
+                placeholder="0"
+                required
+                dataTestId="create-food-salt"
+                error={fieldErrors.salt}
+                labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+              />
             </div>
 
             {/* Default Serving Section */}
@@ -485,48 +627,40 @@ export default function CreateFoodSidebar({
                 Default Serving (optional)
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                    Serving Amount (
-                    {formData.measurementType === "weight"
-                      ? userSettings.weightUnit
-                      : userSettings.volumeUnit}
-                    )
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={formData.defaultServingAmount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        defaultServingAmount: e.target.value,
-                      })
-                    }
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                    placeholder="e.g. 70"
-                    data-testid="create-food-serving-amount"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                    Serving Description
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={50}
-                    value={formData.defaultServingDescription}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        defaultServingDescription: e.target.value,
-                      })
-                    }
-                    className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                    placeholder="e.g. 1 medium egg"
-                    data-testid="create-food-serving-description"
-                  />
-                </div>
+                <ValidatedNumberField
+                  id="create-food-serving-amount-input"
+                  label={`Serving Amount (${formData.measurementType === "weight" ? userSettings.weightUnit : userSettings.volumeUnit})`}
+                  value={formData.defaultServingAmount}
+                  onChange={(value) =>
+                    updateAndValidateField("defaultServingAmount", value)
+                  }
+                  onBlur={() => {
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      defaultServingAmount: validateField(
+                        "defaultServingAmount",
+                        formData.defaultServingAmount,
+                      ),
+                    }));
+                  }}
+                  step="0.1"
+                  placeholder="e.g. 70"
+                  dataTestId="create-food-serving-amount"
+                  error={fieldErrors.defaultServingAmount}
+                  labelClassName="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                  inputClassName="w-full border rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
+                />
+                <ValidatedTextField
+                  id="create-food-serving-description-input"
+                  label="Serving Description"
+                  value={formData.defaultServingDescription}
+                  onChange={(value) =>
+                    updateField("defaultServingDescription", value)
+                  }
+                  maxLength={50}
+                  placeholder="e.g. 1 medium egg"
+                  dataTestId="create-food-serving-description"
+                />
               </div>
             </div>
           </div>

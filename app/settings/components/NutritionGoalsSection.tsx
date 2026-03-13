@@ -1,16 +1,31 @@
 import HelpButton from "@/app/components/HelpButton";
-import { SettingsData, UserSettings } from "../types";
+import { SettingsData } from "../types";
+import ValidatedNumberField from "@/app/diary/components/ValidatedNumberField";
+
+type NutritionGoalField =
+  | "calorieGoal"
+  | "proteinGoal"
+  | "carbGoal"
+  | "fatGoal"
+  | "saturatesGoal"
+  | "sugarsGoal"
+  | "fibreGoal"
+  | "saltGoal";
+
+type NutritionGoalErrors = Partial<Record<NutritionGoalField, string>>;
 
 interface NutritionGoalsSectionProps {
   settings: SettingsData;
   onChange: (field: keyof SettingsData, value: string | number) => void;
-  userSettings: UserSettings;
+  fieldErrors: NutritionGoalErrors;
+  onFieldBlur: (field: NutritionGoalField) => void;
 }
 
 export default function NutritionGoalsSection({
   settings,
   onChange,
-  userSettings,
+  fieldErrors,
+  onFieldBlur,
 }: NutritionGoalsSectionProps) {
   return (
     <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-6">
@@ -27,177 +42,157 @@ export default function NutritionGoalsSection({
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="calorieGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Calories ({settings.calorieUnit}) *
-            </label>
-            <input
-              id="calorieGoal"
-              data-testid="nutritional-goals-calorie-goal-input"
-              type="number"
-              min="0"
-              step="1"
-              value={settings.calorieGoal || ""}
-              onChange={(e) =>
-                onChange("calorieGoal", parseFloat(e.target.value))
-              }
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="calorieGoal"
+            label={`Calories (${settings.calorieUnit}) *`}
+            dataTestId="nutritional-goals-calorie-goal-input"
+            min="0"
+            step="1"
+            value={
+              Number.isFinite(settings.calorieGoal)
+                ? String(settings.calorieGoal)
+                : ""
+            }
+            onChange={(value) => onChange("calorieGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("calorieGoal")}
+            error={fieldErrors.calorieGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="proteinGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Protein ({settings.weightUnit}) *
-            </label>
-            <input
-              id="proteinGoal"
-              data-testid="nutritional-goals-protein-goal-input"
-              type="number"
-              min="0"
-              step="0.1"
-              value={settings.proteinGoal || ""}
-              onChange={(e) =>
-                onChange("proteinGoal", parseFloat(e.target.value))
-              }
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="proteinGoal"
+            label={`Protein (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-protein-goal-input"
+            min="0"
+            step="0.1"
+            value={
+              Number.isFinite(settings.proteinGoal)
+                ? String(settings.proteinGoal)
+                : ""
+            }
+            onChange={(value) => onChange("proteinGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("proteinGoal")}
+            error={fieldErrors.proteinGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="carbGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Carbohydrates ({settings.weightUnit}) *
-            </label>
-            <input
-              id="carbGoal"
-              data-testid="nutritional-goals-carb-goal-input"
-              type="number"
-              min="0"
-              step="0.1"
-              value={settings.carbGoal || ""}
-              onChange={(e) => onChange("carbGoal", parseFloat(e.target.value))}
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="carbGoal"
+            label={`Carbohydrates (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-carb-goal-input"
+            min="0"
+            step="0.1"
+            value={
+              Number.isFinite(settings.carbGoal)
+                ? String(settings.carbGoal)
+                : ""
+            }
+            onChange={(value) => onChange("carbGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("carbGoal")}
+            error={fieldErrors.carbGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="fatGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Fat ({settings.weightUnit}) *
-            </label>
-            <input
-              id="fatGoal"
-              data-testid="nutritional-goals-fat-goal-input"
-              type="number"
-              min="0"
-              step="0.1"
-              value={settings.fatGoal || ""}
-              onChange={(e) => onChange("fatGoal", parseFloat(e.target.value))}
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="fatGoal"
+            label={`Fat (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-fat-goal-input"
+            min="0"
+            step="0.1"
+            value={
+              Number.isFinite(settings.fatGoal) ? String(settings.fatGoal) : ""
+            }
+            onChange={(value) => onChange("fatGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("fatGoal")}
+            error={fieldErrors.fatGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="saturatesGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Saturates ({settings.weightUnit}) *
-            </label>
-            <input
-              id="saturatesGoal"
-              data-testid="nutritional-goals-saturates-goal-input"
-              type="number"
-              min="0"
-              step="1"
-              value={settings.saturatesGoal}
-              onChange={(e) =>
-                onChange("saturatesGoal", parseFloat(e.target.value))
-              }
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="saturatesGoal"
+            label={`Saturates (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-saturates-goal-input"
+            min="0"
+            step="1"
+            value={
+              Number.isFinite(settings.saturatesGoal)
+                ? String(settings.saturatesGoal)
+                : ""
+            }
+            onChange={(value) => onChange("saturatesGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("saturatesGoal")}
+            error={fieldErrors.saturatesGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="sugarsGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Sugars ({settings.weightUnit}) *
-            </label>
-            <input
-              id="sugarsGoal"
-              data-testid="nutritional-goals-sugars-goal-input"
-              type="number"
-              min="0"
-              step="1"
-              value={settings.sugarsGoal}
-              onChange={(e) =>
-                onChange("sugarsGoal", parseFloat(e.target.value))
-              }
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="sugarsGoal"
+            label={`Sugars (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-sugars-goal-input"
+            min="0"
+            step="1"
+            value={
+              Number.isFinite(settings.sugarsGoal)
+                ? String(settings.sugarsGoal)
+                : ""
+            }
+            onChange={(value) => onChange("sugarsGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("sugarsGoal")}
+            error={fieldErrors.sugarsGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="fibreGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Fibre ({settings.weightUnit}) *
-            </label>
-            <input
-              id="fibreGoal"
-              data-testid="nutritional-goals-fibre-goal-input"
-              type="number"
-              min="0"
-              step="1"
-              value={settings.fibreGoal}
-              onChange={(e) =>
-                onChange("fibreGoal", parseFloat(e.target.value))
-              }
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="fibreGoal"
+            label={`Fibre (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-fibre-goal-input"
+            min="0"
+            step="1"
+            value={
+              Number.isFinite(settings.fibreGoal)
+                ? String(settings.fibreGoal)
+                : ""
+            }
+            onChange={(value) => onChange("fibreGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("fibreGoal")}
+            error={fieldErrors.fibreGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
 
-          <div>
-            <label
-              htmlFor="saltGoal"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-            >
-              Salt ({settings.weightUnit}) *
-            </label>
-            <input
-              id="saltGoal"
-              data-testid="nutritional-goals-salt-goal-input"
-              type="number"
-              min="0"
-              step="0.1"
-              value={settings.saltGoal}
-              onChange={(e) => onChange("saltGoal", parseFloat(e.target.value))}
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
-              required
-            />
-          </div>
+          <ValidatedNumberField
+            id="saltGoal"
+            label={`Salt (${settings.weightUnit}) *`}
+            dataTestId="nutritional-goals-salt-goal-input"
+            min="0"
+            step="0.1"
+            value={
+              Number.isFinite(settings.saltGoal)
+                ? String(settings.saltGoal)
+                : ""
+            }
+            onChange={(value) => onChange("saltGoal", parseFloat(value))}
+            onBlur={() => onFieldBlur("saltGoal")}
+            error={fieldErrors.saltGoal}
+            required
+            labelClassName="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            inputClassName="w-full rounded-lg border bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600"
+          />
         </div>
       </div>
     </div>

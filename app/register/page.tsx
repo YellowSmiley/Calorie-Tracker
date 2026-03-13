@@ -4,6 +4,13 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import ValidatedTextField from "../components/ValidatedTextField";
+
+type RegisterFieldErrors = {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+};
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +20,50 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
+
+  const passwordRequirements = [
+    { regex: /.{8,}/, message: "at least 8 characters" },
+    { regex: /[A-Z]/, message: "one uppercase letter" },
+    { regex: /[a-z]/, message: "one lowercase letter" },
+    { regex: /[0-9]/, message: "one number" },
+    { regex: /[^A-Za-z0-9]/, message: "one special character" },
+  ];
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Email is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return "Enter a valid email address.";
+    }
+    return undefined;
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) return "Password is required.";
+    for (const req of passwordRequirements) {
+      if (!req.regex.test(value)) {
+        return `Password must contain ${req.message}.`;
+      }
+    }
+    return undefined;
+  };
+
+  const validateConfirmPassword = (value: string, passwordValue: string) => {
+    if (!value) return "Confirm password is required.";
+    if (value !== passwordValue) return "Passwords do not match.";
+    return undefined;
+  };
+
+  const validateForm = () => {
+    const nextErrors: RegisterFieldErrors = {
+      email: validateEmail(email),
+      password: validatePassword(password),
+      confirmPassword: validateConfirmPassword(confirmPassword, password),
+    };
+    setFieldErrors(nextErrors);
+    return !nextErrors.email && !nextErrors.password && !nextErrors.confirmPassword;
+  };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -27,24 +78,9 @@ export default function RegisterPage() {
     event.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (!validateForm()) {
+      setError("Please fix the highlighted fields.");
       return;
-    }
-
-    // Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-    const passwordRequirements = [
-      { regex: /.{8,}/, message: "at least 8 characters" },
-      { regex: /[A-Z]/, message: "one uppercase letter" },
-      { regex: /[a-z]/, message: "one lowercase letter" },
-      { regex: /[0-9]/, message: "one number" },
-      { regex: /[^A-Za-z0-9]/, message: "one special character" },
-    ];
-    for (const req of passwordRequirements) {
-      if (!req.regex.test(password)) {
-        setError(`Password must contain ${req.message}`);
-        return;
-      }
     }
 
     setIsLoading(true);
@@ -52,7 +88,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
       });
 
       const data = await res.json();
@@ -174,63 +210,77 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <form onSubmit={handleRegister} className="space-y-3">
+                <form onSubmit={handleRegister} noValidate className="space-y-3">
                   <div className="grid gap-2 text-left">
-                    <label
-                      className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      htmlFor="name"
-                    >
-                      Name
-                    </label>
-                    <input
+                    <ValidatedTextField
                       id="name"
-                      data-testid="name"
-                      name="name"
-                      type="text"
+                      label="Name"
                       value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      onChange={setName}
                       autoComplete="name"
                       placeholder="Optional"
+                      dataTestId="name"
+                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <div className="grid gap-2 text-left">
-                    <label
-                      className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      htmlFor="email"
-                    >
-                      Email
-                    </label>
-                    <input
+                    <ValidatedTextField
                       id="email"
-                      data-testid="email"
-                      name="email"
+                      label="Email"
                       type="email"
                       value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      onChange={(value) => {
+                        setEmail(value);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          email: validateEmail(value),
+                        }));
+                      }}
+                      onBlur={() => {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          email: validateEmail(email),
+                        }));
+                      }}
                       autoComplete="email"
                       required
+                      dataTestId="email"
+                      error={fieldErrors.email}
+                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <div className="grid gap-2 text-left">
-                    <label
-                      className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      htmlFor="password"
-                    >
-                      Password
-                    </label>
-                    <input
+                    <ValidatedTextField
                       id="password"
-                      data-testid="password"
-                      name="password"
+                      label="Password"
                       type="password"
                       value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      onChange={(value) => {
+                        setPassword(value);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          password: validatePassword(value),
+                          confirmPassword: validateConfirmPassword(
+                            confirmPassword,
+                            value,
+                          ),
+                        }));
+                      }}
+                      onBlur={() => {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          password: validatePassword(password),
+                        }));
+                      }}
                       autoComplete="new-password"
                       required
                       minLength={8}
+                      dataTestId="password"
+                      error={fieldErrors.password}
+                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                     <p className="text-xs text-zinc-500">
                       Must be at least 8 characters, incl. uppercase, lowercase,
@@ -238,24 +288,36 @@ export default function RegisterPage() {
                     </p>
                   </div>
                   <div className="grid gap-2 text-left">
-                    <label
-                      className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      htmlFor="confirmPassword"
-                    >
-                      Confirm Password
-                    </label>
-                    <input
+                    <ValidatedTextField
                       id="confirmPassword"
-                      data-testid="confirm-password"
-                      name="confirmPassword"
+                      label="Confirm Password"
                       type="password"
                       value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      className="h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      onChange={(value) => {
+                        setConfirmPassword(value);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          confirmPassword: validateConfirmPassword(
+                            value,
+                            password,
+                          ),
+                        }));
+                      }}
+                      onBlur={() => {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          confirmPassword: validateConfirmPassword(
+                            confirmPassword,
+                            password,
+                          ),
+                        }));
+                      }}
                       autoComplete="new-password"
                       required
+                      dataTestId="confirm-password"
+                      error={fieldErrors.confirmPassword}
+                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <button

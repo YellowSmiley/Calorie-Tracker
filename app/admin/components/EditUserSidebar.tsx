@@ -2,6 +2,13 @@
 
 import { User } from "@prisma/client";
 import { useState } from "react";
+import ValidatedTextField from "../../components/ValidatedTextField";
+
+type FieldErrors = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
 
 interface EditUserSidebarProps {
   user: User | null;
@@ -23,6 +30,40 @@ export default function EditUserSidebar({
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const validateName = (value: string) => {
+    if (!value.trim()) return "Name is required.";
+    return undefined;
+  };
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Email is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return "Enter a valid email address.";
+    }
+    return undefined;
+  };
+
+  const validatePassword = (value: string) => {
+    if (value && value.length < 8) {
+      return "Password must be at least 8 characters.";
+    }
+    return undefined;
+  };
+
+  const validateForm = () => {
+    const nextErrors: FieldErrors = {
+      name: validateName(name),
+      email: validateEmail(email),
+      password: validatePassword(password),
+    };
+
+    setFieldErrors(nextErrors);
+
+    return !nextErrors.name && !nextErrors.email && !nextErrors.password;
+  };
 
   // Only show if open
   if (!isOpen) return null;
@@ -52,52 +93,81 @@ export default function EditUserSidebar({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onSave(name, email, password || undefined);
+          if (!validateForm()) return;
+          onSave(name.trim(), email.trim(), password || undefined);
         }}
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-3xl">
             <div className="rounded-lg bg-white dark:bg-black p-6 flex flex-col gap-6 shadow border border-zinc-200 dark:border-zinc-800">
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="Full name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="Email address"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black dark:text-zinc-50 mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 bg-transparent text-black dark:text-zinc-50"
-                  placeholder="Leave blank to keep current password"
-                  autoComplete="new-password"
-                  minLength={8}
-                />
-              </div>
+              <ValidatedTextField
+                id="edit-user-name"
+                label="Name"
+                type="text"
+                value={name}
+                onChange={(nextName) => {
+                  setName(nextName);
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    name: validateName(nextName),
+                  }));
+                }}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    name: validateName(name),
+                  }));
+                }}
+                placeholder="Full name"
+                required
+                error={fieldErrors.name}
+              />
+              <ValidatedTextField
+                id="edit-user-email"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(nextEmail) => {
+                  setEmail(nextEmail);
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    email: validateEmail(nextEmail),
+                  }));
+                }}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    email: validateEmail(email),
+                  }));
+                }}
+                placeholder="Email address"
+                required
+                error={fieldErrors.email}
+              />
+              <ValidatedTextField
+                id="edit-user-password"
+                label="New Password"
+                type="password"
+                value={password}
+                onChange={(nextPassword) => {
+                  setPassword(nextPassword);
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    password: validatePassword(nextPassword),
+                  }));
+                }}
+                onBlur={() => {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    password: validatePassword(password),
+                  }));
+                }}
+                placeholder="Leave blank to keep current password"
+                autoComplete="new-password"
+                minLength={8}
+                error={fieldErrors.password}
+              />
               {error && (
                 <div className="rounded bg-red-100 text-red-700 px-3 py-2 text-sm">
                   {error}
