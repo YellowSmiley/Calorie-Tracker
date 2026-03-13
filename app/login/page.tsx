@@ -143,12 +143,14 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                {error}
+              </p>
             )}
 
             {resetSent && (
-              <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 p-3">
-                <p className="text-sm text-emerald-700 dark:text-emerald-300">
+              <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3">
+                <p className="text-sm text-zinc-700 dark:text-zinc-300">
                   If an account exists with that email, a password reset link
                   has been sent.
                 </p>
@@ -156,8 +158,8 @@ export default function LoginPage() {
             )}
 
             {resetSending && (
-              <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-3">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+              <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3">
+                <p className="text-sm text-zinc-700 dark:text-zinc-300">
                   Sending password reset link to {email}...
                 </p>
               </div>
