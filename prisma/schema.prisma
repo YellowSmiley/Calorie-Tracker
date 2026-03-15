@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   mealEntries   MealEntry[]
+  mealFavorites MealFavorite[]
   weightEntries WeightEntry[]
   createdFoods  Food[]
   provider      String?    @default("credentials") // 'google', 'credentials', etc.
@@ -105,6 +106,39 @@ model Food {
 
   creator  User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
   entries  MealEntry[]
+  mealFavoriteItems MealFavoriteItem[]
+}
+
+model MealFavorite {
+  id        String             @id @default(cuid())
+  userId    String
+  name      String
+  mealType  MealType
+  usageCount Int               @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items MealFavoriteItem[]
+
+  @@index([userId, mealType])
+  @@unique([userId, name, mealType])
+}
+
+model MealFavoriteItem {
+  id         String       @id @default(cuid())
+  favoriteId String
+  foodId     String
+  serving    Float
+  sortOrder  Int          @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  favorite MealFavorite @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
+  food     Food         @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@index([favoriteId])
+  @@index([foodId])
 }
 
 model MealEntry {

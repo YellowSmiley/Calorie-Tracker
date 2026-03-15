@@ -92,10 +92,20 @@ export default function EditFoodSidebar({
       setServingSize(String(defaultServing.toFixed(2)));
       setQuantity("1");
     } else {
-      const totalAmount = food.serving * foodMeasurementAmount;
-      const qty = Number((totalAmount / defaultServing).toFixed(2));
-      setServingSize(String(defaultServing.toFixed(2)));
-      setQuantity(String(qty));
+      const totalAmountInBaseUnits = food.serving * foodMeasurementAmount;
+      const totalAmountInDisplayUnits =
+        food.measurementType === "weight"
+          ? convertWeightForDisplay(
+              totalAmountInBaseUnits,
+              userSettings.weightUnit as AcceptedWeightedUnits,
+            )
+          : convertVolumeForDisplay(
+              totalAmountInBaseUnits,
+              userSettings.volumeUnit as AcceptedVolumeUnits,
+            );
+
+      setServingSize(String(totalAmountInDisplayUnits.toFixed(2)));
+      setQuantity("1");
     }
   }
 

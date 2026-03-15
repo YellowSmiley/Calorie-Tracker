@@ -434,5 +434,9 @@ test.describe("Diary Feature", () => {
     // TODO: Check field error validations work
 
     // TODO: Try create a dupe food item and see if it shows the duplicate warning
+
+    // TODO: Add test for save favorite meal, apply favorite and clear meal
+    // Save meal modal should show correct totals and convert correctly with different settings
+    // Apply meal should search correctly, apply correctly and show correct totals
   });
 });

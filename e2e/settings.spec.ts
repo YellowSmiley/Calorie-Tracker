@@ -376,5 +376,8 @@ test.describe("Settings", () => {
     // TODO: Add tests for user management and search suggestions
 
     // TODO: Check field error validations work
+
+    // TODO: Check favourite meals search, list
+    // Search create, edit, delete and add to diary and check units/values are correct throughout
   });
 });

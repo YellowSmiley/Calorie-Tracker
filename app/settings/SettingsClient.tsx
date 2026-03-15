@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "./components/MyFoodsSidebar";
+import FavoriteMealsSidebar from "./components/FavoriteMealsSidebar";
 import NutritionGoalsSection from "./components/NutritionGoalsSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
@@ -58,6 +59,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     text: string;
   } | null>(null);
   const [showMyFoods, setShowMyFoods] = useState(false);
+  const [showFavoriteMeals, setShowFavoriteMeals] = useState(false);
   const [nutritionGoalErrors, setNutritionGoalErrors] =
     useState<NutritionGoalErrors>({});
 
@@ -346,6 +348,7 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
             <ActionsSection
               isAdmin={session?.user?.isAdmin || false}
               onMyFoodsClick={() => setShowMyFoods(true)}
+              onFavoriteMealsClick={() => setShowFavoriteMeals(true)}
             />
           </form>
         </div>
@@ -372,6 +375,13 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
         onClose={() => setShowMyFoods(false)}
         userSettings={userSettings}
         isAdmin={session?.user?.isAdmin || false}
+      />
+
+      <FavoriteMealsSidebar
+        isOpen={showFavoriteMeals}
+        onClose={() => setShowFavoriteMeals(false)}
+        userSettings={userSettings}
+        onError={(text) => setMessage(text ? { type: "error", text } : null)}
       />
     </div>
   );
