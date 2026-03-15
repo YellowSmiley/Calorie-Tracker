@@ -374,5 +374,7 @@ test.describe("Settings", () => {
     // TODO: Check body weight unit changes and converts correctly and shows correctly on diary and dashboard
 
     // TODO: Add tests for user management and search suggestions
+
+    // TODO: Check field error validations work
   });
 });

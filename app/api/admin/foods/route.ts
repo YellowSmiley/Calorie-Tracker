@@ -8,6 +8,7 @@ import {
   findCloseFoodSuggestions,
   sortByRelevanceAndUsage,
 } from "../../../../lib/foodSearchSuggestions";
+import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 
 export type FoodWithCreator = Food & { createdByName?: string };
 
@@ -173,6 +174,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Invalid macro values" },
         { status: 400 },
+      );
+    }
+
+    const duplicate = await findLikelyDuplicateFood({
+      name,
+      measurementType,
+      measurementAmount:
+        measurementAmount && measurementAmount > 0 ? measurementAmount : 100,
+      calories,
+      protein,
+      carbs,
+      fat,
+      saturates: typeof saturates === "number" ? saturates : 0,
+      sugars: typeof sugars === "number" ? sugars : 0,
+      fibre: typeof fibre === "number" ? fibre : 0,
+      salt: typeof salt === "number" ? salt : 0,
+    });
+
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          error: `Food appears to be a duplicate of \"${duplicate.name}\". Please review before creating another item.`,
+          duplicateFoodId: duplicate.id,
+          duplicateFoodName: duplicate.name,
+        },
+        { status: 409 },
       );
     }
 

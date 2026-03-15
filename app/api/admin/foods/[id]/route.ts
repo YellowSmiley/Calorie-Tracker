@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
 import { FoodItem } from "@/app/diary/types";
+import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 
 export async function PUT(
   request: NextRequest,
@@ -127,6 +128,47 @@ export async function PUT(
     if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
+
+    const mergedFoodForDuplicateCheck = {
+      id: foodId,
+      name: body.name ?? existingFood.name,
+      measurementType: body.measurementType ?? existingFood.measurementType,
+      measurementAmount:
+        typeof body.measurementAmount === "number"
+          ? body.measurementAmount
+          : existingFood.measurementAmount,
+      calories:
+        typeof body.calories === "number"
+          ? body.calories
+          : existingFood.calories,
+      protein:
+        typeof body.protein === "number" ? body.protein : existingFood.protein,
+      carbs: typeof body.carbs === "number" ? body.carbs : existingFood.carbs,
+      fat: typeof body.fat === "number" ? body.fat : existingFood.fat,
+      saturates:
+        typeof body.saturates === "number"
+          ? body.saturates
+          : existingFood.saturates,
+      sugars:
+        typeof body.sugars === "number" ? body.sugars : existingFood.sugars,
+      fibre: typeof body.fibre === "number" ? body.fibre : existingFood.fibre,
+      salt: typeof body.salt === "number" ? body.salt : existingFood.salt,
+    };
+
+    const duplicate = await findLikelyDuplicateFood(
+      mergedFoodForDuplicateCheck,
+    );
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          error: `Food appears to be a duplicate of \"${duplicate.name}\". Please review before saving.`,
+          duplicateFoodId: duplicate.id,
+          duplicateFoodName: duplicate.name,
+        },
+        { status: 409 },
+      );
+    }
+
     const updated = await prisma.food.update({
       where: { id: foodId },
       data: {
