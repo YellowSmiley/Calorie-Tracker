@@ -10,7 +10,7 @@ interface SearchInputProps {
   onSuggestionClick?: (suggestion: string) => void;
   suggestionsTestId?: string;
   suggestionButtonTestIdPrefix?: string;
-  "data-testid"?: string;
+  "data-testid": string;
 }
 
 export default function SearchInput({

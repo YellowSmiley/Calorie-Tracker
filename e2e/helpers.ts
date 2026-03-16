@@ -22,7 +22,7 @@ function randomFoodName() {
 export const resetFoodItems = async (page: Page) => {
   await page.getByTestId("nav-settings").click();
   await page.getByTestId("my-foods-button").click();
-  await expect(page.getByTestId("food-search-input")).toBeVisible();
+  await expect(page.getByTestId("food-table-search-input")).toBeVisible();
 
   while (!(await page.getByTestId("no-foods-found").isVisible())) {
     const deleteButtons = page.getByTestId(/delete-food-button-/);
@@ -114,7 +114,7 @@ export async function addFoodToMeal(
   quantity?: string,
 ) {
   await page.getByTestId(`diary-add-food-button-${mealTestId}`).click();
-  await page.getByTestId("food-search-input").fill(foodName);
+  await page.getByTestId("food-list-search-input").fill(foodName);
   await page
     .getByTestId(/food-item-/)
     .filter({ hasText: foodName })

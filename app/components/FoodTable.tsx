@@ -212,6 +212,7 @@ export default function FoodTable({
           showSuggestions={!isLoading && foods.length === 0 && !!searchQuery}
           suggestions={suggestions}
           onSuggestionClick={setSearchQuery}
+          data-testid="food-table-search"
         />
 
         {/* Error Message */}

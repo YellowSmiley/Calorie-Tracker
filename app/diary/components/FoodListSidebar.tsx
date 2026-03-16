@@ -206,6 +206,7 @@ export default function FoodListSidebar({
             }
             suggestions={suggestions}
             onSuggestionClick={setSearchQuery}
+            data-testid="food-list-search"
           />
 
           <DataTableShell

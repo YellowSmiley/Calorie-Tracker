@@ -155,7 +155,7 @@ test.describe("Settings", () => {
     await expect(page.getByTestId("summary-goal-salt")).toContainText(`0.2oz`);
     // Add Food and check it uses correct units
     await page.getByTestId("diary-add-food-button-breakfast").click();
-    await page.getByTestId("food-search-input").fill(foodName);
+    await page.getByTestId("food-list-search-input").fill(foodName);
     await expect(
       page.getByTestId(/food-item-/).filter({ hasText: foodName }),
     ).toContainText("35oz");
@@ -304,7 +304,7 @@ test.describe("Settings", () => {
 
     await page.getByTestId("nav-diary").click();
     await page.getByTestId("diary-add-food-button-breakfast").click();
-    await page.getByTestId("food-search-input").fill(volumeFoodName);
+    await page.getByTestId("food-list-search-input").fill(volumeFoodName);
     await expect(
       page.getByTestId(/food-item-/).filter({ hasText: volumeFoodName }),
     ).toContainText("4 cup");

@@ -22,7 +22,7 @@ export const resetFoodItems = async (page: Page) => {
   await page.getByTestId("nav-settings").click();
   await page.getByTestId("my-foods-button").click();
   // wait for data-testid="food-search-input"
-  await expect(page.getByTestId("food-search-input")).toBeVisible();
+  await expect(page.getByTestId("food-table-search-input")).toBeVisible();
   // Loop while there are foods to delete
   while (!(await page.getByTestId("no-foods-found").isVisible())) {
     // Get all delete-food-button- and click them
@@ -415,9 +415,9 @@ test.describe("Diary Feature", () => {
 
     // Test add food search
     await page.getByTestId("diary-add-food-button-breakfast").click();
-    await page.getByTestId("food-search-input").fill(foodName);
+    await page.getByTestId("food-list-search-input").fill(foodName);
     await expect(page.getByTestId(/food-item-/)).toContainText(foodName);
-    await page.getByTestId("food-search-input").fill("nonexistentfood");
+    await page.getByTestId("food-list-search-input").fill("nonexistentfood");
     await expect(page.getByTestId("no-foods-found")).toBeVisible();
     await page.getByTestId("food-list-sidebar-back-button").click();
 

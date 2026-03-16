@@ -146,6 +146,7 @@ export default function MealFavoritesPickerSidebar({
             showSuggestions={false}
             suggestions={[]}
             onSuggestionClick={() => {}}
+            data-testid="meal-favorites-search"
           />
 
           <DataTableShell

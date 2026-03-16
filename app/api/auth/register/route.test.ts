@@ -1,7 +1,11 @@
 /**
  * @jest-environment node
  */
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { POST } from "./route";
+import type { Mock } from "jest-mock";
+
+type AsyncMock = Mock<(...args: unknown[]) => Promise<unknown>>;
 
 // Mock dependencies
 jest.mock("@/lib/prisma", () => ({
@@ -17,11 +21,11 @@ jest.mock("@/lib/prisma", () => ({
 }));
 
 jest.mock("@/lib/email", () => ({
-    sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+    sendVerificationEmail: jest.fn(async () => undefined),
 }));
 
 jest.mock("bcryptjs", () => ({
-    hash: jest.fn().mockResolvedValue("hashed_password"),
+    hash: jest.fn(async () => "hashed_password"),
 }));
 
 jest.mock("crypto", () => ({
@@ -36,7 +40,7 @@ jest.mock("crypto", () => ({
 }));
 
 jest.mock("@/lib/rateLimit", () => ({
-    checkRegisterRateLimit: jest.fn().mockResolvedValue(null),
+    checkRegisterRateLimit: jest.fn(async () => null),
 }));
 
 import { prisma } from "@/lib/prisma";
@@ -54,9 +58,9 @@ function makeRequest(body: Record<string, unknown>): Request {
 describe("POST /api/auth/register", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-        (prisma.user.create as jest.Mock).mockResolvedValue({ id: "new-user" });
-        (prisma.verificationToken.create as jest.Mock).mockResolvedValue({});
+        (prisma.user.findUnique as unknown as AsyncMock).mockResolvedValue(null);
+        (prisma.user.create as unknown as AsyncMock).mockResolvedValue({ id: "new-user" });
+        (prisma.verificationToken.create as unknown as AsyncMock).mockResolvedValue({});
     });
 
     describe("validation", () => {
@@ -107,7 +111,7 @@ describe("POST /api/auth/register", () => {
 
     describe("duplicate check", () => {
         it("returns 201 with generic message when email already exists (no enumeration)", async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+            (prisma.user.findUnique as unknown as AsyncMock).mockResolvedValue({
                 id: "existing",
             });
 
@@ -213,7 +217,7 @@ describe("POST /api/auth/register", () => {
 
     describe("error handling", () => {
         it("returns 500 when an unexpected error occurs", async () => {
-            (prisma.user.findUnique as jest.Mock).mockRejectedValue(
+            (prisma.user.findUnique as unknown as AsyncMock).mockRejectedValue(
                 new Error("DB down"),
             );
 

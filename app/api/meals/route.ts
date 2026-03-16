@@ -169,7 +169,7 @@ export async function POST(request: Request) {
       saturates: Number((food.saturates * servingValue).toFixed(1)),
       sugars: Number((food.sugars * servingValue).toFixed(1)),
       fibre: Number((food.fibre * servingValue).toFixed(1)),
-      salt: Number((food.salt * servingValue).toFixed(1)),
+      salt: Number((food.salt * servingValue).toFixed(2)),
     },
     include: {
       food: true,

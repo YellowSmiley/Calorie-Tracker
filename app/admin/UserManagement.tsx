@@ -138,6 +138,7 @@ export default function UserManagement() {
           onSuggestionClick={setSearchQuery}
           suggestionsTestId="user-search-suggestions"
           suggestionButtonTestIdPrefix="user-search-suggestion"
+          data-testid="user-search"
         />
 
         {/* Error Message */}
