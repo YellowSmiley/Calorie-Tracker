@@ -5,6 +5,7 @@ import FoodListSidebar from "./FoodListSidebar";
 import CreateFoodSidebar, {
   CreateFoodSidebarOnSubmitData,
 } from "./create-food-sidebar/CreateFoodSidebar";
+import { getApiErrorMessage } from "@/lib/apiError";
 import EditFoodSidebar from "./EditFoodSidebar";
 import DeleteFoodModal from "./DeleteFoodModal";
 import MealItemRow from "./MealItemRow";
@@ -166,7 +167,9 @@ export default function MealsSection({
       });
 
       if (!createResponse.ok) {
-        throw new Error("Failed to create food");
+        throw new Error(
+          await getApiErrorMessage(createResponse, "Failed to create food"),
+        );
       }
 
       const created = (await createResponse.json()) as FoodWithCreator;

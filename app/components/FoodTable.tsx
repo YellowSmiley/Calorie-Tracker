@@ -12,6 +12,7 @@ import {
   convertVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
+import { getApiErrorMessage } from "@/lib/apiError";
 import SearchInput from "./SearchInput";
 import DataTableShell from "./DataTableShell";
 
@@ -21,19 +22,6 @@ interface FoodTableProps {
 }
 
 const PAGE_SIZE = 50;
-const DUPLICATE_ITEM_ERROR = "This item has already been added";
-
-const getRequestErrorMessage = (
-  response: Response,
-  fallbackMessage: string,
-) => {
-  if (response.status === 409) {
-    return DUPLICATE_ITEM_ERROR;
-  }
-
-  return fallbackMessage;
-};
-
 export default function FoodTable({
   userSettings,
   isAdmin = false,
@@ -150,7 +138,7 @@ export default function FoodTable({
           setEditingFood(null);
           setShowCreateForm(false);
         } else {
-          setError(getRequestErrorMessage(response, "Something went wrong"));
+          setError(await getApiErrorMessage(response, "Something went wrong"));
         }
       } else {
         // Create new food
@@ -165,7 +153,7 @@ export default function FoodTable({
           fetchFoods(searchQuery, 0, false);
           setShowCreateForm(false);
         } else {
-          setError(getRequestErrorMessage(response, "Something went wrong"));
+          setError(await getApiErrorMessage(response, "Something went wrong"));
         }
       }
     } catch (err) {
@@ -203,7 +191,7 @@ export default function FoodTable({
         setShowDeleteModal(false);
         setError(null);
       } else {
-        setError(getRequestErrorMessage(response, "Something went wrong"));
+        setError(await getApiErrorMessage(response, "Something went wrong"));
       }
     } catch (err) {
       if (process.env.NODE_ENV === "development")
