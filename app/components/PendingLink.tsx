@@ -2,8 +2,8 @@
 
 import Link, { type LinkProps } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useSyncExternalStore } from "react";
 import type { MouseEvent, ReactNode } from "react";
-import { useSyncExternalStore } from "react";
 import LoadingSpinner from "./LoadingSpinner";
 import {
   getRouteLoadingServerSnapshot,
@@ -50,6 +50,35 @@ function normalizeHref(href: LinkProps["href"]) {
 export default function PendingLink({
   children,
   href,
+  className,
+  onClick,
+  ...props
+}: PendingLinkProps) {
+  return (
+    <Suspense
+      fallback={
+        <Link href={href} className={className} onClick={onClick} {...props}>
+          <span className="inline-flex items-center justify-center gap-2">
+            <span>{children}</span>
+          </span>
+        </Link>
+      }
+    >
+      <PendingLinkContent
+        href={href}
+        className={className}
+        onClick={onClick}
+        {...props}
+      >
+        {children}
+      </PendingLinkContent>
+    </Suspense>
+  );
+}
+
+function PendingLinkContent({
+  children,
+  href,
   pendingLabel,
   pendingClassName,
   onClick,
@@ -63,6 +92,7 @@ export default function PendingLink({
     getRouteLoadingSnapshot,
     getRouteLoadingServerSnapshot,
   );
+
   const currentHref = searchParams.toString()
     ? `${pathname}?${searchParams.toString()}`
     : pathname;

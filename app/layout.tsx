@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
@@ -59,7 +60,9 @@ export default function RootLayout({
       >
         <Analytics />
         <Providers>
-          <RouteLoadingIndicator />
+          <Suspense fallback={null}>
+            <RouteLoadingIndicator />
+          </Suspense>
           <AdSense />
           {children}
           <Navigation />
