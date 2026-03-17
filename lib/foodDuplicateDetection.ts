@@ -17,6 +17,7 @@ export type DuplicateCheckInput = {
 
 export const CALORIE_TOLERANCE = 50;
 export const NUTRITION_TOLERANCE = 5;
+export const MIN_NAME_OVERLAP = 0.5;
 
 export function normalizeName(value: string) {
   return value
@@ -70,9 +71,8 @@ export function isLikelyDuplicate(
   const nameScore = tokenOverlap(input.name, existing.name);
   const nutritionMatch = nutritionWithinTolerance(input, existing);
 
-  // Duplicate decision is nutrition-based with fixed tolerances.
-  // Name is informational only and not required for matching.
-  const likelyDuplicate = nutritionMatch;
+  // Only block when nutrition is close and names are substantially similar.
+  const likelyDuplicate = nutritionMatch && nameScore >= MIN_NAME_OVERLAP;
 
   return {
     likelyDuplicate,

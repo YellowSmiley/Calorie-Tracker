@@ -8,6 +8,7 @@ jest.mock("@/lib/prisma", () => ({
 
 import {
   CALORIE_TOLERANCE,
+  MIN_NAME_OVERLAP,
   NUTRITION_TOLERANCE,
   normalizeName,
   tokenSet,
@@ -100,15 +101,25 @@ describe("foodDuplicateDetection helpers", () => {
   });
 
   describe("isLikelyDuplicate", () => {
-    it("flags duplicates within tolerance even when names differ", () => {
+    it("does not flag duplicates when names are substantially different", () => {
       const result = isLikelyDuplicate(baseFood, {
         ...baseFood,
         name: "Totally Different Name",
         protein: 35,
       });
 
-      expect(result.likelyDuplicate).toBe(true);
+      expect(result.likelyDuplicate).toBe(false);
       expect(result.nutritionMatch).toBe(true);
+    });
+
+    it("flags duplicates when nutrition matches and names overlap enough", () => {
+      const result = isLikelyDuplicate(baseFood, {
+        ...baseFood,
+        name: "Chicken Breast Fillet",
+      });
+
+      expect(result.nameScore).toBeGreaterThanOrEqual(MIN_NAME_OVERLAP);
+      expect(result.likelyDuplicate).toBe(true);
     });
 
     it("does not flag when one nutrition field is out of tolerance", () => {
@@ -122,10 +133,10 @@ describe("foodDuplicateDetection helpers", () => {
       expect(result.nutritionMatch).toBe(false);
     });
 
-    it("ignores measurementAmount differences", () => {
+    it("ignores measurementAmount differences for similarly named foods", () => {
       const result = isLikelyDuplicate(baseFood, {
         ...baseFood,
-        name: "Another Name",
+        name: "Chicken Breast Large",
         measurementAmount: 1000,
       });
 
