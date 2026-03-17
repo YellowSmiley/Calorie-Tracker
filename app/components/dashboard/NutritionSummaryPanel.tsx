@@ -12,6 +12,7 @@ import {
 import DashboardPanel from "./DashboardPanel";
 import DashboardSegmentedControl from "./DashboardSegmentedControl";
 import NutritionMetricCard from "./NutritionMetricCard";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 type TimeRange = "day" | "week" | "month";
 
@@ -235,6 +236,7 @@ export default function NutritionSummaryPanel({
           value={timeRange}
           options={SUMMARY_RANGE_OPTIONS}
           onChange={onTimeRangeChange}
+          isLoading={isLoading}
           fullWidthOnMobile
         />
       }
@@ -254,6 +256,7 @@ export default function NutritionSummaryPanel({
           <button
             type="button"
             onClick={handlePreviousDate}
+            disabled={isLoading}
             className="rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
           >
             <svg
@@ -275,12 +278,14 @@ export default function NutritionSummaryPanel({
             type="date"
             value={selectedDate}
             onChange={(event) => onDateChange(event.target.value)}
+            disabled={isLoading}
             className="min-w-40 cursor-pointer rounded-lg border border-zinc-200 bg-white px-4 py-2 text-center text-black scheme-light dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:scheme-dark"
           />
 
           <button
             type="button"
             onClick={handleNextDate}
+            disabled={isLoading}
             className="rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
           >
             <svg
@@ -298,6 +303,12 @@ export default function NutritionSummaryPanel({
             </svg>
           </button>
         </div>
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <LoadingSpinner className="h-3.5 w-3.5" />
+            <span>Updating dashboard...</span>
+          </div>
+        )}
       </div>
 
       <div

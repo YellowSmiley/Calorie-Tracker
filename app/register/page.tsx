@@ -1,10 +1,10 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import ValidatedTextField from "../components/ValidatedTextField";
+import PendingLink from "@/app/components/PendingLink";
 
 type RegisterFieldErrors = {
   email?: string;
@@ -143,12 +143,13 @@ export default function RegisterPage() {
               </p>
               <p className="text-sm text-zinc-500">
                 Click the link in the email to verify your account, then{" "}
-                <Link
+                <PendingLink
                   href="/login"
                   className="font-medium text-black dark:text-zinc-50 underline underline-offset-4 hover:no-underline"
+                  pendingLabel="Loading sign in..."
                 >
                   sign in
-                </Link>
+                </PendingLink>
                 .
               </p>
             </>
@@ -343,12 +344,13 @@ export default function RegisterPage() {
 
               <p className="mt-6 text-sm text-zinc-600 dark:text-zinc-400">
                 Already have an account?{" "}
-                <Link
+                <PendingLink
                   href="/login"
                   className="font-medium text-black dark:text-zinc-50 underline underline-offset-4 hover:no-underline"
+                  pendingLabel="Loading sign in..."
                 >
                   Sign in
-                </Link>
+                </PendingLink>
               </p>
             </>
           )}

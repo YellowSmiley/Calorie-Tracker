@@ -11,6 +11,7 @@ import MealItemRow from "./MealItemRow";
 import MealFavoritesPickerSidebar from "./MealFavoritesPickerSidebar";
 import SaveMealFavoriteModal from "./SaveMealFavoriteModal";
 import HelpButton from "@/app/components/HelpButton";
+import LoadingButton from "@/app/components/LoadingButton";
 import { getCalorieForDisplay } from "@/lib/unitConversions";
 import type { FoodItem, Meal } from "../types";
 import { UserSettings } from "@/app/settings/types";
@@ -596,13 +597,15 @@ export default function MealsSection({
               >
                 Cancel
               </button>
-              <button
+              <LoadingButton
                 onClick={handleClearMeal}
-                disabled={isClearingMeal}
+                isLoading={isClearingMeal}
+                loadingLabel="Clearing meal..."
+                spinnerClassName="h-4 w-4"
                 className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50"
               >
-                {isClearingMeal ? "Clearing..." : "Clear Meal"}
-              </button>
+                Clear Meal
+              </LoadingButton>
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import PendingLink from "@/app/components/PendingLink";
 
 export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -227,23 +227,32 @@ export default function LoginPage() {
 
           <p className="mt-6 text-sm text-zinc-600 dark:text-zinc-400">
             Don&apos;t have an account?{" "}
-            <Link
+            <PendingLink
               href="/register"
               className="font-medium text-black dark:text-zinc-50 underline underline-offset-4 hover:no-underline"
+              pendingLabel="Loading registration..."
             >
               Create one
-            </Link>
+            </PendingLink>
           </p>
 
           <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-500">
             By signing in, you agree to our{" "}
-            <Link href="/terms" className="underline hover:no-underline">
+            <PendingLink
+              href="/terms"
+              className="underline hover:no-underline"
+              pendingLabel="Loading terms..."
+            >
               Terms of Service
-            </Link>{" "}
+            </PendingLink>{" "}
             and{" "}
-            <Link href="/privacy" className="underline hover:no-underline">
+            <PendingLink
+              href="/privacy"
+              className="underline hover:no-underline"
+              pendingLabel="Loading privacy policy..."
+            >
               Privacy Policy
-            </Link>
+            </PendingLink>
           </p>
         </div>
 

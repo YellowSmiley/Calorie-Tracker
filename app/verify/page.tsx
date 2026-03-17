@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import PendingLink from "@/app/components/PendingLink";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -72,12 +72,13 @@ function VerifyContent() {
                 Email Verified
               </h1>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">{message}</p>
-              <Link
+              <PendingLink
                 href="/login"
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+                pendingLabel="Loading sign in..."
               >
                 Sign in
-              </Link>
+              </PendingLink>
             </>
           )}
 
@@ -102,12 +103,13 @@ function VerifyContent() {
                 Verification Failed
               </h1>
               <p className="text-zinc-600 dark:text-zinc-400 mb-6">{message}</p>
-              <Link
+              <PendingLink
                 href="/register"
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+                pendingLabel="Loading registration..."
               >
                 Register again
-              </Link>
+              </PendingLink>
             </>
           )}
         </div>

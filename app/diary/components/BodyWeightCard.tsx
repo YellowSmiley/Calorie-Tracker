@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import HelpButton from "@/app/components/HelpButton";
+import LoadingButton from "@/app/components/LoadingButton";
 import {
   convertBodyWeightFromInput,
   getBodyWeightForDisplay,
@@ -128,15 +129,17 @@ export default function BodyWeightCard({
             data-testid="diary-body-weight-input"
           />
         </div>
-        <button
+        <LoadingButton
           type="button"
           onClick={handleSaveBodyWeight}
-          disabled={isSavingBodyWeight}
+          isLoading={isSavingBodyWeight}
+          loadingLabel="Saving weight..."
+          spinnerClassName="h-4 w-4"
           className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           data-testid="diary-body-weight-save-button"
         >
-          {isSavingBodyWeight ? "Saving..." : "Save Weight"}
-        </button>
+          Save Weight
+        </LoadingButton>
       </div>
       <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
         {savedBodyWeightKg === null

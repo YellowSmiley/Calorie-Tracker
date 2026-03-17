@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import SearchInput from "@/app/components/SearchInput";
 import DataTableShell from "@/app/components/DataTableShell";
+import LoadingButton from "@/app/components/LoadingButton";
 import FavoriteMealEditorSidebar from "./FavoriteMealEditorSidebar";
 import { UserSettings } from "../types";
 import {
@@ -299,13 +300,15 @@ export default function FavoriteMealsSidebar({
               >
                 Cancel
               </button>
-              <button
+              <LoadingButton
                 onClick={handleDeleteFavorite}
-                disabled={isDeleting}
+                isLoading={isDeleting}
+                loadingLabel="Deleting favorite..."
+                spinnerClassName="h-4 w-4"
                 className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
+                Delete
+              </LoadingButton>
             </div>
           </div>
         </div>

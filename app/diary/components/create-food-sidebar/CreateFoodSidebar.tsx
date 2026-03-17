@@ -15,6 +15,7 @@ import { Food } from "@prisma/client";
 import BarcodeInput from "./BarcodeInput";
 import ValidatedNumberField from "../ValidatedNumberField";
 import ValidatedTextField from "../../../components/ValidatedTextField";
+import LoadingButton from "@/app/components/LoadingButton";
 
 export type CreateFoodSidebarOnSubmitData = Omit<
   FoodItem,
@@ -679,20 +680,18 @@ export default function CreateFoodSidebar({
                 Error: {error}
               </p>
             )}
-            <button
+            <LoadingButton
               type="submit"
-              disabled={isLoading}
+              isLoading={isLoading}
+              loadingLabel={
+                editingFood ? "Updating food..." : "Creating food..."
+              }
+              spinnerClassName="h-4 w-4"
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="create-food-submit"
             >
-              {isLoading
-                ? editingFood
-                  ? "Updating..."
-                  : "Creating..."
-                : editingFood
-                  ? "Update Food"
-                  : "Create Food"}
-            </button>
+              {editingFood ? "Update Food" : "Create Food"}
+            </LoadingButton>
           </div>
         </div>
       </form>

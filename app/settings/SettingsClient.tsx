@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "./components/MyFoodsSidebar";
 import FavoriteMealsSidebar from "./components/FavoriteMealsSidebar";
@@ -16,9 +16,11 @@ import {
   convertWeightForDisplay,
   convertWeightFromInput,
 } from "@/lib/unitConversions";
+import LoadingButton from "@/app/components/LoadingButton";
 
 interface SettingsClientProps {
   userSettings: UserSettings;
+  initialSettings: SettingsData;
 }
 
 type NutritionGoalField =
@@ -33,23 +35,46 @@ type NutritionGoalField =
 
 type NutritionGoalErrors = Partial<Record<NutritionGoalField, string>>;
 
-export default function SettingsClient({ userSettings }: SettingsClientProps) {
+export default function SettingsClient({
+  userSettings,
+  initialSettings,
+}: SettingsClientProps) {
   const { data: session } = useSession();
-  const [settings, setSettings] = useState<SettingsData>({
-    calorieGoal: 3000,
-    proteinGoal: 150,
-    carbGoal: 410,
-    fatGoal: 83,
-    saturatesGoal: 20,
-    sugarsGoal: 90,
-    fibreGoal: 30,
-    saltGoal: 6,
-    calorieUnit: "kcal",
-    weightUnit: "g",
-    bodyWeightUnit: userSettings.bodyWeightUnit ?? "kg",
-    volumeUnit: "ml",
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<SettingsData>(() => ({
+    ...initialSettings,
+    calorieGoal: convertCaloriesForDisplay(
+      initialSettings.calorieGoal,
+      initialSettings.calorieUnit,
+    ),
+    proteinGoal: convertWeightForDisplay(
+      initialSettings.proteinGoal,
+      initialSettings.weightUnit,
+    ),
+    carbGoal: convertWeightForDisplay(
+      initialSettings.carbGoal,
+      initialSettings.weightUnit,
+    ),
+    fatGoal: convertWeightForDisplay(
+      initialSettings.fatGoal,
+      initialSettings.weightUnit,
+    ),
+    saturatesGoal: convertWeightForDisplay(
+      initialSettings.saturatesGoal,
+      initialSettings.weightUnit,
+    ),
+    sugarsGoal: convertWeightForDisplay(
+      initialSettings.sugarsGoal,
+      initialSettings.weightUnit,
+    ),
+    fibreGoal: convertWeightForDisplay(
+      initialSettings.fibreGoal,
+      initialSettings.weightUnit,
+    ),
+    saltGoal: convertWeightForDisplay(
+      initialSettings.saltGoal,
+      initialSettings.weightUnit,
+    ),
+  }));
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -121,47 +146,17 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     }));
   };
 
-  useEffect(() => {
-    fetchSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const convertBackSettings = (data: SettingsData): SettingsData => {
-    const convertedBackSettings: SettingsData = {
-      ...data,
-      calorieGoal: convertCaloriesForDisplay(
-        data.calorieGoal,
-        data.calorieUnit,
-      ),
-      proteinGoal: convertWeightForDisplay(data.proteinGoal, data.weightUnit),
-      carbGoal: convertWeightForDisplay(data.carbGoal, data.weightUnit),
-      fatGoal: convertWeightForDisplay(data.fatGoal, data.weightUnit),
-      saturatesGoal: convertWeightForDisplay(
-        data.saturatesGoal,
-        data.weightUnit,
-      ),
-      sugarsGoal: convertWeightForDisplay(data.sugarsGoal, data.weightUnit),
-      fibreGoal: convertWeightForDisplay(data.fibreGoal, data.weightUnit),
-      saltGoal: convertWeightForDisplay(data.saltGoal, data.weightUnit),
-    };
-    return convertedBackSettings;
-  };
-
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/settings");
-      if (response.ok) {
-        const data = (await response.json()) as SettingsData;
-        setSettings(convertBackSettings(data));
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === "development")
-        console.error("Error fetching settings:", error);
-      setMessage({ type: "error", text: "Failed to load settings" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const convertBackSettings = (data: SettingsData): SettingsData => ({
+    ...data,
+    calorieGoal: convertCaloriesForDisplay(data.calorieGoal, data.calorieUnit),
+    proteinGoal: convertWeightForDisplay(data.proteinGoal, data.weightUnit),
+    carbGoal: convertWeightForDisplay(data.carbGoal, data.weightUnit),
+    fatGoal: convertWeightForDisplay(data.fatGoal, data.weightUnit),
+    saturatesGoal: convertWeightForDisplay(data.saturatesGoal, data.weightUnit),
+    sugarsGoal: convertWeightForDisplay(data.sugarsGoal, data.weightUnit),
+    fibreGoal: convertWeightForDisplay(data.fibreGoal, data.weightUnit),
+    saltGoal: convertWeightForDisplay(data.saltGoal, data.weightUnit),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,14 +284,6 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading settings...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-full flex flex-col">
       {/* Header */}
@@ -357,15 +344,17 @@ export default function SettingsClient({ userSettings }: SettingsClientProps) {
       {/* Fixed Buttons */}
       <div className="fixed bottom-20 left-0 right-0 z-30 border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black p-4">
         <div className="mx-auto max-w-3xl">
-          <button
+          <LoadingButton
             type="button"
             data-testid="settings-save-button"
             onClick={handleSubmit}
-            disabled={isSaving}
+            isLoading={isSaving}
+            loadingLabel="Saving settings..."
+            spinnerClassName="h-4 w-4"
             className="w-full rounded-lg bg-foreground text-background px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {isSaving ? "Saving..." : "Save Settings"}
-          </button>
+            Save Settings
+          </LoadingButton>
         </div>
       </div>
 

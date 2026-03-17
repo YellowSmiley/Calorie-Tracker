@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
+import PendingLink from "@/app/components/PendingLink";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Calorie Tracker",
@@ -322,12 +322,13 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800">
-            <Link
+            <PendingLink
               href="/login"
               className="text-sm text-zinc-500 dark:text-zinc-400 underline hover:no-underline"
+              pendingLabel="Loading sign in..."
             >
               Back to sign in
-            </Link>
+            </PendingLink>
           </div>
         </div>
       </div>

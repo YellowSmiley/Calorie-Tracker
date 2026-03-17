@@ -12,6 +12,7 @@ import {
 } from "@/app/meal-favorites/types";
 import { getCalorieForDisplay } from "@/lib/unitConversions";
 import ValidatedTextField from "@/app/components/ValidatedTextField";
+import LoadingButton from "@/app/components/LoadingButton";
 
 interface FavoriteMealEditorSidebarProps {
   isOpen: boolean;
@@ -306,19 +307,19 @@ export default function FavoriteMealEditorSidebar({
 
         <div className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
           <div className="mx-auto w-full max-w-3xl">
-            <button
+            <LoadingButton
               type="button"
               onClick={handleSave}
-              disabled={isSaving}
+              isLoading={isSaving}
+              loadingLabel={
+                editingFavorite ? "Saving favorite..." : "Creating favorite..."
+              }
+              spinnerClassName="h-4 w-4"
               className="w-full rounded-lg bg-foreground text-background px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
               data-testid="favorite-save-button"
             >
-              {isSaving
-                ? "Saving..."
-                : editingFavorite
-                  ? "Save Favorite"
-                  : "Create Favorite"}
-            </button>
+              {editingFavorite ? "Save Favorite" : "Create Favorite"}
+            </LoadingButton>
           </div>
         </div>
       </div>

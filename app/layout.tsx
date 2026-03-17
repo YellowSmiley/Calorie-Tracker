@@ -7,6 +7,7 @@ import Providers from "./providers";
 import { Analytics } from "@vercel/analytics/next";
 import AdSense from "./components/AdSense";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import RouteLoadingIndicator from "./components/RouteLoadingIndicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,6 +59,7 @@ export default function RootLayout({
       >
         <Analytics />
         <Providers>
+          <RouteLoadingIndicator />
           <AdSense />
           {children}
           <Navigation />

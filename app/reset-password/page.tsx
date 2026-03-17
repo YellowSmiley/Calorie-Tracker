@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import type { FormEvent } from "react";
+import PendingLink from "@/app/components/PendingLink";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -84,24 +84,26 @@ function ResetPasswordContent() {
                   {message}
                 </p>
               </div>
-              <Link
+              <PendingLink
                 href="/login"
                 className="inline-block w-full h-10 leading-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                pendingLabel="Loading sign in..."
               >
                 Back to Login
-              </Link>
+              </PendingLink>
             </div>
           ) : status === "error" && (!token || !email) ? (
             <div className="space-y-4">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {message}
               </p>
-              <Link
+              <PendingLink
                 href="/login"
                 className="inline-block w-full h-10 leading-10 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                pendingLabel="Loading sign in..."
               >
                 Back to Login
-              </Link>
+              </PendingLink>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -153,12 +155,13 @@ function ResetPasswordContent() {
               >
                 {status === "loading" ? "Resetting..." : "Reset Password"}
               </button>
-              <Link
+              <PendingLink
                 href="/login"
                 className="block text-sm text-zinc-600 dark:text-zinc-400 hover:underline mt-2"
+                pendingLabel="Loading sign in..."
               >
                 Back to Login
-              </Link>
+              </PendingLink>
             </form>
           )}
         </div>

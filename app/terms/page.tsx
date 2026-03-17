@@ -1,6 +1,7 @@
-import Link from "next/link";
+import PendingLink from "@/app/components/PendingLink";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Terms of Service - Calorie Tracker",
 };
 
@@ -166,9 +167,13 @@ export default function TermsOfServicePage() {
               </h2>
               <p>
                 Your use of the Service is also governed by our{" "}
-                <Link href="/privacy" className="underline hover:no-underline">
+                <PendingLink
+                  href="/privacy"
+                  className="underline hover:no-underline"
+                  pendingLabel="Loading privacy policy..."
+                >
                   Privacy Policy
-                </Link>
+                </PendingLink>
                 , which explains how we collect, use, and protect your personal
                 data.
               </p>
@@ -216,12 +221,13 @@ export default function TermsOfServicePage() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800">
-            <Link
+            <PendingLink
               href="/login"
               className="text-sm text-zinc-500 dark:text-zinc-400 underline hover:no-underline"
+              pendingLabel="Loading sign in..."
             >
               Back to sign in
-            </Link>
+            </PendingLink>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DailySummaryAccordion from "./components/DailySummaryAccordion";
 import BodyWeightCard from "./components/BodyWeightCard";
@@ -8,6 +8,7 @@ import MealsSection from "./components/MealsSection";
 import HelpButton from "@/app/components/HelpButton";
 import type { Meal } from "./types";
 import { UserSettings } from "../settings/types";
+import { startRouteLoading } from "@/app/components/routeLoading";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
@@ -34,6 +35,7 @@ export default function DiaryClient({
   userGoals,
 }: DiaryClientProps) {
   const router = useRouter();
+  const [isNavigatingDate, startDateNavigation] = useTransition();
   const [currentDate, setCurrentDate] = useState(activeDate);
   const [goals] = useState(userGoals);
 
@@ -67,8 +69,10 @@ export default function DiaryClient({
 
   const handleDateChange = (newDate: string) => {
     setCurrentDate(newDate);
-    router.push(`/diary?date=${newDate}`);
-    router.refresh();
+    startRouteLoading("Loading diary...");
+    startDateNavigation(() => {
+      router.push(`/diary?date=${newDate}`);
+    });
   };
 
   const handlePreviousDay = () => {
@@ -110,6 +114,7 @@ export default function DiaryClient({
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={handlePreviousDay}
+                disabled={isNavigatingDate}
                 className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
                 aria-label="Previous day"
                 data-testid="previous-day-button"
@@ -133,12 +138,14 @@ export default function DiaryClient({
                 type="date"
                 value={currentDate}
                 onChange={(e) => handleDateChange(e.target.value)}
+                disabled={isNavigatingDate}
                 className="px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-black dark:text-zinc-50 text-center cursor-pointer scheme-light dark:scheme-dark"
                 style={{ minWidth: "160px" }}
               />
 
               <button
                 onClick={handleNextDay}
+                disabled={isNavigatingDate}
                 className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors shrink-0"
                 aria-label="Next day"
                 data-testid="next-day-button"
@@ -158,6 +165,11 @@ export default function DiaryClient({
                 </svg>
               </button>
             </div>
+            {isNavigatingDate && (
+              <p className="mt-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Loading selected day...
+              </p>
+            )}
           </div>
         </div>
       </div>

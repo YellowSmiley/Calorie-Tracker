@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
+import PendingLink from "@/app/components/PendingLink";
 
 function getConsentSnapshot() {
   return localStorage.getItem("cookie-consent");
@@ -38,12 +38,13 @@ export default function CookieBanner() {
           This site uses strictly necessary cookies to keep you signed in and
           protect your account. No tracking or advertising cookies are used. See
           our{" "}
-          <Link
+          <PendingLink
             href="/privacy"
             className="underline hover:no-underline text-black dark:text-zinc-50"
+            pendingLabel="Loading privacy policy..."
           >
             Privacy Policy
-          </Link>{" "}
+          </PendingLink>{" "}
           for details.
         </p>
         <button

@@ -18,6 +18,7 @@ import {
   UserSettings,
 } from "../../settings/types";
 import ValidatedNumberField from "./ValidatedNumberField";
+import LoadingButton from "@/app/components/LoadingButton";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -610,7 +611,7 @@ export default function EditFoodSidebar({
         {/* Submit Button - Fixed at Bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-black border-t border-zinc-200 dark:border-zinc-800">
           <div className="mx-auto w-full max-w-3xl">
-            <button
+            <LoadingButton
               type="submit"
               disabled={
                 isLoading ||
@@ -618,15 +619,14 @@ export default function EditFoodSidebar({
                 Boolean(fieldErrors.servingSize) ||
                 Boolean(fieldErrors.quantity)
               }
+              isLoading={isLoading}
+              loadingLabel="Updating serving..."
+              spinnerClassName="h-4 w-4"
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid={isAdd ? "add-food-submit" : "edit-food-submit"}
             >
-              {isLoading
-                ? "Updating..."
-                : isAdd
-                  ? "Add Food"
-                  : "Update Serving"}
-            </button>
+              {isAdd ? "Add Food" : "Update Serving"}
+            </LoadingButton>
           </div>
         </div>
       </form>

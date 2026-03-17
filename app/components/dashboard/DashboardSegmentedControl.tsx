@@ -1,5 +1,7 @@
 "use client";
 
+import LoadingSpinner from "@/app/components/LoadingSpinner";
+
 type SegmentedOption<T extends string> = {
   value: T;
   label: string;
@@ -10,6 +12,7 @@ interface DashboardSegmentedControlProps<T extends string> {
   value: T;
   options: readonly SegmentedOption<T>[];
   onChange: (value: T) => void;
+  isLoading?: boolean;
   size?: "sm" | "md";
   fullWidthOnMobile?: boolean;
   className?: string;
@@ -19,6 +22,7 @@ export default function DashboardSegmentedControl<T extends string>({
   value,
   options,
   onChange,
+  isLoading = false,
   size = "md",
   fullWidthOnMobile = false,
   className,
@@ -45,8 +49,9 @@ export default function DashboardSegmentedControl<T extends string>({
             type="button"
             data-testid={option.testId}
             onClick={() => onChange(option.value)}
+            disabled={isLoading}
             className={[
-              "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
+              "inline-flex items-center justify-center rounded-lg font-medium transition-colors disabled:opacity-60",
               buttonSizeClasses,
               fullWidthOnMobile ? "flex-1 sm:flex-none" : "",
               isActive
@@ -56,6 +61,9 @@ export default function DashboardSegmentedControl<T extends string>({
               .filter(Boolean)
               .join(" ")}
           >
+            {isLoading && isActive && (
+              <LoadingSpinner className="h-3.5 w-3.5" />
+            )}
             {option.label}
           </button>
         );
