@@ -6,7 +6,7 @@
     "dev": "concurrently -n next,tsc,eslint -c cyan,yellow,magenta \"npm run dev:next\" \"npm run dev:types\" \"npm run dev:lint\"",
     "dev:next": "next dev",
     "dev:types": "tsc --noEmit --watch --preserveWatchOutput",
-    "dev:lint": "eslint . --watch",
+    "dev:lint": "eslint . --cache --cache-location .eslintcache",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",

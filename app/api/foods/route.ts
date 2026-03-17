@@ -45,7 +45,11 @@ export async function GET(request: NextRequest) {
   const total = sortedFoods.length;
   const foods = sortedFoods
     .slice(skip, skip + take)
-    .map(({ _count, usageCount, ...food }) => food);
+    .map(({ _count, usageCount, ...food }) => {
+      void _count;
+      void usageCount;
+      return food;
+    });
 
   let suggestions: string[] = [];
 

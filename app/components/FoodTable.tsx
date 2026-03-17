@@ -21,6 +21,18 @@ interface FoodTableProps {
 }
 
 const PAGE_SIZE = 50;
+const DUPLICATE_ITEM_ERROR = "This item has already been added";
+
+const getRequestErrorMessage = (
+  response: Response,
+  fallbackMessage: string,
+) => {
+  if (response.status === 409) {
+    return DUPLICATE_ITEM_ERROR;
+  }
+
+  return fallbackMessage;
+};
 
 export default function FoodTable({
   userSettings,
@@ -138,7 +150,7 @@ export default function FoodTable({
           setEditingFood(null);
           setShowCreateForm(false);
         } else {
-          setError("Failed to update food");
+          setError(getRequestErrorMessage(response, "Something went wrong"));
         }
       } else {
         // Create new food
@@ -153,7 +165,7 @@ export default function FoodTable({
           fetchFoods(searchQuery, 0, false);
           setShowCreateForm(false);
         } else {
-          setError("Failed to create food");
+          setError(getRequestErrorMessage(response, "Something went wrong"));
         }
       }
     } catch (err) {
@@ -191,7 +203,7 @@ export default function FoodTable({
         setShowDeleteModal(false);
         setError(null);
       } else {
-        setError("Failed to delete food");
+        setError(getRequestErrorMessage(response, "Something went wrong"));
       }
     } catch (err) {
       if (process.env.NODE_ENV === "development")
@@ -218,14 +230,14 @@ export default function FoodTable({
         {/* Error Message */}
         {error && (
           <div className="px-4 pt-4" data-testid="food-table-error">
-            <div className="rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 p-4">
+            <div className="rounded-lg border border-zinc-300 bg-zinc-100 p-4 dark:border-zinc-700 dark:bg-zinc-900">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-900 dark:text-zinc-200">
                   {error}
                 </p>
                 <button
                   onClick={() => setError(null)}
-                  className="text-zinc-700 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-300"
+                  className="text-zinc-700 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-300"
                 >
                   ×
                 </button>
@@ -340,6 +352,7 @@ export default function FoodTable({
         userSettings={userSettings}
         isLoading={isLoading}
         editingFood={editingFood}
+        error={error}
       />
 
       <DeleteFoodModal
