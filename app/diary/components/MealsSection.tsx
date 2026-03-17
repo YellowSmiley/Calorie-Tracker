@@ -530,6 +530,7 @@ export default function MealsSection({
         onSubmit={addCustomFood}
         userSettings={userSettings}
         isLoading={isLoadingCustom}
+        error={error}
       />
 
       <EditFoodSidebar
