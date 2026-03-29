@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
 
@@ -11,7 +11,7 @@ export async function PATCH(
   }
 
   try {
-    const { id: userId } = await params;
+    const { id: userId } = (await params) as { id: string };
     const body = await request.json();
     const { name, email, password } = body;
 
@@ -51,7 +51,7 @@ import { logError } from "@/lib/logger";
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
 
@@ -60,7 +60,7 @@ export async function DELETE(
   }
 
   try {
-    const { id: userId } = await params;
+    const { id: userId } = (await params) as { id: string };
 
     // Prevent admin from deleting themselves
     if (userId === session.user.id) {

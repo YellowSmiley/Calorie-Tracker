@@ -7,7 +7,7 @@ import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
 
@@ -16,7 +16,7 @@ export async function PUT(
   }
 
   try {
-    const { id: foodId } = await params;
+    const { id: foodId } = (await params) as { id: string };
     const body = (await request.json()) as FoodItem;
 
     // Validate input (same rules as POST)
@@ -218,7 +218,7 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
 
@@ -227,7 +227,7 @@ export async function DELETE(
   }
 
   try {
-    const { id: foodId } = await params;
+    const { id: foodId } = (await params) as { id: string };
 
     // Ownership check
     const existingFood = await prisma.food.findUnique({

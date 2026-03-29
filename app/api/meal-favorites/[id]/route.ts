@@ -85,14 +85,14 @@ const mapFavoriteItemForClient = (favoriteItem: {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
+  const { id } = (await params) as { id: string };
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
@@ -134,14 +134,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
+  const { id } = (await params) as { id: string };
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
@@ -310,14 +310,14 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
+  const { id } = (await params) as { id: string };
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
