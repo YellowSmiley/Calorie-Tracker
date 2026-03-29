@@ -159,13 +159,8 @@ export default function MealFavoritesPickerSidebar({
             scrollRef={scrollRef}
             onScroll={() => {}}
             containerClassName="flex-1 overflow-y-auto"
-            loadingNode={
-              isLoading ? (
-                <div className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 text-center">
-                  Loading...
-                </div>
-              ) : undefined
-            }
+            isLoading={isLoading}
+            loadingLabel="Loading favorite meals"
             emptyNode={
               !isLoading && favorites.length === 0 ? (
                 <div className="px-4 py-6 text-sm text-zinc-500 dark:text-zinc-400 text-center">

@@ -217,23 +217,9 @@ export default function FoodListSidebar({
           <DataTableShell
             scrollRef={scrollRef}
             onScroll={handleScroll}
-            containerClassName="overflow-y-auto relative"
-            overlay={
-              isLoading ? (
-                <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
-                  <div className="text-sm text-zinc-700 dark:text-zinc-300">
-                    Adding food...
-                  </div>
-                </div>
-              ) : undefined
-            }
-            loadingNode={
-              isFetching ? (
-                <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                  Loading...
-                </div>
-              ) : undefined
-            }
+            containerClassName="overflow-y-auto"
+            isLoading={isFetching || isLoading}
+            loadingLabel={isLoading ? "Adding food" : "Loading foods"}
             emptyNode={
               !isFetching && hasLoaded && foods.length === 0 ? (
                 <div className="px-4 py-6 text-center">

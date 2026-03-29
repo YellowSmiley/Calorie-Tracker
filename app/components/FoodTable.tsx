@@ -237,16 +237,8 @@ export default function FoodTable({
         <DataTableShell
           scrollRef={scrollRef}
           onScroll={handleScroll}
-          loadingNode={
-            isLoading ? (
-              <div
-                className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400"
-                data-testid="loading-foods"
-              >
-                Loading...
-              </div>
-            ) : undefined
-          }
+          isLoading={isLoading}
+          loadingLabel="Loading foods"
           emptyNode={
             !isLoading && foods.length === 0 ? (
               <div className="px-4 py-6 text-center">

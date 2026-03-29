@@ -163,13 +163,8 @@ export default function UserManagement() {
         <DataTableShell
           scrollRef={scrollRef}
           onScroll={handleScroll}
-          loadingNode={
-            isLoading ? (
-              <div className="px-4 py-3 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                Loading...
-              </div>
-            ) : undefined
-          }
+          isLoading={isLoading}
+          loadingLabel="Loading users"
           emptyNode={
             !isLoading && users.length === 0 ? (
               <div className="px-4 py-6 text-center">
