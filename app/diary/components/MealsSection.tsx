@@ -406,6 +406,7 @@ export default function MealsSection({
               <button
                 type="button"
                 onClick={() => {
+                  onError(null);
                   setSaveFavoriteMealIndex(mealIndex);
                   setSaveFavoriteName(`${meal.name} Favorite`);
                 }}
@@ -622,6 +623,7 @@ export default function MealsSection({
           items={meals[saveFavoriteMealIndex]?.items ?? []}
           userSettings={userSettings}
           favoriteName={saveFavoriteName}
+          error={error}
           onFavoriteNameChange={setSaveFavoriteName}
           isLoading={isSavingFavorite}
           onCancel={() => {

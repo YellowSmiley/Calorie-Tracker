@@ -18,6 +18,7 @@ interface SaveMealFavoriteModalProps {
   items: FoodItem[];
   userSettings: UserSettings;
   favoriteName: string;
+  error?: string | null;
   onFavoriteNameChange: (value: string) => void;
   isLoading?: boolean;
   onCancel: () => void;
@@ -30,6 +31,7 @@ export default function SaveMealFavoriteModal({
   items,
   userSettings,
   favoriteName,
+  error = null,
   onFavoriteNameChange,
   isLoading = false,
   onCancel,
@@ -108,6 +110,17 @@ export default function SaveMealFavoriteModal({
         Save the current <span className="font-medium">{mealName}</span> items
         as a reusable favorite.
       </p>
+
+      {error && (
+        <div
+          className="rounded-lg border border-zinc-300 bg-zinc-100 p-3 dark:border-zinc-700 dark:bg-zinc-900"
+          role="alert"
+          aria-live="polite"
+          data-testid="save-favorite-error"
+        >
+          <p className="text-sm text-zinc-900 dark:text-zinc-200">{error}</p>
+        </div>
+      )}
 
       <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         <div className="px-3 py-2 bg-zinc-50 dark:bg-black border-b border-zinc-200 dark:border-zinc-800">
