@@ -103,6 +103,7 @@ export default function MealFavoritesPickerSidebar({
         throw new Error(data.error || "Failed to apply favorite");
       }
 
+      setSearchQuery("");
       onApplied();
       onClose();
     } catch (err) {
@@ -110,6 +111,11 @@ export default function MealFavoritesPickerSidebar({
     } finally {
       setIsApplying(false);
     }
+  };
+
+  const handleClose = () => {
+    setSearchQuery("");
+    onClose();
   };
 
   return (
@@ -120,7 +126,7 @@ export default function MealFavoritesPickerSidebar({
     >
       <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="h-10 rounded-lg border border-solid border-black/8 px-4 text-sm font-medium text-black transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
         >
           Back

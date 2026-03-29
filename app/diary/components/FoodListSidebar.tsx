@@ -123,7 +123,7 @@ export default function FoodListSidebar({
     if (!isOpen) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      fetchFoods(searchQuery, 0, false);
+      fetchFoods(searchQuery.trim(), 0, false);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 1000);
     return () => {
@@ -133,7 +133,7 @@ export default function FoodListSidebar({
 
   const loadMore = useCallback(() => {
     if (isFetching || foods.length >= total) return;
-    fetchFoods(searchQuery, foods.length, true);
+    fetchFoods(searchQuery.trim(), foods.length, true);
   }, [isFetching, foods.length, total, searchQuery, fetchFoods]);
 
   // Infinite scroll
@@ -166,6 +166,11 @@ export default function FoodListSidebar({
     const totalAmount = serving * selectedFood.measurementAmount;
     onSelectFood(selectedFood, totalAmount);
     setShowEditForm(false);
+    setSearchQuery("");
+    setSuggestions([]);
+    setFoods([]);
+    setTotal(0);
+    setHasLoaded(false);
   };
 
   return (

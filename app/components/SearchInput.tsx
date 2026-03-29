@@ -45,7 +45,7 @@ export default function SearchInput({
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion}
-                onClick={() => onSuggestionClick?.(suggestion)}
+                onClick={() => onSuggestionClick?.(suggestion.trim())}
                 className="rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1 text-xs text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 data-testid={`${dataTestId}-suggestion-${suggestion}`}
               >
