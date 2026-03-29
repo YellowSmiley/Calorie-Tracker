@@ -21,7 +21,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search") || "";
+    const search = (searchParams.get("search") || "")
+      .replace(/\s+/g, " ")
+      .trim();
     const take = Math.min(
       parseInt(searchParams.get("take") || "50") || 50,
       200,
