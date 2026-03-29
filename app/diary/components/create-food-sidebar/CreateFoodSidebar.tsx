@@ -665,6 +665,63 @@ export default function CreateFoodSidebar({
                   dataTestId="create-food-serving-description"
                 />
               </div>
+
+              {(() => {
+                const servAmt = parseFloat(formData.defaultServingAmount);
+                const measAmt = parseFloat(formData.measurementAmount);
+                if (!servAmt || !measAmt || servAmt <= 0 || measAmt <= 0)
+                  return null;
+                const ratio = servAmt / measAmt;
+                const scale = (v: string) => {
+                  const n = parseFloat(v);
+                  return isNaN(n)
+                    ? "0"
+                    : String(Math.round(n * ratio * 10) / 10);
+                };
+                const unit = userSettings.weightUnit;
+                const cal = userSettings.calorieUnit;
+                const nutrients = [
+                  {
+                    label: "Calories",
+                    value: `${scale(formData.calories)} ${cal}`,
+                  },
+                  {
+                    label: "Protein",
+                    value: `${scale(formData.protein)}${unit}`,
+                  },
+                  { label: "Carbs", value: `${scale(formData.carbs)}${unit}` },
+                  { label: "Fat", value: `${scale(formData.fat)}${unit}` },
+                  {
+                    label: "Saturates",
+                    value: `${scale(formData.saturates)}${unit}`,
+                  },
+                  {
+                    label: "Sugars",
+                    value: `${scale(formData.sugars)}${unit}`,
+                  },
+                  { label: "Fibre", value: `${scale(formData.fibre)}${unit}` },
+                  { label: "Salt", value: `${scale(formData.salt)}${unit}` },
+                ];
+                return (
+                  <div className="mt-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+                    <h4 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
+                      Nutrition per serving (Serving size * quantity)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {nutrients.map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                            {label}
+                          </p>
+                          <p className="text-xl font-bold text-black dark:text-zinc-50">
+                            {value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
