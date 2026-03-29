@@ -62,7 +62,7 @@ export default function DashboardSegmentedControl<T extends string>({
               .join(" ")}
           >
             {isLoading && isActive && (
-              <LoadingSpinner className="h-3.5 w-3.5" />
+              <LoadingSpinner className="h-3.5 w-3.5 mr-1.5" />
             )}
             {option.label}
           </button>

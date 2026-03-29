@@ -145,7 +145,7 @@ export default function MealFavoritesPickerSidebar({
       </div>
 
       <div className="flex flex-col h-full p-4">
-        <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}

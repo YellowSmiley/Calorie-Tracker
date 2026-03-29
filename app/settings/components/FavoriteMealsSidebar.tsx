@@ -159,8 +159,8 @@ export default function FavoriteMealsSidebar({
           <div className="w-12" />
         </div>
 
-        <div className="flex flex-col h-full p-4">
-          <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 p-4">
+          <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
             <SearchInput
               value={searchQuery}
               onChange={setSearchQuery}
@@ -184,19 +184,6 @@ export default function FavoriteMealsSidebar({
                         ? `No favorites found for "${searchQuery}"`
                         : "No favorite meals yet. Create your first favorite to quickly apply meals in Diary."}
                     </p>
-                    <button
-                      onClick={openEditorForCreate}
-                      className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                      data-testid="create-favorite-button"
-                    >
-                      Create Favorite
-                    </button>
-                  </div>
-                ) : undefined
-              }
-              footerNode={
-                !isLoading && favorites.length > 0 ? (
-                  <div className="px-4 py-4 text-center">
                     <button
                       onClick={openEditorForCreate}
                       className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
@@ -255,6 +242,18 @@ export default function FavoriteMealsSidebar({
                 </div>
               ))}
             </DataTableShell>
+
+            {!isLoading && favorites.length > 0 && (
+              <div className="border-t border-zinc-200 dark:border-zinc-800 px-4 py-4 text-center">
+                <button
+                  onClick={openEditorForCreate}
+                  className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  data-testid="create-favorite-button"
+                >
+                  Create Favorite
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

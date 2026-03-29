@@ -29,7 +29,7 @@ export default function DataTableShell({
     <div
       ref={scrollRef}
       onScroll={onScroll}
-      className={containerClassName}
+      className={`${containerClassName} min-h-0`}
       aria-busy={isLoading}
       aria-live="polite"
     >
