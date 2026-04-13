@@ -381,6 +381,36 @@ test.describe("Diary Feature", () => {
     await expect(page.getByTestId("summary-left-fibre")).toContainText("29g");
     await expect(page.getByTestId("summary-left-salt")).toContainText("5.5g");
 
+    await expect(
+      page.getByTestId("meal-summary-breakfast-accordion-button"),
+    ).toContainText("Breakfast Summary");
+    await page.getByTestId("meal-summary-breakfast-accordion-button").click();
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-calories"),
+    ).toContainText(`${calories}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-protein"),
+    ).toContainText(`${protein}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-carbs"),
+    ).toContainText(`${carbs}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-fat"),
+    ).toContainText(`${fat}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-saturates"),
+    ).toContainText(`${saturates}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-sugars"),
+    ).toContainText(`${sugars}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-fibre"),
+    ).toContainText(`${fibre}`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-salt"),
+    ).toContainText(`${salt}`);
+    await page.getByTestId("meal-summary-breakfast-accordion-button").click();
+
     await page.getByTestId("daily-summary-accordion-button").click();
 
     // Change date and check summary updates

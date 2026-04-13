@@ -15,6 +15,7 @@ When making code changes, run these checks in this order when feasible:
 3. `npm run test:e2e`
 
 If a full Playwright run is too slow for the task, run the most relevant Playwright spec(s) first, then call out that full `npm run test:e2e` is still recommended.
+For this workspace, local Playwright is only reliable when tests are run one at a time and not in headless mode. Prefer a single spec, single project, headed run such as `npm run test:e2e -- e2e/diary.spec.ts --project=chromium --workers=1 --headed`.
 
 ## Component Reuse Rules
 
@@ -34,11 +35,13 @@ If a full Playwright run is too slow for the task, run the most relevant Playwri
 - Prefer stable selectors using `data-testid` for interactive elements used by end-to-end tests.
 - Do not remove or rename existing `data-testid` attributes without updating affected Playwright specs in the same change.
 - For UI refactors, verify Playwright selectors still match and call out any selector migrations in the final response.
+- When adding any UI feature, check whether the change needs Playwright coverage, in both default units and converted units, and tests pass with all added scenarios before finalizing.
+- Ensure BDD-style Playwright tests are focused on user behaviors and outcomes, not implementation details. If a test is failing due to a non-user-facing change, update the test to be more resilient rather than changing the implementation to fit the test.
 
 ## PR/Review Mindset
 
 - Call out potential regressions first.
-- Highlight missing tests for changed behavior.
+- Highlight missing tests for changed behaviors.
 - Flag repeated UI patterns that should become shared components.
 
 ## Scope and Safety

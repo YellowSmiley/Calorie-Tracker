@@ -153,6 +153,35 @@ test.describe("Settings", () => {
     );
     await expect(page.getByTestId("summary-goal-fibre")).toContainText(`1.1oz`);
     await expect(page.getByTestId("summary-goal-salt")).toContainText(`0.2oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-accordion-button"),
+    ).toContainText("Breakfast Summary");
+    await page.getByTestId("meal-summary-breakfast-accordion-button").click();
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-calories"),
+    ).toContainText(`209 kJ`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-protein"),
+    ).toContainText(`1.8oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-carbs"),
+    ).toContainText(`1.8oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-fat"),
+    ).toContainText(`0.2oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-saturates"),
+    ).toContainText(`0.2oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-sugars"),
+    ).toContainText(`0.2oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-fibre"),
+    ).toContainText(`0.2oz`);
+    await expect(
+      page.getByTestId("meal-summary-breakfast-total-salt"),
+    ).toContainText(`0.2oz`);
+    await page.getByTestId("meal-summary-breakfast-accordion-button").click();
     // Add Food and check it uses correct units
     await page.getByTestId("diary-add-food-button-breakfast").click();
     await page.getByTestId("food-list-search-input").fill(foodName);

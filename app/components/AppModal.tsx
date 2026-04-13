@@ -46,7 +46,7 @@ export default function AppModal({
         aria-labelledby={titleId}
         className={`h-full w-full max-w-none rounded-none border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950 sm:h-auto ${maxWidthClassName} sm:rounded-lg`}
         onClick={(event) => event.stopPropagation()}
-        data-testid={dataTestId ? `${dataTestId}-modal` : undefined}
+        data-testid={dataTestId}
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between gap-3 border-b border-zinc-200 p-4 dark:border-zinc-800">
