@@ -11,9 +11,11 @@ import DeleteFoodModal from "./DeleteFoodModal";
 import MealItemRow from "./MealItemRow";
 import MealFavoritesPickerSidebar from "./MealFavoritesPickerSidebar";
 import SaveMealFavoriteModal from "./SaveMealFavoriteModal";
+import NutritionSummaryAccordion from "./NutritionSummaryAccordion";
 import HelpButton from "@/app/components/HelpButton";
 import LoadingButton from "@/app/components/LoadingButton";
 import { getCalorieForDisplay } from "@/lib/unitConversions";
+import { calculateNutritionTotals } from "@/lib/nutritionSummary";
 import type { FoodItem, Meal } from "../types";
 import { UserSettings } from "@/app/settings/types";
 import { FoodWithCreator } from "@/app/api/admin/foods/route";
@@ -91,17 +93,7 @@ export default function MealsSection({
   );
 
   const getMealTotals = (mealIndex: number) => {
-    const items = meals[mealIndex].items;
-    return {
-      calories: items.reduce((sum, item) => sum + item.calories, 0),
-      protein: items.reduce((sum, item) => sum + item.protein, 0),
-      carbs: items.reduce((sum, item) => sum + item.carbs, 0),
-      fat: items.reduce((sum, item) => sum + item.fat, 0),
-      saturates: items.reduce((sum, item) => sum + item.saturates, 0),
-      sugars: items.reduce((sum, item) => sum + item.sugars, 0),
-      fibre: items.reduce((sum, item) => sum + item.fibre, 0),
-      salt: items.reduce((sum, item) => sum + item.salt, 0),
-    };
+    return calculateNutritionTotals(meals[mealIndex].items);
   };
 
   const addFoodFromList = async (food: FoodItem, serving: number = 1) => {
@@ -399,109 +391,127 @@ export default function MealsSection({
             className="mb-8 last:mb-0"
             data-testid={`diary-meal-${meal.name.toLowerCase()}`}
           >
-            <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
-              {meal.name}
-            </h2>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  onError(null);
-                  setSaveFavoriteMealIndex(mealIndex);
-                  setSaveFavoriteName(`${meal.name} Favorite`);
-                }}
-                disabled={isSavingFavorite}
-                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors disabled:opacity-50"
-                data-testid={`save-favorite-${meal.name.toLowerCase()}`}
-              >
-                Save as Favorite
-              </button>
-              <button
-                type="button"
-                onClick={() => setFavoritePickerMealIndex(mealIndex)}
-                className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                data-testid={`apply-favorite-${meal.name.toLowerCase()}`}
-              >
-                Apply Favorite
-              </button>
-              <button
-                type="button"
-                onClick={() => setClearMealIndex(mealIndex)}
-                className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                data-testid={`clear-meal-${meal.name.toLowerCase()}`}
-              >
-                Clear Meal
-              </button>
-              <HelpButton
-                title="Favorite Meals"
-                content="Save the current meal as a favorite to reuse it later. Use 'Apply Favorite' to replace this meal with a saved favorite. The apply list includes search, item previews, nutrition totals, and sorts favorites by how often you use them."
-                ariaLabel={`Help: Favorite meals for ${meal.name}`}
-              />
-            </div>
-            <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <table className="w-full border-collapse bg-white dark:bg-black">
-                <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                      Food Item
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                      Calories
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {meal.items.map((item) => (
-                    <MealItemRow
-                      key={item.id}
-                      item={item}
-                      mealIndex={mealIndex}
-                      userSettings={userSettings}
-                      onEdit={(targetMealIndex, itemId) => {
-                        setEditTarget({ mealIndex: targetMealIndex, itemId });
-                        setShowEditForm(true);
+            {(() => {
+              const mealTotals = getMealTotals(mealIndex);
+
+              return (
+                <>
+                  <h2 className="text-lg font-semibold text-black dark:text-zinc-50 mb-3">
+                    {meal.name}
+                  </h2>
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onError(null);
+                        setSaveFavoriteMealIndex(mealIndex);
+                        setSaveFavoriteName(`${meal.name} Favorite`);
                       }}
-                      onRemove={showDeleteModal}
+                      disabled={isSavingFavorite}
+                      className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors disabled:opacity-50"
+                      data-testid={`save-favorite-${meal.name.toLowerCase()}`}
+                    >
+                      Save as Favorite
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFavoritePickerMealIndex(mealIndex)}
+                      className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                      data-testid={`apply-favorite-${meal.name.toLowerCase()}`}
+                    >
+                      Apply Favorite
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setClearMealIndex(mealIndex)}
+                      className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                      data-testid={`clear-meal-${meal.name.toLowerCase()}`}
+                    >
+                      Clear Meal
+                    </button>
+                    <HelpButton
+                      title="Favorite Meals"
+                      content="Save the current meal as a favorite to reuse it later. Use 'Apply Favorite' to replace this meal with a saved favorite. The apply list includes search, item previews, nutrition totals, and sorts favorites by how often you use them."
+                      ariaLabel={`Help: Favorite meals for ${meal.name}`}
                     />
-                  ))}
-                  <tr
-                    className="border-b border-zinc-200 dark:border-zinc-800"
-                    data-testid={`diary-meal-total-${meal.name.toLowerCase()}`}
-                  >
-                    <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
-                      Total
-                    </td>
-                    <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
-                      {getCalorieForDisplay(
-                        getMealTotals(mealIndex).calories,
-                        userSettings.calorieUnit,
-                      )}
-                    </td>
-                    <td className="px-4 py-3"></td>
-                  </tr>
-                  <tr
-                    data-testid={`diary-add-food-${meal.name.toLowerCase()}`}
-                    onClick={() => {
-                      setSelectedMealIndex(mealIndex);
-                      setShowFoodList(true);
-                    }}
-                  >
-                    <td colSpan={3} className="px-4 py-3 text-center">
-                      <button
-                        type="button"
-                        className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-center text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                        data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
-                      >
-                        Add Food
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  </div>
+                  <NutritionSummaryAccordion
+                    title={`${meal.name} Summary`}
+                    totals={mealTotals}
+                    userSettings={userSettings}
+                    testIdPrefix={`meal-summary-${meal.name.toLowerCase()}`}
+                    className="mb-3"
+                  />
+                  <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <table className="w-full border-collapse bg-white dark:bg-black">
+                      <thead>
+                        <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                            Food Item
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                            Calories
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-black dark:text-zinc-50">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {meal.items.map((item) => (
+                          <MealItemRow
+                            key={item.id}
+                            item={item}
+                            mealIndex={mealIndex}
+                            userSettings={userSettings}
+                            onEdit={(targetMealIndex, itemId) => {
+                              setEditTarget({
+                                mealIndex: targetMealIndex,
+                                itemId,
+                              });
+                              setShowEditForm(true);
+                            }}
+                            onRemove={showDeleteModal}
+                          />
+                        ))}
+                        <tr
+                          className="border-b border-zinc-200 dark:border-zinc-800"
+                          data-testid={`diary-meal-total-${meal.name.toLowerCase()}`}
+                        >
+                          <td className="px-4 py-3 text-black dark:text-zinc-50 font-semibold">
+                            Total
+                          </td>
+                          <td className="px-4 py-3 text-sm text-black dark:text-zinc-50 font-semibold">
+                            {getCalorieForDisplay(
+                              mealTotals.calories,
+                              userSettings.calorieUnit,
+                            )}
+                          </td>
+                          <td className="px-4 py-3"></td>
+                        </tr>
+                        <tr
+                          data-testid={`diary-add-food-${meal.name.toLowerCase()}`}
+                          onClick={() => {
+                            setSelectedMealIndex(mealIndex);
+                            setShowFoodList(true);
+                          }}
+                        >
+                          <td colSpan={3} className="px-4 py-3 text-center">
+                            <button
+                              type="button"
+                              className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-center text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                              data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
+                            >
+                              Add Food
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         ))}
       </div>

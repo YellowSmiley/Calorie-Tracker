@@ -6,6 +6,7 @@ import DailySummaryAccordion from "./components/DailySummaryAccordion";
 import BodyWeightCard from "./components/BodyWeightCard";
 import MealsSection from "./components/MealsSection";
 import HelpButton from "@/app/components/HelpButton";
+import { calculateNutritionTotals } from "@/lib/nutritionSummary";
 import type { Meal } from "./types";
 import { UserSettings } from "../settings/types";
 import { startRouteLoading } from "@/app/components/routeLoading";
@@ -54,17 +55,7 @@ export default function DiaryClient({
   const [error, setError] = useState<string | null>(null);
 
   const totals = useMemo(() => {
-    const allItems = meals.flatMap((meal) => meal.items);
-    return {
-      calories: allItems.reduce((sum, item) => sum + item.calories, 0),
-      protein: allItems.reduce((sum, item) => sum + item.protein, 0),
-      carbs: allItems.reduce((sum, item) => sum + item.carbs, 0),
-      fat: allItems.reduce((sum, item) => sum + item.fat, 0),
-      saturates: allItems.reduce((sum, item) => sum + item.saturates, 0),
-      sugars: allItems.reduce((sum, item) => sum + item.sugars, 0),
-      fibre: allItems.reduce((sum, item) => sum + item.fibre, 0),
-      salt: allItems.reduce((sum, item) => sum + item.salt, 0),
-    };
+    return calculateNutritionTotals(meals.flatMap((meal) => meal.items));
   }, [meals]);
 
   const handleDateChange = (newDate: string) => {
