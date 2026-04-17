@@ -28,10 +28,10 @@ interface GoalRecommendations {
   proteinGoal: number;
   carbGoal: number;
   fatGoal: number;
-  saturatesGoal?: number;
-  sugarsGoal?: number;
-  fibreGoal?: number;
-  saltGoal?: number;
+  saturatesGoal: number;
+  sugarsGoal: number;
+  fibreGoal: number;
+  saltGoal: number;
 }
 
 interface GoalsCalculatorSectionProps {
@@ -61,9 +61,7 @@ export default function GoalsCalculatorSection({
     useState<WeightChangePace>("normal");
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<GoalRecommendations | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
-  const [includeDerivedLimits, setIncludeDerivedLimits] = useState(false);
 
   const displayedBodyWeight = useMemo(
     () =>
@@ -95,7 +93,7 @@ export default function GoalsCalculatorSection({
     const validationError = getGoalCalculatorValidationError(input);
     if (validationError) {
       setError(validationError);
-      setResult(null);
+      setStatusMessage("");
       return;
     }
 
@@ -104,7 +102,7 @@ export default function GoalsCalculatorSection({
     const recommendations = calculateGoalRecommendations(input);
     if (!recommendations) {
       setError("Unable to calculate goals.");
-      setResult(null);
+      setStatusMessage("");
       return;
     }
 
@@ -112,7 +110,7 @@ export default function GoalsCalculatorSection({
       recommendations.calorieTargetKcal,
     );
 
-    setResult({
+    onApplyGoals({
       calorieGoal: convertCaloriesForDisplay(
         recommendations.calorieTargetKcal,
         calorieUnit,
@@ -123,28 +121,18 @@ export default function GoalsCalculatorSection({
       ),
       carbGoal: convertWeightForDisplay(recommendations.carbGrams, weightUnit),
       fatGoal: convertWeightForDisplay(recommendations.fatGrams, weightUnit),
-      saturatesGoal: includeDerivedLimits
-        ? convertWeightForDisplay(derivedLimits.saturatesGrams, weightUnit)
-        : undefined,
-      sugarsGoal: includeDerivedLimits
-        ? convertWeightForDisplay(derivedLimits.sugarsGrams, weightUnit)
-        : undefined,
-      fibreGoal: includeDerivedLimits
-        ? convertWeightForDisplay(derivedLimits.fibreGrams, weightUnit)
-        : undefined,
-      saltGoal: includeDerivedLimits
-        ? convertWeightForDisplay(derivedLimits.saltGrams, weightUnit)
-        : undefined,
+      saturatesGoal: convertWeightForDisplay(
+        derivedLimits.saturatesGrams,
+        weightUnit,
+      ),
+      sugarsGoal: convertWeightForDisplay(
+        derivedLimits.sugarsGrams,
+        weightUnit,
+      ),
+      fibreGoal: convertWeightForDisplay(derivedLimits.fibreGrams, weightUnit),
+      saltGoal: convertWeightForDisplay(derivedLimits.saltGrams, weightUnit),
     });
-    setStatusMessage("Goals calculated. Review and apply if they look right.");
-  };
-
-  const applyGoals = () => {
-    if (!result) {
-      return;
-    }
-    onApplyGoals(result);
-    setStatusMessage("Calculated goals applied to nutritional goals.");
+    setStatusMessage("Goals applied. Save Settings to keep these values.");
   };
 
   return (
@@ -181,9 +169,9 @@ export default function GoalsCalculatorSection({
             </li>
           </ul>
           <p>
-            Optional limits use calorie-based guidelines: saturates about 10% of
-            calories, sugars about 10%, fibre about 14g per 1000 kcal, and salt
-            6g/day.
+            We always estimate saturates, sugars, fibre, and salt using
+            calorie-based guidelines: saturates about 10% of calories, sugars
+            about 10%, fibre about 14g per 1000 kcal, and salt 6g/day.
           </p>
           <p>
             Values are starting estimates. Adjust based on progress and
@@ -424,44 +412,14 @@ export default function GoalsCalculatorSection({
             className="rounded-lg border border-solid border-black/8 px-4 py-2 text-sm font-medium text-black transition-colors hover:border-black hover:bg-black/4 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:border-white/[.145] dark:text-zinc-50 dark:hover:border-white dark:hover:bg-[#1a1a1a]"
             data-testid="goal-calculator-calculate"
           >
-            Calculate goals
-          </button>
-          <button
-            type="button"
-            onClick={applyGoals}
-            disabled={!result}
-            className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-            data-testid="goal-calculator-apply"
-          >
-            Apply to nutritional goals
+            Calculate and apply goals
           </button>
         </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="flex items-start gap-3">
-            <input
-              id="goal-calc-include-limits"
-              type="checkbox"
-              checked={includeDerivedLimits}
-              onChange={(event) =>
-                setIncludeDerivedLimits(event.target.checked)
-              }
-              className="mt-1 h-4 w-4 rounded border-zinc-300 text-black focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
-            />
-            <div>
-              <label
-                htmlFor="goal-calc-include-limits"
-                className="text-sm font-medium text-zinc-800 dark:text-zinc-200"
-              >
-                Also estimate saturates, sugars, fibre, and salt
-              </label>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-                Uses calorie-based guideline estimates and applies them with
-                your macro goals.
-              </p>
-            </div>
-          </div>
-        </div>
+        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+          Saturates, sugars, fibre, and salt are automatically estimated from
+          your calorie target using guideline values.
+        </p>
       </fieldset>
 
       {error ? (
@@ -473,62 +431,17 @@ export default function GoalsCalculatorSection({
         </p>
       ) : null}
 
-      {result ? (
-        <div
-          className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950"
-          aria-live="polite"
-          data-testid="goal-calculator-result"
-        >
-          <h3 className="text-sm font-semibold text-black dark:text-zinc-50">
-            Recommended daily goals
-          </h3>
-          <ul className="mt-2 space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
-            <li>
-              Calories: {result.calorieGoal} {calorieUnit}
-            </li>
-            <li>
-              Protein: {result.proteinGoal} {weightUnit}
-            </li>
-            <li>
-              Carbohydrates: {result.carbGoal} {weightUnit}
-            </li>
-            <li>
-              Fat: {result.fatGoal} {weightUnit}
-            </li>
-            {typeof result.saturatesGoal === "number" ? (
-              <li>
-                Saturates: {result.saturatesGoal} {weightUnit}
-              </li>
-            ) : null}
-            {typeof result.sugarsGoal === "number" ? (
-              <li>
-                Sugars: {result.sugarsGoal} {weightUnit}
-              </li>
-            ) : null}
-            {typeof result.fibreGoal === "number" ? (
-              <li>
-                Fibre: {result.fibreGoal} {weightUnit}
-              </li>
-            ) : null}
-            {typeof result.saltGoal === "number" ? (
-              <li>
-                Salt: {result.saltGoal} {weightUnit}
-              </li>
-            ) : null}
-          </ul>
-        </div>
-      ) : null}
-
       {statusMessage ? (
-        <div
-          className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+        <p
+          className="mt-3 text-sm text-zinc-700 dark:text-zinc-300"
           role="status"
           aria-live="polite"
           data-testid="goal-calculator-status"
         >
           {statusMessage}
-        </div>
+        </p>
       ) : null}
+
     </section>
   );
 }

@@ -30,6 +30,13 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - If logic is repeated in 2+ places (validation, formatting, calculations, query shaping), extract it to a `lib/` utility unless there is a clear reason not to.
 - When adding or changing a `lib/` utility, add or update Jest tests in `lib/*.test.ts` in the same change.
 - If repeated code is intentionally not extracted, explicitly explain why in the final response.
+- Always update relevant in-app help text, tutorials, and guidance copy in the same change when user workflows or behavior are changed.
+
+## Action Feedback & Validation Rules
+
+- For any user-triggered action, provide clear feedback as appropriate: loading state, success confirmation, and error messaging.
+- Do not rely on silent updates for important user actions; users should be able to tell what happened.
+- Add validation for all inputs that submit data, with visible and accessible error messaging.
 
 ## Jest Scope Rules
 

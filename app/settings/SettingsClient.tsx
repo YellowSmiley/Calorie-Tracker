@@ -246,10 +246,10 @@ export default function SettingsClient({
     proteinGoal: number;
     carbGoal: number;
     fatGoal: number;
-    saturatesGoal?: number;
-    sugarsGoal?: number;
-    fibreGoal?: number;
-    saltGoal?: number;
+    saturatesGoal: number;
+    sugarsGoal: number;
+    fibreGoal: number;
+    saltGoal: number;
   }) => {
     setSettings((prev) => ({ ...prev, ...goals }));
     setNutritionGoalErrors((prev) => ({
@@ -258,37 +258,14 @@ export default function SettingsClient({
       proteinGoal: validateNutritionGoalField("proteinGoal", goals.proteinGoal),
       carbGoal: validateNutritionGoalField("carbGoal", goals.carbGoal),
       fatGoal: validateNutritionGoalField("fatGoal", goals.fatGoal),
-      ...(typeof goals.saturatesGoal === "number"
-        ? {
-            saturatesGoal: validateNutritionGoalField(
-              "saturatesGoal",
-              goals.saturatesGoal,
-            ),
-          }
-        : {}),
-      ...(typeof goals.sugarsGoal === "number"
-        ? {
-            sugarsGoal: validateNutritionGoalField(
-              "sugarsGoal",
-              goals.sugarsGoal,
-            ),
-          }
-        : {}),
-      ...(typeof goals.fibreGoal === "number"
-        ? {
-            fibreGoal: validateNutritionGoalField("fibreGoal", goals.fibreGoal),
-          }
-        : {}),
-      ...(typeof goals.saltGoal === "number"
-        ? {
-            saltGoal: validateNutritionGoalField("saltGoal", goals.saltGoal),
-          }
-        : {}),
+      saturatesGoal: validateNutritionGoalField(
+        "saturatesGoal",
+        goals.saturatesGoal,
+      ),
+      sugarsGoal: validateNutritionGoalField("sugarsGoal", goals.sugarsGoal),
+      fibreGoal: validateNutritionGoalField("fibreGoal", goals.fibreGoal),
+      saltGoal: validateNutritionGoalField("saltGoal", goals.saltGoal),
     }));
-    setMessage({
-      type: "success",
-      text: "Calculated goals applied. Review and save settings.",
-    });
   };
 
   const handleExportData = async () => {
