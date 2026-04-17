@@ -8,7 +8,7 @@ interface DashboardPanelProps {
   children: ReactNode;
   actions?: ReactNode;
   helpTitle?: string;
-  helpContent?: string;
+  helpContent?: ReactNode;
   helpAriaLabel?: string;
   className?: string;
   contentClassName?: string;
@@ -39,11 +39,9 @@ export default function DashboardPanel({
             {title}
           </h2>
           {helpTitle && helpContent && helpAriaLabel ? (
-            <HelpButton
-              title={helpTitle}
-              content={helpContent}
-              ariaLabel={helpAriaLabel}
-            />
+            <HelpButton title={helpTitle} ariaLabel={helpAriaLabel}>
+              {helpContent}
+            </HelpButton>
           ) : null}
         </div>
 

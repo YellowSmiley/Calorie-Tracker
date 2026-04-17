@@ -35,9 +35,18 @@ export default function NutritionGoalsSection({
         </h2>
         <HelpButton
           title="Nutritional Goals"
-          content="Set your daily nutrition targets here. These goals are used to calculate your daily progress on the dashboard. You can set goals for calories, macronutrients (protein, carbs, fat), and micronutrients (saturates, sugars, fibre, salt). Adjust these based on your dietary needs and health objectives."
           ariaLabel="Help: Nutritional goals explained"
-        />
+        >
+          <p>
+            Set your daily nutrition targets here. These goals are used to
+            calculate your daily progress on the dashboard.
+          </p>
+          <p>
+            You can set goals for calories, macros (protein, carbs, fat), and
+            micronutrients (saturates, sugars, fibre, salt).
+          </p>
+          <p>Adjust goals to match your dietary needs and objectives.</p>
+        </HelpButton>
       </div>
 
       <div className="space-y-4">

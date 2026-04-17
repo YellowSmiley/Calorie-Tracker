@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "./components/MyFoodsSidebar";
 import FavoriteMealsSidebar from "./components/FavoriteMealsSidebar";
 import NutritionGoalsSection from "./components/NutritionGoalsSection";
+import GoalsCalculatorSection from "./components/GoalsCalculatorSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
@@ -240,6 +241,56 @@ export default function SettingsClient({
     }
   };
 
+  const handleApplyCalculatedGoals = (goals: {
+    calorieGoal: number;
+    proteinGoal: number;
+    carbGoal: number;
+    fatGoal: number;
+    saturatesGoal?: number;
+    sugarsGoal?: number;
+    fibreGoal?: number;
+    saltGoal?: number;
+  }) => {
+    setSettings((prev) => ({ ...prev, ...goals }));
+    setNutritionGoalErrors((prev) => ({
+      ...prev,
+      calorieGoal: validateNutritionGoalField("calorieGoal", goals.calorieGoal),
+      proteinGoal: validateNutritionGoalField("proteinGoal", goals.proteinGoal),
+      carbGoal: validateNutritionGoalField("carbGoal", goals.carbGoal),
+      fatGoal: validateNutritionGoalField("fatGoal", goals.fatGoal),
+      ...(typeof goals.saturatesGoal === "number"
+        ? {
+            saturatesGoal: validateNutritionGoalField(
+              "saturatesGoal",
+              goals.saturatesGoal,
+            ),
+          }
+        : {}),
+      ...(typeof goals.sugarsGoal === "number"
+        ? {
+            sugarsGoal: validateNutritionGoalField(
+              "sugarsGoal",
+              goals.sugarsGoal,
+            ),
+          }
+        : {}),
+      ...(typeof goals.fibreGoal === "number"
+        ? {
+            fibreGoal: validateNutritionGoalField("fibreGoal", goals.fibreGoal),
+          }
+        : {}),
+      ...(typeof goals.saltGoal === "number"
+        ? {
+            saltGoal: validateNutritionGoalField("saltGoal", goals.saltGoal),
+          }
+        : {}),
+    }));
+    setMessage({
+      type: "success",
+      text: "Calculated goals applied. Review and save settings.",
+    });
+  };
+
   const handleExportData = async () => {
     setIsExporting(true);
     try {
@@ -299,6 +350,13 @@ export default function SettingsClient({
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            <GoalsCalculatorSection
+              calorieUnit={settings.calorieUnit}
+              weightUnit={settings.weightUnit}
+              bodyWeightUnit={settings.bodyWeightUnit}
+              onApplyGoals={handleApplyCalculatedGoals}
+            />
+
             <NutritionGoalsSection
               settings={settings}
               onChange={handleChange}

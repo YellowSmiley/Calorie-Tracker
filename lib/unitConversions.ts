@@ -219,6 +219,29 @@ export function getBodyWeightForDisplay(
   return `${formatted}${bodyWeightUnit ? ` ${bodyWeightUnit}` : ""}`;
 }
 
+export function convertHeightCmToFeetInches(
+  cmValue: number | null | undefined,
+): { feet: number; inches: number } {
+  if (cmValue === null || cmValue === undefined || cmValue <= 0) {
+    return { feet: 0, inches: 0 };
+  }
+
+  const totalInches = cmValue / 2.54;
+  const feet = Math.floor(totalInches / 12);
+  const inches = Number((totalInches - feet * 12).toFixed(1));
+
+  return { feet, inches };
+}
+
+export function convertHeightFeetInchesToCm(
+  feet: number | null | undefined,
+  inches: number | null | undefined,
+): number {
+  const safeFeet = Number.isFinite(feet) ? Math.max(0, feet ?? 0) : 0;
+  const safeInches = Number.isFinite(inches) ? Math.max(0, inches ?? 0) : 0;
+  return (safeFeet * 12 + safeInches) * 2.54;
+}
+
 export function getMeasurementType(
   unit: AcceptedVolumeUnits | AcceptedWeightedUnits | null | undefined,
 ): MeasurementType {

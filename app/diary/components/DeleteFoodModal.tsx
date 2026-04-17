@@ -55,9 +55,12 @@ export default function DeleteFoodModal({
       headerRight={
         <HelpButton
           title="Remove Food"
-          content="Click 'Remove' to delete this food item from your meal. This action will decrease your daily totals. You can always add the food back if you change your mind."
           ariaLabel="Help: How to remove a food item"
-        />
+        >
+          <p>Click Remove to delete this food item from your meal.</p>
+          <p>This decreases your daily totals.</p>
+          <p>You can always add the food back if you change your mind.</p>
+        </HelpButton>
       }
       dataTestId="delete-food-modal"
       bodyClassName="p-4 space-y-4 max-h-[calc(100vh-8.5rem)] overflow-y-auto sm:max-h-none"

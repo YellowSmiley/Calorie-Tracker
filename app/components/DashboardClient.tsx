@@ -118,10 +118,22 @@ export default function DashboardClient({
             </h1>
             <HelpButton
               title="Dashboard Overview"
-              content="Your Dashboard provides a snapshot of your nutrition intake. Use the View Period selector to switch between daily, weekly, and monthly views. Each card shows your current intake vs. your goals, with progress bars to visualize how close you are to reaching them. Adjust your goals in Settings to see changes reflected here."
               ariaLabel="Help: Dashboard overview"
               data-testid="dashboard-help"
-            />
+            >
+              <p>
+                Your Dashboard provides a snapshot of your nutrition intake.
+              </p>
+              <p>
+                Use the View Period selector to switch between daily, weekly,
+                and monthly views.
+              </p>
+              <p>
+                Each card shows intake vs. goal, with progress bars to show how
+                close you are to your targets.
+              </p>
+              <p>Adjust goals in Settings to see changes reflected here.</p>
+            </HelpButton>
           </div>
         </div>
       </div>
@@ -150,7 +162,19 @@ export default function DashboardClient({
           <DashboardPanel
             title="Charts & Trends"
             helpTitle="Charts & Trends"
-            helpContent="The chart shows your daily calories and body weight over time. Use the selector to adjust the date range. This helps you see trends and how your intake correlates with changes in body weight."
+            helpContent={
+              <>
+                <p>The chart shows daily calories and body weight over time.</p>
+                <p>
+                  Use the selector to adjust the date range and review longer or
+                  shorter trends.
+                </p>
+                <p>
+                  This helps you see how intake patterns may correlate with
+                  changes in body weight.
+                </p>
+              </>
+            }
             helpAriaLabel="Help: Trend analysis explained"
             actions={
               <DashboardSegmentedControl<ChartDateRange>

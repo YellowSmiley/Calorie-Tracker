@@ -91,9 +91,17 @@ export default function DiaryClient({
             </h1>
             <HelpButton
               title="Food Diary"
-              content="Log your daily food intake to track calories and nutrition. Click on any food to adjust serving size, or remove it if needed. Use the date selector to view and record meals from different days."
               ariaLabel="Help: Food diary overview"
-            />
+            >
+              <p>Log daily food intake to track calories and nutrition.</p>
+              <p>
+                Click any food to adjust serving size, or remove it when needed.
+              </p>
+              <p>
+                Use the date selector to view and record meals from different
+                days.
+              </p>
+            </HelpButton>
           </div>
         </div>
       </div>

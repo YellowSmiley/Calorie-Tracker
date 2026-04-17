@@ -29,9 +29,19 @@ export default function DataPrivacySection({
         </h2>
         <HelpButton
           title="Data &amp; Privacy"
-          content="Export your personal data as a JSON file for backup or data portability. You can also permanently delete your account and all associated data here. Deleting your account is irreversible and will remove all meals, foods, and settings. Read our Privacy Policy and Terms of Service for more information."
           ariaLabel="Help: Data and privacy options explained"
-        />
+        >
+          <p>
+            Export your personal data as a JSON file for backup or data
+            portability.
+          </p>
+          <p>
+            You can also permanently delete your account and all associated
+            data. Deleting your account is irreversible and removes all meals,
+            foods, and settings.
+          </p>
+          <p>Read our Privacy Policy and Terms of Service for more details.</p>
+        </HelpButton>
       </div>
 
       <div className="space-y-3">

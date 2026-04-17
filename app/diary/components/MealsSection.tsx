@@ -381,9 +381,17 @@ export default function MealsSection({
           </h2>
           <HelpButton
             title="How to Use"
-            content="Click 'Add Food' at the bottom of each meal section to log foods. Click on any food item to adjust the serving size. Click the 'Remove' button to delete a food from your diary. Your daily totals are calculated automatically and displayed at the top."
             ariaLabel="Help: How to add and manage foods"
-          />
+          >
+            <p>
+              Click Add Food at the bottom of each meal section to log foods.
+            </p>
+            <p>Click any food item to adjust serving size.</p>
+            <p>
+              Click Remove to delete a food from your diary. Daily totals update
+              automatically.
+            </p>
+          </HelpButton>
         </div>
         {meals.map((meal, mealIndex) => (
           <div
@@ -431,9 +439,21 @@ export default function MealsSection({
                     </button>
                     <HelpButton
                       title="Favorite Meals"
-                      content="Save the current meal as a favorite to reuse it later. Use 'Apply Favorite' to replace this meal with a saved favorite. The apply list includes search, item previews, nutrition totals, and sorts favorites by how often you use them."
                       ariaLabel={`Help: Favorite meals for ${meal.name}`}
-                    />
+                    >
+                      <p>
+                        Save the current meal as a favorite so you can reuse it
+                        later.
+                      </p>
+                      <p>
+                        Use Apply Favorite to replace this meal with a saved
+                        favorite.
+                      </p>
+                      <p>
+                        The apply list includes search, item previews, nutrition
+                        totals, and usage-based ordering.
+                      </p>
+                    </HelpButton>
                   </div>
                   <NutritionSummaryAccordion
                     title={`${meal.name} Summary`}

@@ -26,9 +26,17 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 
 ## Utility and Test Rules
 
+- Default to extracting non-trivial logic from UI/components/routes into `lib/` whenever feasible.
 - If logic is repeated in 2+ places (validation, formatting, calculations, query shaping), extract it to a `lib/` utility unless there is a clear reason not to.
 - When adding or changing a `lib/` utility, add or update Jest tests in `lib/*.test.ts` in the same change.
 - If repeated code is intentionally not extracted, explicitly explain why in the final response.
+
+## Jest Scope Rules
+
+- Use Jest for unit and business-logic tests only (pure functions, calculations, validation, transforms, and API/helper logic).
+- Do not add Jest tests that primarily verify page rendering flows, component interaction journeys, routing, or end-to-end behavior; cover those with Playwright instead.
+- When UI features include non-trivial logic, extract that logic to `lib/` and test it with Jest, then keep the user-flow validation in Playwright.
+- Prefer focused Jest runs for changed units (for example `npm run test:ci -- lib/someUtility.test.ts`) before broader suites.
 
 ## Playwright Stability Rules
 
@@ -55,3 +63,10 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Keep UI colors monochrome throughout the app: whites, blacks, and greys only.
 - Do not introduce accent colors (for example blue, green, purple, red) for links, buttons, badges, highlights, or focus states unless explicitly requested.
 - Prefer existing zinc/neutral classes and maintain consistent contrast in both light and dark themes.
+
+## Accessibility Standards
+
+- Treat accessibility as a default requirement for every change.
+- Use semantic HTML, associated labels, keyboard-accessible controls, and visible focus states for all interactive elements.
+- Provide screen-reader support with meaningful names, instructions, and live/error messaging where relevant.
+- Ensure color is not the only way information is conveyed.

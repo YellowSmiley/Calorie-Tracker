@@ -194,9 +194,15 @@ export default function FoodListSidebar({
           </h2>
           <HelpButton
             title="Select Food"
-            content="Search for a food to add to your meal. Use the search bar to find foods by name. You can also create custom foods if you don't find what you're looking for. Select a food and adjust the quantity before adding it to your meal."
             ariaLabel="Help: How to select and add food"
-          />
+          >
+            <p>Search for a food to add to your meal.</p>
+            <p>Use the search bar to find foods by name.</p>
+            <p>
+              You can create custom foods if nothing matches, then adjust
+              quantity before adding.
+            </p>
+          </HelpButton>
         </div>
         <div className="w-12" />
       </div>

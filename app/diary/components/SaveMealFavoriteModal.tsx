@@ -75,9 +75,17 @@ export default function SaveMealFavoriteModal({
       headerRight={
         <HelpButton
           title="Save Meal as Favorite"
-          content="This saves all current meal items and their serving sizes as a reusable favorite. Review the item list and totals, choose a clear name, and save. You can apply it later to any meal from the diary."
           ariaLabel="Help: Save meal as favorite"
-        />
+        >
+          <p>
+            This saves all current meal items and serving sizes as a reusable
+            favorite.
+          </p>
+          <p>
+            Review the item list and totals, choose a clear name, then save.
+          </p>
+          <p>You can apply it later to any meal from the diary.</p>
+        </HelpButton>
       }
       dataTestId="save-favorite-modal"
       bodyClassName="p-4 space-y-3 max-h-[calc(100vh-8.5rem)] overflow-y-auto sm:max-h-none"

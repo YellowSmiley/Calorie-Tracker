@@ -29,9 +29,18 @@ export default function MeasurementUnitsSection({
         </h2>
         <HelpButton
           title="Measurement Units"
-          content="Choose how you want nutrition information displayed. You can display calories in kcal or kJ, food and nutrition weights in grams, ounces, kilograms, pounds, or milligrams, and body weight in kilograms or pounds. Your preferences apply throughout the app on dashboards and food logs."
           ariaLabel="Help: Measurement units explained"
-        />
+        >
+          <p>Choose how nutrition information is displayed in the app.</p>
+          <p>
+            Calories can be shown as kcal or kJ. Food and nutrition weights can
+            use grams, ounces, kilograms, pounds, or milligrams.
+          </p>
+          <p>
+            Body weight can use kilograms or pounds. These preferences apply
+            across dashboards and food logs.
+          </p>
+        </HelpButton>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,23 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import AppModal from "./AppModal";
 
 interface HelpButtonProps {
-  /** Modal content text or React node */
-  content: string | React.ReactNode;
   /** Modal title */
   title?: string;
   /** Optional label for screen readers */
   ariaLabel?: string;
   "data-testid"?: string; // Allow passing data-testid for testing purposes
+  children: ReactNode;
 }
 
 export default function HelpButton({
-  content,
   title = "Help",
   ariaLabel = "Help information",
   "data-testid": dataTestId,
+  children,
 }: HelpButtonProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -26,7 +25,7 @@ export default function HelpButton({
       <button
         onClick={() => setShowModal(true)}
         aria-label={ariaLabel}
-        className="inline text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 dark:focus:ring-offset-zinc-950"
+        className="inline text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-zinc-500 dark:focus:ring-offset-zinc-950"
         type="button"
         data-testid={dataTestId}
       >
@@ -50,13 +49,9 @@ export default function HelpButton({
           </button>
         }
       >
-        {typeof content === "string" ? (
-          <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-            {content}
-          </p>
-        ) : (
-          content
-        )}
+        <div className="space-y-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+          {children}
+        </div>
       </AppModal>
     </>
   );

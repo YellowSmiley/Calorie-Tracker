@@ -103,11 +103,14 @@ export default function BodyWeightCard({
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
           Body Weight
         </h2>
-        <HelpButton
-          title="Body Weight"
-          content="Log your body weight for the selected diary date. Entries are stored per day and shown on the dashboard trend chart using your preferred body weight unit from Settings."
-          ariaLabel="Help: Body weight tracking"
-        />
+        <HelpButton title="Body Weight" ariaLabel="Help: Body weight tracking">
+          <p>Log your body weight for the selected diary date.</p>
+          <p>Entries are stored per day.</p>
+          <p>
+            Weight is shown on dashboard trends using your preferred body weight
+            unit from Settings.
+          </p>
+        </HelpButton>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">

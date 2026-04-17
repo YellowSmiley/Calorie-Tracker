@@ -26,11 +26,17 @@ export default function ActionsSection({
         <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
           Actions
         </h2>
-        <HelpButton
-          title="Actions"
-          content="Quick access to other functions. 'My Foods' lets you manage your food entries, and admins can see and manage all foods there. 'Admin Panel' is for user management only. 'Sign Out' securely logs you out of your account."
-          ariaLabel="Help: Actions explained"
-        />
+        <HelpButton title="Actions" ariaLabel="Help: Actions explained">
+          <p>Quick access to account and management actions.</p>
+          <p>
+            My Foods lets you manage your own food entries, and admins can
+            manage all foods there.
+          </p>
+          <p>
+            User Management is for account administration only. Sign Out safely
+            logs you out of your account.
+          </p>
+        </HelpButton>
       </div>
 
       <div className="space-y-3">

@@ -1,4 +1,6 @@
 import {
+  convertHeightCmToFeetInches,
+  convertHeightFeetInchesToCm,
   convertCaloriesForDisplay,
   convertCaloriesFromInput,
   convertVolumeForDisplay,
@@ -158,4 +160,21 @@ test("getBodyWeightForDisplay", () => {
   expect(getBodyWeightForDisplay(undefined, "kg")).toBe("0 kg");
   expect(getBodyWeightForDisplay(70, null)).toBe("70");
   expect(getBodyWeightForDisplay(70, undefined)).toBe("70");
+});
+
+test("convertHeightCmToFeetInches", () => {
+  expect(convertHeightCmToFeetInches(170)).toEqual({ feet: 5, inches: 6.9 });
+  expect(convertHeightCmToFeetInches(null)).toEqual({ feet: 0, inches: 0 });
+  expect(convertHeightCmToFeetInches(undefined)).toEqual({
+    feet: 0,
+    inches: 0,
+  });
+  expect(convertHeightCmToFeetInches(0)).toEqual({ feet: 0, inches: 0 });
+});
+
+test("convertHeightFeetInchesToCm", () => {
+  expect(convertHeightFeetInchesToCm(5, 7)).toBeCloseTo(170.18, 2);
+  expect(convertHeightFeetInchesToCm(0, 0)).toBe(0);
+  expect(convertHeightFeetInchesToCm(null, 10)).toBeCloseTo(25.4, 1);
+  expect(convertHeightFeetInchesToCm(5, undefined)).toBeCloseTo(152.4, 1);
 });

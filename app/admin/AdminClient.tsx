@@ -15,9 +15,13 @@ export default function AdminClient() {
             </h1>
             <HelpButton
               title="User Management"
-              content="Manage user accounts and permissions. Food management is handled in Settings via My Foods."
               ariaLabel="Help: User management overview"
-            />
+            >
+              <p>
+                Manage user accounts and permissions. Food management is handled
+                in Settings via My Foods.
+              </p>
+            </HelpButton>
           </div>
         </div>
       </div>

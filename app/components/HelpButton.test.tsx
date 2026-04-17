@@ -8,7 +8,9 @@ describe("HelpButton", () => {
 
   it("renders button with correct title and aria-label", () => {
     render(
-      <HelpButton title={title} content={content} ariaLabel={ariaLabel} />,
+      <HelpButton title={title} ariaLabel={ariaLabel}>
+        <p>{content}</p>
+      </HelpButton>,
     );
     const button = screen.getByRole("button", { name: /help/i });
     expect(button).toBeInTheDocument();
@@ -17,7 +19,9 @@ describe("HelpButton", () => {
 
   it("shows and hides modal with correct content and title", () => {
     render(
-      <HelpButton title={title} content={content} ariaLabel={ariaLabel} />,
+      <HelpButton title={title} ariaLabel={ariaLabel}>
+        <p>{content}</p>
+      </HelpButton>,
     );
     const button = screen.getByRole("button", { name: /help/i });
     // Modal/dialog should not be visible initially

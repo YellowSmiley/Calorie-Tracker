@@ -205,17 +205,30 @@ export default function EditFoodSidebar({
           </h2>
           <HelpButton
             title={isAdd ? "Add Food" : "Edit Serving"}
-            content={
-              isAdd
-                ? "Fill in the details to add a new food item. Enter the name, serving size, and nutrition information."
-                : "Adjust the serving size of this food by entering the amount and units. You can use the quantity field to increase or decrease the serving. The nutrition information will update automatically based on the serving size you specify."
-            }
             ariaLabel={
               isAdd
                 ? "Help: How to add a new food item"
                 : "Help: How to adjust serving size"
             }
-          />
+          >
+            {isAdd ? (
+              <>
+                <p>Fill in details to add a new food item.</p>
+                <p>Enter the name, serving size, and nutrition information.</p>
+              </>
+            ) : (
+              <>
+                <p>
+                  Adjust serving size by entering the amount and units you want
+                  to use.
+                </p>
+                <p>
+                  Use quantity to increase or decrease the serving. Nutrition
+                  updates automatically.
+                </p>
+              </>
+            )}
+          </HelpButton>
         </div>
         <div className="w-12" />
       </div>

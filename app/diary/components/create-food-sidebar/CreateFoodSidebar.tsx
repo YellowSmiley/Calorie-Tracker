@@ -369,9 +369,22 @@ export default function CreateFoodSidebar({
           </h2>
           <HelpButton
             title={editingFood ? "Edit Food" : "Create Food"}
-            content="Enter the food details including name, measurement unit, and nutrition information. Fill in all fields marked with * (required). Nutrition values should be per the measurement unit you specify (e.g., per 100g, per serving). You can optionally set a default serving size and description for easier logging."
             ariaLabel="Help: How to create or edit a food"
-          />
+          >
+            <p>
+              Enter food details including name, measurement unit, and nutrition
+              information.
+            </p>
+            <p>Fill in all fields marked with * (required).</p>
+            <p>
+              Nutrition values should match the measurement unit you specify
+              (for example per 100g or per serving).
+            </p>
+            <p>
+              Optionally set a default serving size and description for faster
+              logging.
+            </p>
+          </HelpButton>
         </div>
         <div className="w-12" />
       </div>

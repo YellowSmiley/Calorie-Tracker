@@ -229,7 +229,16 @@ export default function NutritionSummaryPanel({
     <DashboardPanel
       title="Nutrition Summary"
       helpTitle="Nutrition Summary"
-      helpContent="Each card shows your current intake vs. daily goal. The progress bar indicates how close you are to your goal. Switch between day, week, and month to review totals while keeping the same date anchor."
+      helpContent={
+        <>
+          <p>Each card shows current intake vs. your daily goal.</p>
+          <p>Progress bars indicate how close you are to each target.</p>
+          <p>
+            Switch between day, week, and month to review totals while keeping
+            the same date anchor.
+          </p>
+        </>
+      }
       helpAriaLabel="Help: Nutrition summary explained"
       actions={
         <DashboardSegmentedControl<TimeRange>

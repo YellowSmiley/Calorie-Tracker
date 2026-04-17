@@ -137,9 +137,17 @@ export default function MealFavoritesPickerSidebar({
           </h2>
           <HelpButton
             title="Apply Favorite Meal"
-            content="Pick any saved favorite to set this meal for the selected date. Applying a favorite replaces the current meal items. Use search to find favorites quickly, and review each row summary before applying."
             ariaLabel="Help: Apply favorite meal"
-          />
+          >
+            <p>
+              Pick any saved favorite to set this meal for the selected date.
+            </p>
+            <p>Applying a favorite replaces the current meal items.</p>
+            <p>
+              Use search to find favorites quickly and review each summary
+              before applying.
+            </p>
+          </HelpButton>
         </div>
         <div className="w-12" />
       </div>
