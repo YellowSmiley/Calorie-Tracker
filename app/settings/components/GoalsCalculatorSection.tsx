@@ -441,7 +441,6 @@ export default function GoalsCalculatorSection({
           {statusMessage}
         </p>
       ) : null}
-
     </section>
   );
 }
