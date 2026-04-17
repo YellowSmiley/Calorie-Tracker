@@ -36,6 +36,11 @@ type NutritionGoalField =
 
 type NutritionGoalErrors = Partial<Record<NutritionGoalField, string>>;
 
+type SectionMessage = {
+  type: "success" | "error";
+  text: string;
+};
+
 export default function SettingsClient({
   userSettings,
   initialSettings,
@@ -80,10 +85,15 @@ export default function SettingsClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  const [saveMessage, setSaveMessage] = useState<SectionMessage | null>(null);
+  const [exportMessage, setExportMessage] = useState<SectionMessage | null>(
+    null,
+  );
+  const [deleteMessage, setDeleteMessage] = useState<SectionMessage | null>(
+    null,
+  );
+  const [favoriteMealsMessage, setFavoriteMealsMessage] =
+    useState<SectionMessage | null>(null);
   const [showMyFoods, setShowMyFoods] = useState(false);
   const [showFavoriteMeals, setShowFavoriteMeals] = useState(false);
   const [nutritionGoalErrors, setNutritionGoalErrors] =
@@ -163,7 +173,7 @@ export default function SettingsClient({
     e.preventDefault();
 
     if (!validateAllNutritionGoals()) {
-      setMessage({
+      setSaveMessage({
         type: "error",
         text: "Please fix the highlighted nutritional goals.",
       });
@@ -171,7 +181,7 @@ export default function SettingsClient({
     }
 
     setIsSaving(true);
-    setMessage(null);
+    setSaveMessage(null);
 
     // Convert settings to base units before saving
 
@@ -212,10 +222,13 @@ export default function SettingsClient({
       if (response.ok) {
         const updated = (await response.json()) as SettingsData;
         setSettings(convertBackSettings(updated));
-        setMessage({ type: "success", text: "Settings saved successfully!" });
+        setSaveMessage({
+          type: "success",
+          text: "Settings saved successfully!",
+        });
       } else {
         const error = (await response.json()) as { error?: string };
-        setMessage({
+        setSaveMessage({
           type: "error",
           text: error.error || "Failed to save settings",
         });
@@ -223,7 +236,7 @@ export default function SettingsClient({
     } catch (error) {
       if (process.env.NODE_ENV === "development")
         console.error("Error saving settings:", error);
-      setMessage({ type: "error", text: "Failed to save settings" });
+      setSaveMessage({ type: "error", text: "Failed to save settings" });
     } finally {
       setIsSaving(false);
     }
@@ -270,6 +283,7 @@ export default function SettingsClient({
 
   const handleExportData = async () => {
     setIsExporting(true);
+    setExportMessage(null);
     try {
       const response = await fetch("/api/account/export");
       if (!response.ok) throw new Error("Export failed");
@@ -282,9 +296,12 @@ export default function SettingsClient({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      setMessage({ type: "success", text: "Data exported successfully!" });
+      setExportMessage({
+        type: "success",
+        text: "Data exported successfully!",
+      });
     } catch {
-      setMessage({ type: "error", text: "Failed to export data" });
+      setExportMessage({ type: "error", text: "Failed to export data" });
     } finally {
       setIsExporting(false);
     }
@@ -292,11 +309,12 @@ export default function SettingsClient({
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
+    setDeleteMessage(null);
     try {
       const response = await fetch("/api/account", { method: "DELETE" });
       if (!response.ok) {
         const data = (await response.json()) as { error?: string };
-        setMessage({
+        setDeleteMessage({
           type: "error",
           text: data.error || "Failed to delete account",
         });
@@ -305,7 +323,7 @@ export default function SettingsClient({
       }
       signOut({ callbackUrl: "/login" });
     } catch {
-      setMessage({ type: "error", text: "Failed to delete account" });
+      setDeleteMessage({ type: "error", text: "Failed to delete account" });
       setShowDeleteConfirm(false);
     } finally {
       setIsDeleting(false);
@@ -324,7 +342,7 @@ export default function SettingsClient({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4">
+      <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-32">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <GoalsCalculatorSection
@@ -345,27 +363,40 @@ export default function SettingsClient({
               settings={settings}
               onChange={handleChange}
             />
-            {message && (
-              <div
-                className={`rounded-lg p-4 ${
-                  message.type === "success"
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
-                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
 
             <DataPrivacySection
               showDeleteConfirm={showDeleteConfirm}
               isExporting={isExporting}
               isDeleting={isDeleting}
+              exportMessage={exportMessage}
+              deleteMessage={deleteMessage}
               onExport={handleExportData}
-              onDeleteClick={() => setShowDeleteConfirm(true)}
+              onDeleteClick={() => {
+                setDeleteMessage(null);
+                setShowDeleteConfirm(true);
+              }}
               onDeleteConfirm={handleDeleteAccount}
-              onDeleteCancel={() => setShowDeleteConfirm(false)}
+              onDeleteCancel={() => {
+                setDeleteMessage(null);
+                setShowDeleteConfirm(false);
+              }}
             />
+
+            {favoriteMealsMessage && (
+              <div
+                className={`rounded-lg p-4 ${
+                  favoriteMealsMessage.type === "success"
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
+                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
+                }`}
+                role={
+                  favoriteMealsMessage.type === "error" ? "alert" : "status"
+                }
+                aria-live="polite"
+              >
+                {favoriteMealsMessage.text}
+              </div>
+            )}
 
             <ActionsSection
               isAdmin={session?.user?.isAdmin || false}
@@ -378,7 +409,22 @@ export default function SettingsClient({
 
       {/* Fixed Buttons */}
       <div className="fixed bottom-20 left-0 right-0 z-30 border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black p-4">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl space-y-3">
+          <div className="min-h-14">
+            {saveMessage && (
+              <div
+                className={`rounded-lg p-4 ${
+                  saveMessage.type === "success"
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
+                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
+                }`}
+                role={saveMessage.type === "error" ? "alert" : "status"}
+                aria-live="polite"
+              >
+                {saveMessage.text}
+              </div>
+            )}
+          </div>
           <LoadingButton
             type="button"
             data-testid="settings-save-button"
@@ -405,7 +451,9 @@ export default function SettingsClient({
         isOpen={showFavoriteMeals}
         onClose={() => setShowFavoriteMeals(false)}
         userSettings={userSettings}
-        onError={(text) => setMessage(text ? { type: "error", text } : null)}
+        onError={(text) =>
+          setFavoriteMealsMessage(text ? { type: "error", text } : null)
+        }
       />
     </div>
   );

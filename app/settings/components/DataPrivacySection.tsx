@@ -6,6 +6,14 @@ interface DataPrivacySectionProps {
   showDeleteConfirm: boolean;
   isExporting: boolean;
   isDeleting: boolean;
+  exportMessage: {
+    type: "success" | "error";
+    text: string;
+  } | null;
+  deleteMessage: {
+    type: "success" | "error";
+    text: string;
+  } | null;
   onExport: () => void;
   onDeleteClick: () => void;
   onDeleteConfirm: () => void;
@@ -16,6 +24,8 @@ export default function DataPrivacySection({
   showDeleteConfirm,
   isExporting,
   isDeleting,
+  exportMessage,
+  deleteMessage,
   onExport,
   onDeleteClick,
   onDeleteConfirm,
@@ -56,20 +66,44 @@ export default function DataPrivacySection({
         >
           Export My Data
         </LoadingButton>
+        {exportMessage && (
+          <p
+            className={`px-1 text-sm ${
+              exportMessage.type === "success"
+                ? "text-zinc-700 dark:text-zinc-300"
+                : "text-zinc-800 dark:text-zinc-200"
+            }`}
+            role={exportMessage.type === "error" ? "alert" : "status"}
+            aria-live="polite"
+          >
+            {exportMessage.text}
+          </p>
+        )}
         <p className="text-xs text-zinc-500 dark:text-zinc-400 px-1">
           Download all your personal data in JSON format (meals, foods,
           settings).
         </p>
 
         {!showDeleteConfirm ? (
-          <button
-            type="button"
-            data-testid="delete-account-button"
-            onClick={onDeleteClick}
-            className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
-          >
-            Delete My Account
-          </button>
+          <>
+            <button
+              type="button"
+              data-testid="delete-account-button"
+              onClick={onDeleteClick}
+              className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+            >
+              Delete My Account
+            </button>
+            {deleteMessage && (
+              <p
+                className="px-1 text-sm text-zinc-800 dark:text-zinc-200"
+                role={deleteMessage.type === "error" ? "alert" : "status"}
+                aria-live="polite"
+              >
+                {deleteMessage.text}
+              </p>
+            )}
+          </>
         ) : (
           <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
             <p className="text-sm text-red-700 dark:text-red-300 mb-3">
