@@ -90,7 +90,7 @@ export default function DataPrivacySection({
               type="button"
               data-testid="delete-account-button"
               onClick={onDeleteClick}
-              className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+              className="ct-button-danger-subtle w-full rounded-lg px-6 py-3 font-medium transition-colors"
             >
               Delete My Account
             </button>
@@ -118,7 +118,7 @@ export default function DataPrivacySection({
                 isLoading={isDeleting}
                 loadingLabel="Deleting account..."
                 spinnerClassName="h-4 w-4"
-                className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
+                className="ct-button-danger-solid flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
               >
                 Yes, Delete Everything
               </LoadingButton>
@@ -137,7 +137,7 @@ export default function DataPrivacySection({
         <div className="pt-2 flex gap-3 text-xs text-zinc-500 dark:text-zinc-400">
           <PendingLink
             href="/privacy"
-            className="underline hover:no-underline"
+            className="ct-link-accent underline hover:no-underline"
             pendingLabel="Loading privacy policy..."
             data-testid="privacy-policy-link"
           >
@@ -145,7 +145,7 @@ export default function DataPrivacySection({
           </PendingLink>
           <PendingLink
             href="/terms"
-            className="underline hover:no-underline"
+            className="ct-link-accent underline hover:no-underline"
             pendingLabel="Loading terms..."
             data-testid="terms-of-service-link"
           >

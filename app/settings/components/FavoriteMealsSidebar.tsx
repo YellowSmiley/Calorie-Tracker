@@ -234,7 +234,7 @@ export default function FavoriteMealsSidebar({
                   >
                     <button
                       onClick={() => setDeleteTarget(favorite)}
-                      className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                      className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                     >
                       Delete
                     </button>
@@ -304,7 +304,7 @@ export default function FavoriteMealsSidebar({
                 isLoading={isDeleting}
                 loadingLabel="Deleting favorite..."
                 spinnerClassName="h-4 w-4"
-                className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50"
+                className="ct-button-danger-solid flex-1 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
               >
                 Delete
               </LoadingButton>

@@ -25,7 +25,7 @@ export default function HelpButton({
       <button
         onClick={() => setShowModal(true)}
         aria-label={ariaLabel}
-        className="inline text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-zinc-500 dark:focus:ring-offset-zinc-950"
+        className="ct-link-accent inline text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-zinc-500 dark:focus:ring-offset-zinc-950"
         type="button"
         data-testid={dataTestId}
       >

@@ -56,6 +56,14 @@ interface ChartDataPoint {
 
 type MetricKey = "calories" | "bodyWeight" | "protein" | "carbs" | "fat";
 
+const METRIC_STROKES: Record<MetricKey, string> = {
+  calories: "#f94807",
+  bodyWeight: "#fa9932",
+  protein: "#e43c03",
+  carbs: "#fbd577",
+  fat: "#fa9932",
+};
+
 interface CalorieWeightChartProps {
   points: TrendPoint[];
   calorieUnit: AcceptedCalorieUnits;
@@ -347,7 +355,7 @@ export default function Charts({
       {renderTrendPanel("calories", {
         title: "Calorie Trend",
         dataKey: "calories",
-        stroke: "currentColor",
+        stroke: METRIC_STROKES.calories,
         goalValue: displayedCalorieGoal,
         yAxisLabel: calorieUnit,
         summary: (
@@ -363,7 +371,7 @@ export default function Charts({
       {renderTrendPanel("bodyWeight", {
         title: "Body Weight Trend",
         dataKey: "bodyWeight",
-        stroke: "currentColor",
+        stroke: METRIC_STROKES.bodyWeight,
         yAxisLabel: bodyWeightUnit,
         summary: (
           <span>
@@ -387,7 +395,7 @@ export default function Charts({
       {renderTrendPanel("protein", {
         title: "Protein Trend",
         dataKey: "protein",
-        stroke: "currentColor",
+        stroke: METRIC_STROKES.protein,
         goalValue: displayedProteinGoal,
         yAxisLabel: weightUnit,
         summary: (
@@ -402,7 +410,7 @@ export default function Charts({
       {renderTrendPanel("carbs", {
         title: "Carb Trend",
         dataKey: "carbs",
-        stroke: "currentColor",
+        stroke: METRIC_STROKES.carbs,
         goalValue: displayedCarbGoal,
         yAxisLabel: weightUnit,
         summary: (
@@ -417,7 +425,7 @@ export default function Charts({
       {renderTrendPanel("fat", {
         title: "Fat Trend",
         dataKey: "fat",
-        stroke: "currentColor",
+        stroke: METRIC_STROKES.fat,
         goalValue: displayedFatGoal,
         yAxisLabel: weightUnit,
         summary: (

@@ -75,7 +75,7 @@ export default function MealItemRow({
             event.stopPropagation();
             onRemove(mealIndex, item.id);
           }}
-          className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+          className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"
           data-testid={`diary-food-remove-${item.id}`}
         >
           Remove

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HelpButton from "@/app/components/HelpButton";
 import Charts, { TrendPoint } from "./Charts";
 import DashboardPanel from "./dashboard/DashboardPanel";
 import DashboardQuickStartTutorial from "./dashboard/DashboardQuickStartTutorial";
 import DashboardSegmentedControl from "./dashboard/DashboardSegmentedControl";
 import NutritionSummaryPanel from "./dashboard/NutritionSummaryPanel";
 import { UserSettings } from "../settings/types";
+import AppHeader from "@/app/components/AppHeader";
 
 type TimeRange = "day" | "week" | "month";
 type ChartDateRange = "1m" | "3m" | "6m" | "1y" | "all";
@@ -110,33 +110,26 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-full flex flex-col">
-      <div className="border-b border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-              Dashboard
-            </h1>
-            <HelpButton
-              title="Dashboard Overview"
-              ariaLabel="Help: Dashboard overview"
-              data-testid="dashboard-help"
-            >
-              <p>
-                Your Dashboard provides a snapshot of your nutrition intake.
-              </p>
-              <p>
-                Use the View Period selector to switch between daily, weekly,
-                and monthly views.
-              </p>
-              <p>
-                Each card shows intake vs. goal, with progress bars to show how
-                close you are to your targets.
-              </p>
-              <p>Adjust goals in Settings to see changes reflected here.</p>
-            </HelpButton>
-          </div>
-        </div>
-      </div>
+      <AppHeader
+        title="Dashboard"
+        helpTitle="Dashboard Overview"
+        helpAriaLabel="Help: Dashboard overview"
+        helpTestId="dashboard-help"
+        helpContent={
+          <>
+            <p>Your Dashboard provides a snapshot of your nutrition intake.</p>
+            <p>
+              Use the View Period selector to switch between daily, weekly, and
+              monthly views.
+            </p>
+            <p>
+              Each card shows intake vs. goal, with progress bars to show how
+              close you are to your targets.
+            </p>
+            <p>Adjust goals in Settings to see changes reflected here.</p>
+          </>
+        }
+      />
 
       <div className="flex-1 bg-zinc-50 p-4 pb-24 dark:bg-zinc-950">
         <div className="mx-auto max-w-5xl space-y-6">

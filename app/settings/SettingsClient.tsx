@@ -18,6 +18,7 @@ import {
   convertWeightFromInput,
 } from "@/lib/unitConversions";
 import LoadingButton from "@/app/components/LoadingButton";
+import AppHeader from "../components/AppHeader";
 
 interface SettingsClientProps {
   userSettings: UserSettings;
@@ -332,14 +333,7 @@ export default function SettingsClient({
 
   return (
     <div className="min-h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-            Settings
-          </h1>
-        </div>
-      </div>
+      <AppHeader title="Settings" />
 
       {/* Main Content */}
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-4 pb-32">
@@ -410,21 +404,19 @@ export default function SettingsClient({
       {/* Fixed Buttons */}
       <div className="fixed bottom-20 left-0 right-0 z-30 border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black p-4">
         <div className="mx-auto max-w-3xl space-y-3">
-          <div className="min-h-14">
-            {saveMessage && (
-              <div
-                className={`rounded-lg p-4 ${
-                  saveMessage.type === "success"
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
-                    : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
-                }`}
-                role={saveMessage.type === "error" ? "alert" : "status"}
-                aria-live="polite"
-              >
-                {saveMessage.text}
-              </div>
-            )}
-          </div>
+          {saveMessage && (
+            <div
+              className={`rounded-lg p-4 ${
+                saveMessage.type === "success"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200"
+                  : "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200"
+              }`}
+              role={saveMessage.type === "error" ? "alert" : "status"}
+              aria-live="polite"
+            >
+              {saveMessage.text}
+            </div>
+          )}
           <LoadingButton
             type="button"
             data-testid="settings-save-button"
@@ -432,7 +424,7 @@ export default function SettingsClient({
             isLoading={isSaving}
             loadingLabel="Saving settings..."
             spinnerClassName="h-4 w-4"
-            className="w-full rounded-lg bg-foreground text-background px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="ct-button-primary w-full rounded-lg px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             Save Settings
           </LoadingButton>

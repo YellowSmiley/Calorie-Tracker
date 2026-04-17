@@ -3,6 +3,30 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-sun: #fbd577;
+  --brand-orange: #fa9932;
+  --brand-fire: #f94807;
+  --brand-deep: #e43c03;
+  --header-accent-line: rgba(249, 72, 7, 0.28);
+  --icon-shell-bg: #fff7ec;
+  --nav-shell-bg: var(--background);
+  --nav-link-hover: rgba(250, 153, 50, 0.12);
+  --nav-active-bg: #fa9932;
+  --nav-active-text: #111111;
+  --route-pill-bg: rgba(255, 255, 255, 0.96);
+  --route-pill-text: #18181b;
+  --route-pill-border: rgba(228, 60, 3, 0.36);
+  --route-bar: #fa9932;
+  --route-spinner-border: #a1a1aa;
+  --route-spinner-top: var(--brand-fire);
+  --button-primary-bg: #fa9932;
+  --button-primary-hover: #f94807;
+  --button-primary-text: #111111;
+  --link-accent: #e43c03;
+  --link-accent-hover: #f94807;
+  --danger-subtle-bg: #fff1ef;
+  --danger-subtle-border: #ef4444;
+  --danger-subtle-text: #b91c1c;
 }
 
 @theme inline {
@@ -16,6 +40,25 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --header-accent-line: rgba(250, 153, 50, 0.36);
+    --icon-shell-bg: #211912;
+    --nav-shell-bg: var(--background);
+    --nav-link-hover: rgba(250, 153, 50, 0.18);
+    --nav-active-bg: #fbd577;
+    --route-pill-bg: rgba(10, 10, 10, 0.96);
+    --route-pill-text: #f4f4f5;
+    --route-pill-border: rgba(250, 153, 50, 0.44);
+    --route-bar: #fbd577;
+    --route-spinner-border: #52525b;
+    --route-spinner-top: var(--brand-orange);
+    --button-primary-bg: #fbd577;
+    --button-primary-hover: #fa9932;
+    --button-primary-text: #171717;
+    --link-accent: #fbd577;
+    --link-accent-hover: #fa9932;
+    --danger-subtle-bg: rgba(127, 29, 29, 0.25);
+    --danger-subtle-border: #dc2626;
+    --danger-subtle-text: #fca5a5;
   }
 }
 
@@ -23,6 +66,102 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.ct-app-header {
+  background: var(--background);
+  box-shadow: inset 0 -2px 0 0 var(--header-accent-line);
+}
+
+.ct-app-icon-shell {
+  background: var(--icon-shell-bg);
+}
+
+.ct-nav-shell {
+  background: var(--nav-shell-bg);
+}
+
+.ct-nav-link:hover {
+  background: var(--nav-link-hover);
+  border-color: transparent;
+}
+
+.ct-nav-active {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+}
+
+.ct-route-loading-bar {
+  background: var(--route-bar);
+}
+
+.ct-route-loading-pill {
+  background: var(--route-pill-bg);
+  color: var(--route-pill-text);
+  border-color: var(--route-pill-border);
+}
+
+.ct-route-loading-spinner {
+  border-color: var(--route-spinner-border);
+  border-top-color: var(--route-spinner-top);
+}
+
+.ct-button-primary {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.ct-button-primary:hover {
+  background: var(--button-primary-hover);
+}
+
+.ct-link-accent {
+  color: var(--link-accent);
+}
+
+.ct-link-accent:hover {
+  color: var(--link-accent-hover);
+}
+
+.ct-button-danger-subtle {
+  background: var(--danger-subtle-bg);
+  border: 1px solid var(--danger-subtle-border);
+  color: var(--danger-subtle-text);
+}
+
+.ct-button-danger-subtle:hover {
+  filter: brightness(0.96);
+}
+
+.ct-button-danger-solid {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.ct-button-danger-solid:hover {
+  background: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ct-button-danger-solid {
+    background: #ef4444;
+    color: #111111;
+  }
+
+  .ct-button-danger-solid:hover {
+    background: #f87171;
+  }
+}
+
+button.bg-foreground.text-background,
+a.bg-foreground.text-background {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+button.bg-foreground.text-background:hover,
+a.bg-foreground.text-background:hover {
+  background: var(--button-primary-hover);
 }
 
 @keyframes route-loading {

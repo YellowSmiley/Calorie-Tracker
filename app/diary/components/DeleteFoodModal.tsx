@@ -83,7 +83,7 @@ export default function DeleteFoodModal({
             isLoading={isLoading}
             loadingLabel="Removing item..."
             spinnerClassName="h-4 w-4"
-            className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ct-button-danger-solid flex-1 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="delete-food-confirm"
           >
             Remove Item

@@ -215,7 +215,7 @@ export default function UserManagement() {
                     setDeleteUser(user);
                     setDeleteError(null);
                   }}
-                  className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                  className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Delete
                 </button>
@@ -325,7 +325,7 @@ export default function UserManagement() {
               <button
                 onClick={() => handleDeleteUser(deleteUser.id)}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="ct-button-danger-solid flex-1 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDeleting ? "Deleting..." : "Delete User"}
               </button>

@@ -55,7 +55,7 @@ export default function DashboardSegmentedControl<T extends string>({
               buttonSizeClasses,
               fullWidthOnMobile ? "flex-1 sm:flex-none" : "",
               isActive
-                ? "bg-foreground text-background"
+                ? "ct-button-primary"
                 : "border border-solid border-black/8 text-black hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a]",
             ]
               .filter(Boolean)

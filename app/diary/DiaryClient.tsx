@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import DailySummaryAccordion from "./components/DailySummaryAccordion";
 import BodyWeightCard from "./components/BodyWeightCard";
 import MealsSection from "./components/MealsSection";
-import HelpButton from "@/app/components/HelpButton";
 import { calculateNutritionTotals } from "@/lib/nutritionSummary";
 import type { Meal } from "./types";
 import { UserSettings } from "../settings/types";
 import { startRouteLoading } from "@/app/components/routeLoading";
+import AppHeader from "@/app/components/AppHeader";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
@@ -82,29 +82,23 @@ export default function DiaryClient({
 
   return (
     <div className="min-h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 p-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-              Diary
-            </h1>
-            <HelpButton
-              title="Food Diary"
-              ariaLabel="Help: Food diary overview"
-            >
-              <p>Log daily food intake to track calories and nutrition.</p>
-              <p>
-                Click any food to adjust serving size, or remove it when needed.
-              </p>
-              <p>
-                Use the date selector to view and record meals from different
-                days.
-              </p>
-            </HelpButton>
-          </div>
-        </div>
-      </div>
+      <AppHeader
+        title="Diary"
+        helpTitle="Food Diary"
+        helpAriaLabel="Help: Food diary overview"
+        helpContent={
+          <>
+            <p>Log daily food intake to track calories and nutrition.</p>
+            <p>
+              Click any food to adjust serving size, or remove it when needed.
+            </p>
+            <p>
+              Use the date selector to view and record meals from different
+              days.
+            </p>
+          </>
+        }
+      />
 
       {/* Date Navigation */}
       <div className="bg-zinc-50 dark:bg-zinc-950 p-4">
