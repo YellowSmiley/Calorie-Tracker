@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import HelpButton from "@/app/components/HelpButton";
 import Charts, { TrendPoint } from "./Charts";
 import DashboardPanel from "./dashboard/DashboardPanel";
+import DashboardQuickStartTutorial from "./dashboard/DashboardQuickStartTutorial";
 import DashboardSegmentedControl from "./dashboard/DashboardSegmentedControl";
 import NutritionSummaryPanel from "./dashboard/NutritionSummaryPanel";
 import { UserSettings } from "../settings/types";
@@ -132,6 +133,7 @@ export default function DashboardClient({
               Track your daily calorie intake and macronutrients to reach your
               health goals.
             </p>
+            <DashboardQuickStartTutorial />
           </DashboardPanel>
 
           <NutritionSummaryPanel

@@ -49,3 +49,9 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Do not introduce new tooling (hooks/CI/deps) unless explicitly requested.
 - Keep changes minimal and aligned with existing project style.
 - Avoid touching unrelated files.
+
+## UI Color Consistency
+
+- Keep UI colors monochrome throughout the app: whites, blacks, and greys only.
+- Do not introduce accent colors (for example blue, green, purple, red) for links, buttons, badges, highlights, or focus states unless explicitly requested.
+- Prefer existing zinc/neutral classes and maintain consistent contrast in both light and dark themes.
