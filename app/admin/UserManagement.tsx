@@ -143,11 +143,20 @@ export default function UserManagement() {
     setUsers((prev) =>
       prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u)),
     );
-    setEditUser((prev) => (prev?.id === updatedUser.id ? { ...prev, ...updatedUser } : prev));
+    setEditUser((prev) =>
+      prev?.id === updatedUser.id ? { ...prev, ...updatedUser } : prev,
+    );
   }, []);
 
   const runModerationAction = useCallback(
-    async (action: "addMark" | "removeMark" | "activate" | "deactivate" | "clearPunishments") => {
+    async (
+      action:
+        | "addMark"
+        | "removeMark"
+        | "activate"
+        | "deactivate"
+        | "clearPunishments",
+    ) => {
       if (!editUser) {
         return;
       }

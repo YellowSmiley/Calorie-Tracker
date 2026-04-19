@@ -202,7 +202,10 @@ export async function PUT(
     });
 
     if (moderationNumberError) {
-      return NextResponse.json({ error: moderationNumberError }, { status: 400 });
+      return NextResponse.json(
+        { error: moderationNumberError },
+        { status: 400 },
+      );
     }
 
     const updated = await prisma.food.update({

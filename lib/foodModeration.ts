@@ -1,15 +1,35 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const FALLBACK_BLOCKED_TERMS = ["fuck", "fucking", "shit", "bitch", "cunt", "nigger", "nigga"];
+const FALLBACK_BLOCKED_TERMS = [
+  "fuck",
+  "fucking",
+  "shit",
+  "bitch",
+  "cunt",
+  "nigger",
+  "nigga",
+];
 
 function loadBlockedTerms(): string[] {
   try {
-    const sourcePath = path.join(process.cwd(), "node_modules", "badwords-list", "dist", "array.js");
+    const sourcePath = path.join(
+      process.cwd(),
+      "node_modules",
+      "badwords-list",
+      "dist",
+      "array.js",
+    );
     const source = fs.readFileSync(sourcePath, "utf8");
     const matches = source.matchAll(/'([^'\\]*(?:\\.[^'\\]*)*)'/g);
     const terms = [...matches]
-      .map((match) => match[1].replace(/\\'/g, "'").replace(/\\\\/g, "\\").trim().toLowerCase())
+      .map((match) =>
+        match[1]
+          .replace(/\\'/g, "'")
+          .replace(/\\\\/g, "\\")
+          .trim()
+          .toLowerCase(),
+      )
       .filter((term) => term.length > 0);
 
     if (terms.length > 0) {
@@ -24,13 +44,14 @@ function loadBlockedTerms(): string[] {
 
 const BLOCKED_TERMS = loadBlockedTerms();
 
-const BLOCKED_PATTERNS = BLOCKED_TERMS.map((term) =>
-  new RegExp(`\\b${term.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\b`, "i"),
+const BLOCKED_PATTERNS = BLOCKED_TERMS.map(
+  (term) =>
+    new RegExp(`\\b${term.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\b`, "i"),
 );
 
-const COMPACT_BLOCKED_TERMS = BLOCKED_TERMS
-  .map((term) => term.toLowerCase().replace(/[^a-z0-9]/g, ""))
-  .filter((term) => term.length >= 4);
+const COMPACT_BLOCKED_TERMS = BLOCKED_TERMS.map((term) =>
+  term.toLowerCase().replace(/[^a-z0-9]/g, ""),
+).filter((term) => term.length >= 4);
 
 export function containsBlockedLanguage(value: string): boolean {
   const normalized = value.trim();

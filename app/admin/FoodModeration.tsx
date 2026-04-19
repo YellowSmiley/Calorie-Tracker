@@ -71,7 +71,9 @@ export default function FoodModeration() {
 
         const response = await fetch(`/api/admin/food-reports?${params}`);
         if (!response.ok) {
-          setError(await getApiErrorMessage(response, "Failed to fetch reports"));
+          setError(
+            await getApiErrorMessage(response, "Failed to fetch reports"),
+          );
           return;
         }
 
@@ -142,7 +144,9 @@ export default function FoodModeration() {
         setError(
           await getApiErrorMessage(
             response,
-            currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+            currentlyApproved
+              ? "Failed to unapprove food"
+              : "Failed to approve food",
           ),
         );
         return;
@@ -162,7 +166,11 @@ export default function FoodModeration() {
         setTotal((prev) => Math.max(prev - 1, 0));
       }
     } catch {
-      setError(currentlyApproved ? "Failed to unapprove food" : "Failed to approve food");
+      setError(
+        currentlyApproved
+          ? "Failed to unapprove food"
+          : "Failed to approve food",
+      );
     } finally {
       setApprovingId(null);
     }
@@ -325,7 +333,7 @@ export default function FoodModeration() {
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     {item.calories} kcal · {item.measurementAmount}
-                    {item.measurementType === "weight" ? "g" : "ml"} · by {" "}
+                    {item.measurementType === "weight" ? "g" : "ml"} · by{" "}
                     {item.createdByName}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -362,7 +370,9 @@ export default function FoodModeration() {
                   <LoadingButton
                     onClick={() => approveFood(item.id, item.isApproved)}
                     isLoading={approvingId === item.id}
-                    loadingLabel={item.isApproved ? "Unapproving..." : "Approving..."}
+                    loadingLabel={
+                      item.isApproved ? "Unapproving..." : "Approving..."
+                    }
                     spinnerClassName="h-4 w-4"
                     className={[
                       "rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50",
@@ -420,9 +430,13 @@ export default function FoodModeration() {
               </button>
               <LoadingButton
                 type="button"
-                onClick={() => approveFood(editingItem.id, editingItem.isApproved)}
+                onClick={() =>
+                  approveFood(editingItem.id, editingItem.isApproved)
+                }
                 isLoading={approvingId === editingItem.id}
-                loadingLabel={editingItem.isApproved ? "Unapproving..." : "Approving..."}
+                loadingLabel={
+                  editingItem.isApproved ? "Unapproving..." : "Approving..."
+                }
                 spinnerClassName="h-4 w-4"
                 className={[
                   "rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50",

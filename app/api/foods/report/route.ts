@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
   const reason = (body.reason || "").trim();
 
   if (!foodId) {
-    return NextResponse.json({ error: "Food id is required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Food id is required." },
+      { status: 400 },
+    );
   }
 
   if (reason.length > 250) {
