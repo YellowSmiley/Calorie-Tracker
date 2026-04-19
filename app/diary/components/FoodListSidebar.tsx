@@ -51,6 +51,9 @@ const mapFood = (food: FoodWithCreator): FoodItem => ({
   defaultServingAmount: food.defaultServingAmount,
   defaultServingDescription: food.defaultServingDescription,
   createdByName: food.createdByName,
+  isApproved: food.isApproved,
+  hasUserReported: food.hasUserReported,
+  reportCount: food.reportCount,
 });
 
 export default function FoodListSidebar({
@@ -69,6 +72,8 @@ export default function FoodListSidebar({
   const [hasLoaded, setHasLoaded] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [reportingFoodId, setReportingFoodId] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,7 +94,13 @@ export default function FoodListSidebar({
           return;
         }
         const data = (await res.json()) as {
-          foods: Food[];
+          foods: Array<
+            Food & {
+              isApproved?: boolean;
+              hasUserReported?: boolean;
+              reportCount?: number;
+            }
+          >;
           total: number;
           suggestions?: string[];
         };
@@ -159,6 +170,51 @@ export default function FoodListSidebar({
     setShowEditForm(true);
   };
 
+  const handleReportFood = async (foodId: string) => {
+    setReportingFoodId(foodId);
+    setReportError(null);
+
+    try {
+      const response = await fetch("/api/foods/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ foodId }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        setReportError(data.error || "Failed to submit report");
+        return;
+      }
+
+      setFoods((prev) =>
+        prev.map((food) =>
+          food.id === foodId
+            ? {
+                ...food,
+                hasUserReported: true,
+                reportCount: (food.reportCount ?? 0) + 1,
+              }
+            : food,
+        ),
+      );
+
+      setSelectedFood((prev) =>
+        prev && prev.id === foodId
+          ? {
+              ...prev,
+              hasUserReported: true,
+              reportCount: (prev.reportCount ?? 0) + 1,
+            }
+          : prev,
+      );
+    } catch {
+      setReportError("Failed to submit report");
+    } finally {
+      setReportingFoodId(null);
+    }
+  };
+
   const applyServingChange = async (serving: number) => {
     if (!selectedFood) return;
     // 'serving' here is actually the number of base servings (e.g., 5), but DiaryClient expects total amount (e.g., 350g)
@@ -199,8 +255,16 @@ export default function FoodListSidebar({
             <p>Search for a food to add to your meal.</p>
             <p>Use the search bar to find foods by name.</p>
             <p>
+              Approved foods are marked with an Approved badge and appear first
+              in results.
+            </p>
+            <p>
               You can create custom foods if nothing matches, then adjust
               quantity before adding.
+            </p>
+            <p>
+              If a food looks incorrect or inappropriate, use Report so admins
+              can review it.
             </p>
           </HelpButton>
         </div>
@@ -209,6 +273,14 @@ export default function FoodListSidebar({
 
       <div className="p-4 overflow-hidden">
         <div className="mx-auto w-full max-w-3xl h-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
+          {reportError && (
+            <div className="px-4 pt-4" data-testid="food-report-error">
+              <div className="rounded-lg border border-zinc-300 bg-zinc-100 p-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+                {reportError}
+              </div>
+            </div>
+          )}
+
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
@@ -262,14 +334,21 @@ export default function FoodListSidebar({
             {foods.map((food) => (
               <div
                 key={food.id}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                 onClick={() => handleSelectFood(food)}
                 data-testid={`food-item-${food.id}`}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-black dark:text-zinc-50">
-                    {food.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-black dark:text-zinc-50">
+                      {food.name}
+                    </p>
+                    {food.isApproved ? (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
+                        Approved
+                      </span>
+                    ) : null}
+                  </div>
                   {(() => {
                     const actualAmount = food.serving * food.measurementAmount;
                     const amountStr =
@@ -307,6 +386,11 @@ export default function FoodListSidebar({
           setShowEditForm(false);
         }}
         onSubmit={applyServingChange}
+        onReport={handleReportFood}
+        isReporting={Boolean(
+          selectedFood && reportingFoodId === selectedFood.id,
+        )}
+        hasUserReported={Boolean(selectedFood?.hasUserReported)}
         userSettings={userSettings}
         isAdd
       />

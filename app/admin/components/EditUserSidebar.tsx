@@ -4,6 +4,11 @@ import { User } from "@prisma/client";
 import { useState } from "react";
 import ValidatedTextField from "../../components/ValidatedTextField";
 
+type EditableAdminUser = Pick<
+  User,
+  "id" | "name" | "email" | "isActive" | "blackMarks" | "bannedAt"
+>;
+
 type FieldErrors = {
   name?: string;
   email?: string;
@@ -11,12 +16,19 @@ type FieldErrors = {
 };
 
 interface EditUserSidebarProps {
-  user: User | null;
+  user: EditableAdminUser | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (name: string, email: string, password?: string) => Promise<void>;
+  onPunish: () => Promise<void>;
+  onUndoPunish: () => Promise<void>;
+  onActivate: () => Promise<void>;
+  onDeactivate: () => Promise<void>;
+  onClearPunishments: () => Promise<void>;
   isSaving: boolean;
+  isModerating: boolean;
   error: string | null;
+  moderationError: string | null;
 }
 
 export default function EditUserSidebar({
@@ -24,8 +36,15 @@ export default function EditUserSidebar({
   isOpen,
   onClose,
   onSave,
+  onPunish,
+  onUndoPunish,
+  onActivate,
+  onDeactivate,
+  onClearPunishments,
   isSaving,
+  isModerating,
   error,
+  moderationError,
 }: EditUserSidebarProps) {
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -168,6 +187,114 @@ export default function EditUserSidebar({
                 minLength={8}
                 error={fieldErrors.password}
               />
+
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-black dark:text-zinc-50">
+                    Moderation
+                  </h3>
+                  <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    View punishment status and apply or undo moderation actions.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="edit-user-black-marks"
+                      className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                    >
+                      Punishments (Black Marks)
+                    </label>
+                    <input
+                      id="edit-user-black-marks"
+                      type="text"
+                      value={String(user?.blackMarks ?? 0)}
+                      readOnly
+                      className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 text-sm text-black dark:text-zinc-50"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="edit-user-active-state"
+                      className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                    >
+                      Active State
+                    </label>
+                    <input
+                      id="edit-user-active-state"
+                      type="text"
+                      value={user?.isActive ? "Active" : "Inactive"}
+                      readOnly
+                      className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 text-sm text-black dark:text-zinc-50"
+                    />
+                  </div>
+                </div>
+
+                {user?.bannedAt && (
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    Banned at: {new Date(user.bannedAt).toLocaleString()}
+                  </p>
+                )}
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={onPunish}
+                    className="ct-button-danger-subtle rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                    disabled={isModerating}
+                    data-testid="edit-user-punish"
+                  >
+                    {isModerating ? "Working..." : "Punish (+1 Mark)"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onUndoPunish}
+                    className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900 disabled:opacity-50"
+                    disabled={isModerating || (user?.blackMarks ?? 0) <= 0}
+                    data-testid="edit-user-undo-punish"
+                  >
+                    Undo Punish (-1 Mark)
+                  </button>
+                  {user?.isActive ? (
+                    <button
+                      type="button"
+                      onClick={onDeactivate}
+                      className="ct-button-danger-subtle rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                      disabled={isModerating}
+                      data-testid="edit-user-deactivate"
+                    >
+                      Deactivate User
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={onActivate}
+                      className="ct-button-primary rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                      disabled={isModerating}
+                      data-testid="edit-user-activate"
+                    >
+                      Activate User
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onClearPunishments}
+                    className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900 disabled:opacity-50"
+                    disabled={isModerating}
+                    data-testid="edit-user-clear-punishments"
+                  >
+                    Clear Marks and Unban
+                  </button>
+                </div>
+
+                {moderationError && (
+                  <div className="rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200 px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700">
+                    {moderationError}
+                  </div>
+                )}
+              </div>
+
               {error && (
                 <div className="rounded bg-red-100 text-red-700 px-3 py-2 text-sm">
                   {error}

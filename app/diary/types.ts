@@ -25,6 +25,9 @@ export interface FoodItem {
   defaultServingAmount?: number | null;
   defaultServingDescription?: string | null;
   createdByName?: string;
+  isApproved?: boolean;
+  hasUserReported?: boolean;
+  reportCount?: number;
 }
 
 export interface Meal {

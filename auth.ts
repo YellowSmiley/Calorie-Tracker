@@ -18,6 +18,7 @@ import {
   DEFAULT_SATURATES_GOAL,
   DEFAULT_SUGARS_GOAL,
 } from "./lib/consts";
+import { getClientIp } from "@/lib/blacklist";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -40,11 +41,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = String(credentials?.email ?? "")
           .toLowerCase()
           .trim();
         const password = String(credentials?.password ?? "");
+        const ip = request?.headers ? getClientIp(request.headers) : null;
 
         if (!email || !password) {
           return null;
@@ -64,11 +66,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: true,
             passwordHash: true,
             emailVerified: true,
+            isActive: true,
           },
         });
 
         if (!user || !user.passwordHash) {
           return null;
+        }
+
+        const blacklistedEmail = await prisma.blacklistEntry.findFirst({
+          where: {
+            entryType: "email",
+            value: email,
+          },
+          select: { id: true },
+        });
+
+        if (blacklistedEmail) {
+          return null;
+        }
+
+        if (ip) {
+          const blacklistedIp = await prisma.blacklistEntry.findFirst({
+            where: {
+              entryType: "ip",
+              value: ip,
+            },
+            select: { id: true },
+          });
+
+          if (blacklistedIp) {
+            return null;
+          }
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash);
@@ -78,6 +107,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user.emailVerified) {
           return null;
+        }
+
+        if (!user.isActive) {
+          return null;
+        }
+
+        if (ip) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastKnownIp: ip },
+          });
         }
 
         return {
@@ -93,6 +133,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
+      if (!user?.id) {
+        return false;
+      }
+
+      const existingForModeration = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          email: true,
+          isActive: true,
+        },
+      });
+
+      if (!existingForModeration?.isActive) {
+        return false;
+      }
+
+      if (existingForModeration.email) {
+        const blacklistedEmail = await prisma.blacklistEntry.findFirst({
+          where: {
+            entryType: "email",
+            value: existingForModeration.email.toLowerCase().trim(),
+          },
+          select: { id: true },
+        });
+
+        if (blacklistedEmail) {
+          return false;
+        }
+      }
+
       // Apply defaults on first sign-in
       if (user.id) {
         const existingUser = await prisma.user.findUnique({

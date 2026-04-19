@@ -28,6 +28,9 @@ interface EditFoodSidebarProps {
   userSettings: UserSettings;
   isLoading?: boolean;
   isAdd?: boolean;
+  onReport?: (foodId: string) => void;
+  isReporting?: boolean;
+  hasUserReported?: boolean;
 }
 
 export default function EditFoodSidebar({
@@ -38,6 +41,9 @@ export default function EditFoodSidebar({
   userSettings,
   isLoading = false,
   isAdd = false,
+  onReport,
+  isReporting = false,
+  hasUserReported = false,
 }: EditFoodSidebarProps) {
   type FieldErrors = {
     servingSize?: string;
@@ -618,6 +624,29 @@ export default function EditFoodSidebar({
                 </div>
               </div>
             </div>
+
+            {isAdd && food ? (
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Found an inappropriate name or suspicious values?
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onReport?.(food.id)}
+                    disabled={isReporting || hasUserReported}
+                    className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
+                    data-testid="add-food-report-button"
+                  >
+                    {hasUserReported
+                      ? "Reported"
+                      : isReporting
+                        ? "Reporting..."
+                        : "Report Food"}
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
 

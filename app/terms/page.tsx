@@ -1,5 +1,6 @@
 import PendingLink from "@/app/components/PendingLink";
 import { Metadata } from "next";
+import AppHeader from "@/app/components/AppHeader";
 
 export const metadata: Metadata = {
   title: "Terms of Service - Calorie Tracker",
@@ -7,19 +8,18 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 pb-24">
-      <div className="max-w-3xl mx-auto">
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8">
-          <h1 className="text-3xl font-bold text-black dark:text-zinc-50 mb-2">
-            Terms of Service
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8">
-            Last updated: 25 January 2026
+    <div className="min-h-screen bg-zinc-50 pb-24 dark:bg-zinc-950">
+      <AppHeader title="Terms of Service" />
+
+      <div className="mx-auto w-full max-w-3xl p-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-black sm:p-8">
+          <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+            Last updated: 19 April 2026
           </p>
 
-          <div className="prose prose-zinc dark:prose-invert max-w-none space-y-6 text-zinc-700 dark:text-zinc-300">
+          <div className="space-y-8 text-zinc-700 dark:text-zinc-300">
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
                 1. Acceptance of Terms
               </h2>
               <p>
@@ -30,22 +30,21 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
                 2. Description of Service
               </h2>
               <p>
                 Calorie Tracker is a personal nutrition tracking web application
                 that allows you to log meals, track calorie and macronutrient
-                intake, and manage custom food entries. The Service is provided
-                free of charge.
+                intake, track weight, and manage custom food entries.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
                 3. Account Registration
               </h2>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
+              <ul className="mt-2 list-disc space-y-1 pl-6">
                 <li>
                   You must provide accurate and complete information when
                   creating an account.
@@ -66,11 +65,11 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
                 4. Acceptable Use
               </h2>
               <p>You agree not to:</p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
+              <ul className="mt-2 list-disc space-y-1 pl-6">
                 <li>
                   Use the Service for any unlawful purpose or in violation of
                   any applicable law
@@ -88,11 +87,15 @@ export default function TermsOfServicePage() {
                 <li>
                   Create multiple accounts to circumvent restrictions or bans
                 </li>
+                <li>
+                  Submit abusive, hateful, threatening, or explicit content in
+                  food names, reports, or any user-generated fields
+                </li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
                 5. User Content
               </h2>
               <p>
@@ -109,15 +112,31 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                6. Disclaimer
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                6. Moderation and Enforcement
+              </h2>
+              <p>
+                To protect users and service quality, we may review reported
+                content and apply moderation actions including warnings,
+                restrictions, deactivation, and bans for serious or repeated
+                violations.
+              </p>
+              <p className="mt-2">
+                Accounts involved in abuse or ban evasion may be blocked,
+                including by email and security signals where appropriate.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                7. Disclaimer
               </h2>
               <p>
                 The Service is provided &quot;as is&quot; and &quot;as
                 available&quot; without warranties of any kind, whether express
                 or implied.
               </p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
+              <ul className="mt-2 list-disc space-y-1 pl-6">
                 <li>
                   Calorie Tracker is <strong>not</strong> a medical or dietary
                   advice tool. Nutritional information is user-provided and may
@@ -136,8 +155,8 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                7. Limitation of Liability
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                8. Limitation of Liability
               </h2>
               <p>
                 To the fullest extent permitted by law, we shall not be liable
@@ -150,8 +169,8 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                8. Account Termination
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                9. Account Termination
               </h2>
               <p>
                 You may delete your account at any time from the Settings page.
@@ -162,14 +181,14 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                9. Privacy
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                10. Privacy
               </h2>
               <p>
                 Your use of the Service is also governed by our{" "}
                 <PendingLink
                   href="/privacy"
-                  className="underline hover:no-underline"
+                  className="ct-link-accent underline hover:no-underline"
                   pendingLabel="Loading privacy policy..."
                 >
                   Privacy Policy
@@ -180,8 +199,8 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                10. Changes to These Terms
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                11. Changes to These Terms
               </h2>
               <p>
                 We may update these terms from time to time. Any changes will be
@@ -192,8 +211,8 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                11. Governing Law
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                12. Governing Law
               </h2>
               <p>
                 These terms are governed by and construed in accordance with the
@@ -203,15 +222,15 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-3">
-                12. Contact
+              <h2 className="mb-3 text-xl font-semibold text-black dark:text-zinc-50">
+                13. Contact
               </h2>
               <p>
                 If you have any questions about these terms, please contact us
-                at{" "}
+                at
                 <a
                   href="mailto:privacy@masmith.uk"
-                  className="underline hover:no-underline"
+                  className="ct-link-accent ml-1 underline hover:no-underline"
                 >
                   privacy@masmith.uk
                 </a>
@@ -220,10 +239,10 @@ export default function TermsOfServicePage() {
             </section>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
             <PendingLink
               href="/login"
-              className="text-sm text-zinc-500 dark:text-zinc-400 underline hover:no-underline"
+              className="ct-link-accent text-sm underline hover:no-underline"
               pendingLabel="Loading sign in..."
             >
               Back to sign in

@@ -8,17 +8,31 @@ import DataTableShell from "../components/DataTableShell";
 
 const PAGE_SIZE = 50;
 
+type AdminUserRow = Pick<
+  User,
+  | "id"
+  | "name"
+  | "email"
+  | "isAdmin"
+  | "provider"
+  | "isActive"
+  | "blackMarks"
+  | "bannedAt"
+>;
+
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const [editUser, setEditUser] = useState<User | null>(null);
+  const [deleteUser, setDeleteUser] = useState<AdminUserRow | null>(null);
+  const [editUser, setEditUser] = useState<AdminUserRow | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isModerating, setIsModerating] = useState(false);
+  const [moderationError, setModerationError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -40,11 +54,11 @@ export default function UserManagement() {
           return;
         }
         const data = (await res.json()) as {
-          users: User[];
+          users: AdminUserRow[];
           total: number;
           suggestions?: string[];
         };
-        const fetched: User[] = data.users || [];
+        const fetched: AdminUserRow[] = data.users || [];
         setUsers((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotal(data.total ?? 0);
         if (!append) {
@@ -125,6 +139,50 @@ export default function UserManagement() {
     }
   };
 
+  const updateUserInState = useCallback((updatedUser: AdminUserRow) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u)),
+    );
+    setEditUser((prev) => (prev?.id === updatedUser.id ? { ...prev, ...updatedUser } : prev));
+  }, []);
+
+  const runModerationAction = useCallback(
+    async (action: "addMark" | "removeMark" | "activate" | "deactivate" | "clearPunishments") => {
+      if (!editUser) {
+        return;
+      }
+
+      setIsModerating(true);
+      setModerationError(null);
+      try {
+        const response = await fetch(`/api/admin/users/${editUser.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        });
+
+        const data = (await response.json()) as {
+          error?: string;
+          user?: AdminUserRow;
+        };
+
+        if (!response.ok) {
+          setModerationError(data.error || "Failed to update moderation state");
+          return;
+        }
+
+        if (data.user) {
+          updateUserInState(data.user);
+        }
+      } catch {
+        setModerationError("Error updating moderation state");
+      } finally {
+        setIsModerating(false);
+      }
+    },
+    [editUser, updateUserInState],
+  );
+
   return (
     <div className="flex flex-col h-full p-4">
       <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
@@ -190,6 +248,7 @@ export default function UserManagement() {
                   ? () => {
                       setEditUser(user);
                       setEditError(null);
+                      setModerationError(null);
                     }
                   : undefined
               }
@@ -229,9 +288,19 @@ export default function UserManagement() {
           key={editUser?.id}
           user={editUser}
           isOpen={!!editUser}
-          onClose={() => setEditUser(null)}
+          onClose={() => {
+            setEditUser(null);
+            setModerationError(null);
+          }}
           isSaving={isSaving}
+          isModerating={isModerating}
           error={editError}
+          moderationError={moderationError}
+          onPunish={() => runModerationAction("addMark")}
+          onUndoPunish={() => runModerationAction("removeMark")}
+          onActivate={() => runModerationAction("activate")}
+          onDeactivate={() => runModerationAction("deactivate")}
+          onClearPunishments={() => runModerationAction("clearPunishments")}
           onSave={async (name, email, password) => {
             setIsSaving(true);
             setEditError(null);
@@ -242,11 +311,10 @@ export default function UserManagement() {
                 body: JSON.stringify({ name, email, password }),
               });
               if (response.ok) {
-                setUsers((prev) =>
-                  prev.map((u) =>
-                    u.id === editUser?.id ? { ...u, name, email } : u,
-                  ),
-                );
+                const data = (await response.json()) as { user?: AdminUserRow };
+                if (data.user) {
+                  updateUserInState(data.user);
+                }
                 setEditUser(null);
               } else {
                 const data = (await response.json()) as { error?: string };

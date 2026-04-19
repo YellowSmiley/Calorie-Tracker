@@ -9,8 +9,16 @@ import {
   sortByRelevanceAndUsage,
 } from "../../../../lib/foodSearchSuggestions";
 import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
+import {
+  containsBlockedLanguage,
+  validateFoodNumbersForModeration,
+} from "@/lib/foodModeration";
 
-export type FoodWithCreator = Food & { createdByName?: string };
+export type FoodWithCreator = Food & {
+  createdByName?: string;
+  hasUserReported?: boolean;
+  reportCount?: number;
+};
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -45,6 +53,10 @@ export async function GET(request: NextRequest) {
         creator: {
           select: { name: true },
         },
+        reports: {
+          where: { isResolved: false },
+          select: { reportedBy: true },
+        },
         _count: {
           select: { entries: true },
         },
@@ -57,14 +69,18 @@ export async function GET(request: NextRequest) {
         usageCount: food._count.entries,
       })),
       search,
-    );
+    ).sort((a, b) => Number(b.isApproved) - Number(a.isApproved));
 
     const total = sortedFoods.length;
     const foodsWithCreator: FoodWithCreator[] = sortedFoods
       .slice(skip, skip + take)
-      .map(({ creator, ...food }) => ({
+      .map(({ creator, reports, ...food }) => ({
         ...food,
         createdByName: creator?.name || "Unknown",
+        hasUserReported: reports.some(
+          (report) => report.reportedBy === session.user.id,
+        ),
+        reportCount: reports.length,
       }));
 
     let suggestions: string[] = [];
@@ -179,6 +195,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (containsBlockedLanguage(name)) {
+      return NextResponse.json(
+        { error: "Food name contains blocked language." },
+        { status: 400 },
+      );
+    }
+
+    if (
+      typeof defaultServingDescription === "string" &&
+      containsBlockedLanguage(defaultServingDescription)
+    ) {
+      return NextResponse.json(
+        { error: "Serving description contains blocked language." },
+        { status: 400 },
+      );
+    }
+
+    const moderationNumberError = validateFoodNumbersForModeration({
+      calories,
+      protein,
+      carbs,
+      fat,
+      saturates: typeof saturates === "number" ? saturates : 0,
+      sugars: typeof sugars === "number" ? sugars : 0,
+      fibre: typeof fibre === "number" ? fibre : 0,
+      salt: typeof salt === "number" ? salt : 0,
+    });
+
+    if (moderationNumberError) {
+      return NextResponse.json({ error: moderationNumberError }, { status: 400 });
+    }
+
     const duplicate = await findLikelyDuplicateFood({
       name,
       measurementType,
@@ -229,6 +277,9 @@ export async function POST(request: NextRequest) {
           defaultServingDescription.trim()
             ? defaultServingDescription.trim().slice(0, 50)
             : null,
+        isApproved: false,
+        approvedBy: null,
+        approvedAt: null,
       },
     });
 

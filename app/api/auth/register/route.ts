@@ -4,6 +4,7 @@ import { sendVerificationEmail } from "@/lib/email";
 import { checkRegisterRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
 import crypto, { createHash } from "crypto";
+import { getClientIp } from "@/lib/blacklist";
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -33,6 +34,33 @@ export async function POST(request: Request) {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
+        const ip = getClientIp(request.headers);
+
+        const emailBlocked = await prisma.blacklistEntry.findFirst({
+            where: {
+                entryType: "email",
+                value: normalizedEmail,
+            },
+            select: { id: true },
+        });
+
+        if (emailBlocked) {
+            return successResponse();
+        }
+
+        if (ip) {
+            const ipBlocked = await prisma.blacklistEntry.findFirst({
+                where: {
+                    entryType: "ip",
+                    value: ip,
+                },
+                select: { id: true },
+            });
+
+            if (ipBlocked) {
+                return successResponse();
+            }
+        }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
             return NextResponse.json(
@@ -64,6 +92,7 @@ export async function POST(request: Request) {
                 name: name?.trim() || null,
                 email: normalizedEmail,
                 passwordHash,
+                lastKnownIp: ip,
             },
         });
 

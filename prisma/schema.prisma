@@ -26,7 +26,14 @@ model User {
   mealFavorites MealFavorite[]
   weightEntries WeightEntry[]
   createdFoods  Food[]
+  approvedFoods Food[]     @relation("FoodApprovals")
+  foodReportsMade FoodReport[] @relation("FoodReportsMade")
+  resolvedFoodReports FoodReport[] @relation("FoodReportsResolved")
   provider      String?    @default("credentials") // 'google', 'credentials', etc.
+  isActive      Boolean    @default(true)
+  blackMarks    Int        @default(0)
+  bannedAt      DateTime?
+  lastKnownIp   String?    @db.VarChar(64)
   
   // User role
   isAdmin       Boolean    @default(false)
@@ -47,6 +54,17 @@ model User {
   weightUnit    String?    @default("g")
   bodyWeightUnit String?   @default("kg")
   volumeUnit    String?    @default("ml")
+}
+
+model BlacklistEntry {
+  id        String   @id @default(cuid())
+  entryType String   @db.VarChar(16)
+  value     String   @db.VarChar(255)
+  reason    String?  @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  @@unique([entryType, value])
+  @@index([value])
 }
 
 model Account {
@@ -101,12 +119,36 @@ model Food {
   defaultServingAmount      Float?
   defaultServingDescription String?   @db.VarChar(50)
   createdBy   String?
+  isApproved  Boolean  @default(false)
+  approvedBy  String?
+  approvedAt  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   creator  User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  approver User? @relation("FoodApprovals", fields: [approvedBy], references: [id], onDelete: SetNull)
   entries  MealEntry[]
   mealFavoriteItems MealFavoriteItem[]
+  reports FoodReport[]
+}
+
+model FoodReport {
+  id          String   @id @default(cuid())
+  foodId      String
+  reportedBy  String
+  reason      String?  @db.VarChar(250)
+  isResolved  Boolean  @default(false)
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  food      Food  @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  reporter  User  @relation("FoodReportsMade", fields: [reportedBy], references: [id], onDelete: Cascade)
+  resolver  User? @relation("FoodReportsResolved", fields: [resolvedBy], references: [id], onDelete: SetNull)
+
+  @@index([foodId, isResolved])
+  @@index([reportedBy, isResolved])
 }
 
 model MealFavorite {

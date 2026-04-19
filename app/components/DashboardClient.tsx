@@ -8,12 +8,14 @@ import DashboardSegmentedControl from "./dashboard/DashboardSegmentedControl";
 import NutritionSummaryPanel from "./dashboard/NutritionSummaryPanel";
 import { UserSettings } from "../settings/types";
 import AppHeader from "@/app/components/AppHeader";
+import AppModal from "@/app/components/AppModal";
 
 type TimeRange = "day" | "week" | "month";
 type ChartDateRange = "1m" | "3m" | "6m" | "1y" | "all";
 
 interface DashboardClientProps {
   userName: string;
+  blackMarks: number;
   userSettings: Omit<UserSettings, "volumeUnit">;
   userGoals: {
     calories: number;
@@ -47,6 +49,7 @@ const CHART_RANGE_OPTIONS = [
 
 export default function DashboardClient({
   userName,
+  blackMarks,
   userSettings,
   userGoals,
   initialTotals,
@@ -56,6 +59,9 @@ export default function DashboardClient({
   const [totals, setTotals] = useState(initialTotals);
   const [trend, setTrend] = useState<TrendPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showModerationWarning, setShowModerationWarning] = useState(
+    blackMarks > 0,
+  );
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
@@ -198,6 +204,39 @@ export default function DashboardClient({
           </DashboardPanel>
         </div>
       </div>
+
+      <AppModal
+        isOpen={showModerationWarning}
+        onClose={() => setShowModerationWarning(false)}
+        title="Account Warning"
+        closeAriaLabel="Close account warning"
+        dataTestId="account-warning-modal"
+        bodyClassName="p-4"
+        footer={
+          <button
+            onClick={() => setShowModerationWarning(false)}
+            className="ct-button-primary w-full rounded-lg px-4 py-2 font-medium"
+            data-testid="account-warning-close"
+          >
+            I Understand
+          </button>
+        }
+      >
+        <div className="space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
+          <p>
+            Your account currently has {blackMarks} moderation mark
+            {blackMarks === 1 ? "" : "s"} for inappropriate food content.
+          </p>
+          <p>
+            Do not submit abusive language or intentionally incorrect nutrition
+            data.
+          </p>
+          <p>
+            At 3 marks, your account will be banned and your email/IP may be
+            blacklisted.
+          </p>
+        </div>
+      </AppModal>
     </div>
   );
 }

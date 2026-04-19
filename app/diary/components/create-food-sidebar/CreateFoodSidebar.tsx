@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import {
   convertCaloriesFromInput,
   convertWeightFromInput,
@@ -38,6 +38,11 @@ interface CreateFoodSidebarProps {
   userSettings: UserSettings;
   isLoading?: boolean;
   editingFood?: Food | null;
+  editingDetails?: {
+    createdByName?: string;
+    createdAt?: string | Date | null;
+  };
+  adminActions?: ReactNode;
   error?: string | null;
 }
 
@@ -48,6 +53,8 @@ export default function CreateFoodSidebar({
   userSettings,
   isLoading = false,
   editingFood = null,
+  editingDetails,
+  adminActions,
   error = null,
 }: CreateFoodSidebarProps) {
   type FormErrors = Partial<Record<keyof typeof initialFormData, string>>;
@@ -384,6 +391,13 @@ export default function CreateFoodSidebar({
               Optionally set a default serving size and description for faster
               logging.
             </p>
+            <p>
+              Food names and descriptions with abusive language are blocked.
+            </p>
+            <p>
+              Foods may be reported by users and reviewed by admins. Approved
+              foods are prioritized in search.
+            </p>
           </HelpButton>
         </div>
         <div className="w-12" />
@@ -397,6 +411,34 @@ export default function CreateFoodSidebar({
       >
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-6xl rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+            {editingFood && editingDetails ? (
+              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                    Created by
+                  </label>
+                  <input
+                    value={editingDetails.createdByName || "Unknown"}
+                    readOnly
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                    Created date/time
+                  </label>
+                  <input
+                    value={
+                      editingDetails.createdAt
+                        ? new Date(editingDetails.createdAt).toLocaleString()
+                        : "Unknown"
+                    }
+                    readOnly
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                  />
+                </div>
+              </div>
+            ) : null}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Wrapping in isOpen to clear on close */}
               {isOpen && (
@@ -736,6 +778,15 @@ export default function CreateFoodSidebar({
                 );
               })()}
             </div>
+
+            {editingFood && adminActions ? (
+              <div className="mt-6 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+                <h3 className="mb-3 text-sm font-semibold text-black dark:text-zinc-50">
+                  Admin Actions
+                </h3>
+                {adminActions}
+              </div>
+            ) : null}
           </div>
         </div>
 

@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
 import { FoodItem } from "@/app/diary/types";
 import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
+import {
+  containsBlockedLanguage,
+  validateFoodNumbersForModeration,
+} from "@/lib/foodModeration";
 
 export async function PUT(
   request: NextRequest,
@@ -118,6 +122,23 @@ export async function PUT(
       );
     }
 
+    if (containsBlockedLanguage(body.name)) {
+      return NextResponse.json(
+        { error: "Food name contains blocked language." },
+        { status: 400 },
+      );
+    }
+
+    if (
+      typeof body.defaultServingDescription === "string" &&
+      containsBlockedLanguage(body.defaultServingDescription)
+    ) {
+      return NextResponse.json(
+        { error: "Serving description contains blocked language." },
+        { status: 400 },
+      );
+    }
+
     // Ownership check
     const existingFood = await prisma.food.findUnique({
       where: { id: foodId },
@@ -169,6 +190,21 @@ export async function PUT(
       );
     }
 
+    const moderationNumberError = validateFoodNumbersForModeration({
+      calories: mergedFoodForDuplicateCheck.calories,
+      protein: mergedFoodForDuplicateCheck.protein,
+      carbs: mergedFoodForDuplicateCheck.carbs,
+      fat: mergedFoodForDuplicateCheck.fat,
+      saturates: mergedFoodForDuplicateCheck.saturates,
+      sugars: mergedFoodForDuplicateCheck.sugars,
+      fibre: mergedFoodForDuplicateCheck.fibre,
+      salt: mergedFoodForDuplicateCheck.salt,
+    });
+
+    if (moderationNumberError) {
+      return NextResponse.json({ error: moderationNumberError }, { status: 400 });
+    }
+
     const updated = await prisma.food.update({
       where: { id: foodId },
       data: {
@@ -193,6 +229,9 @@ export async function PUT(
           body.defaultServingDescription.trim()
             ? body.defaultServingDescription.trim().slice(0, 50)
             : null,
+        isApproved: false,
+        approvedBy: null,
+        approvedAt: null,
       },
     });
 

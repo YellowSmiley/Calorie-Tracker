@@ -145,7 +145,7 @@ body {
 @media (prefers-color-scheme: dark) {
   .ct-button-danger-solid {
     background: #ef4444;
-    color: #111111;
+    color: #ffffff;
   }
 
   .ct-button-danger-solid:hover {

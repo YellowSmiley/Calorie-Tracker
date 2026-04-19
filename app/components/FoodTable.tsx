@@ -15,6 +15,7 @@ import {
 import { getApiErrorMessage } from "@/lib/apiError";
 import SearchInput from "./SearchInput";
 import DataTableShell from "./DataTableShell";
+import LoadingButton from "./LoadingButton";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -38,8 +39,14 @@ export default function FoodTable({
   );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [punishingId, setPunishingId] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingDetails, setEditingDetails] = useState<{
+    createdByName?: string;
+    createdAt?: string | Date | null;
+  } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -165,9 +172,66 @@ export default function FoodTable({
     }
   };
 
-  const startEditing = (food: Food) => {
+  const startEditing = (food: FoodWithCreator) => {
     setEditingFood(food);
+    setEditingDetails({
+      createdByName: food.createdByName,
+      createdAt: food.createdAt,
+    });
     setShowCreateForm(true);
+  };
+
+  const handleApproveFood = async (foodId: string, currentlyApproved: boolean) => {
+    setApprovingId(foodId);
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/foods/${foodId}/approve`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        setError(await getApiErrorMessage(response, "Something went wrong"));
+        return;
+      }
+
+      setFoods((prev) =>
+        prev.map((food) =>
+          food.id === foodId ? { ...food, isApproved: !currentlyApproved } : food,
+        ),
+      );
+      setEditingFood((prev) =>
+        prev?.id === foodId ? { ...prev, isApproved: !currentlyApproved } : prev,
+      );
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error approving food:", err);
+      }
+      setError(currentlyApproved ? "Error unapproving food" : "Error approving food");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  const handlePunishCreator = async (foodId: string) => {
+    setPunishingId(foodId);
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/foods/${foodId}/punish`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        setError(await getApiErrorMessage(response, "Something went wrong"));
+        return;
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error punishing creator:", err);
+      }
+      setError("Error punishing creator");
+    } finally {
+      setPunishingId(null);
+    }
   };
 
   const handleDeleteFood = async () => {
@@ -284,9 +348,16 @@ export default function FoodTable({
               data-testid={`food-search-result-${food.id}`}
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-black dark:text-zinc-50">
-                  {food.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-black dark:text-zinc-50">
+                    {food.name}
+                  </p>
+                  {food.isApproved ? (
+                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
+                      Approved
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {food.measurementType === "weight"
                     ? getWeightForDisplay(
@@ -326,12 +397,63 @@ export default function FoodTable({
         onClose={() => {
           setShowCreateForm(false);
           setEditingFood(null);
+          setEditingDetails(null);
           setError(null);
         }}
         onSubmit={handleFoodSubmit}
         userSettings={userSettings}
         isLoading={isLoading}
         editingFood={editingFood}
+        editingDetails={editingDetails ?? undefined}
+        adminActions={
+          isAdmin && editingFood ? (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <LoadingButton
+                type="button"
+                onClick={() => handlePunishCreator(editingFood.id)}
+                isLoading={punishingId === editingFood.id}
+                loadingLabel="Punishing..."
+                spinnerClassName="h-4 w-4"
+                className="ct-button-danger-subtle rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                data-testid="food-table-edit-punish"
+              >
+                Punish
+              </LoadingButton>
+              <button
+                type="button"
+                className="ct-button-danger-subtle rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                onClick={() => {
+                  const fullFood = foods.find(
+                    (food) => food.id === editingFood.id,
+                  );
+                  if (fullFood) {
+                    setDeleteTarget(fullFood);
+                    setShowDeleteModal(true);
+                  }
+                }}
+                data-testid="food-table-edit-delete"
+              >
+                Delete
+              </button>
+              <LoadingButton
+                type="button"
+                onClick={() => handleApproveFood(editingFood.id, editingFood.isApproved)}
+                isLoading={approvingId === editingFood.id}
+                loadingLabel={editingFood.isApproved ? "Unapproving..." : "Approving..."}
+                spinnerClassName="h-4 w-4"
+                className={[
+                  "rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50",
+                  editingFood.isApproved
+                    ? "border border-zinc-300 text-black hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                    : "ct-button-primary",
+                ].join(" ")}
+                data-testid="food-table-edit-approve"
+              >
+                {editingFood.isApproved ? "Unapprove" : "Approve"}
+              </LoadingButton>
+            </div>
+          ) : undefined
+        }
         error={error}
       />
 

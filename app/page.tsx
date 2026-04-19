@@ -2,6 +2,12 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "./components/DashboardClient";
 import { SettingsData, UserSettings } from "./settings/types";
+import { redirect } from "next/navigation";
+
+type DashboardUserData = SettingsData & {
+  isActive: boolean;
+  blackMarks: number;
+};
 
 export default async function Home() {
   const session = await auth();
@@ -25,8 +31,14 @@ export default async function Home() {
       calorieUnit: true,
       weightUnit: true,
       bodyWeightUnit: true,
+      isActive: true,
+      blackMarks: true,
     },
-  })) as SettingsData;
+  })) as DashboardUserData;
+
+  if (user && user.isActive === false) {
+    redirect("/login?banned=1");
+  }
 
   const userSettings: Omit<UserSettings, "volumeUnit"> = {
     calorieUnit: user?.calorieUnit ?? "kcal",
@@ -96,6 +108,7 @@ export default async function Home() {
       userSettings={userSettings}
       userGoals={userGoals}
       initialTotals={initialTotals}
+      blackMarks={user?.blackMarks ?? 0}
     />
   );
 }

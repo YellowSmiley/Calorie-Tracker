@@ -33,8 +33,8 @@ export default function ActionsSection({
             manage all foods there.
           </p>
           <p>
-            User Management is for account administration only. Sign Out safely
-            logs you out of your account.
+            Admin is for account administration only. Sign Out safely logs you
+            out of your account.
           </p>
         </HelpButton>
       </div>
@@ -63,7 +63,7 @@ export default function ActionsSection({
             pendingLabel="Loading admin panel..."
             data-testid="admin-panel-link"
           >
-            User Management
+            Admin
           </PendingLink>
         )}
         <LoadingButton

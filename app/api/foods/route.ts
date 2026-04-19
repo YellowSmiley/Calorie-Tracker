@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
   const matchingFoods = await prisma.food.findMany({
     where,
     include: {
+      reports: {
+        where: { isResolved: false },
+        select: { reportedBy: true },
+      },
       _count: {
         select: { entries: true },
       },
@@ -40,15 +44,21 @@ export async function GET(request: NextRequest) {
       usageCount: food._count.entries,
     })),
     search,
-  );
+  ).sort((a, b) => Number(b.isApproved) - Number(a.isApproved));
 
   const total = sortedFoods.length;
   const foods = sortedFoods
     .slice(skip, skip + take)
-    .map(({ _count, usageCount, ...food }) => {
+    .map(({ _count, usageCount, reports, ...food }) => {
       void _count;
       void usageCount;
-      return food;
+      return {
+        ...food,
+        hasUserReported: reports.some(
+          (report) => report.reportedBy === session.user.id,
+        ),
+        reportCount: reports.length,
+      };
     });
 
   let suggestions: string[] = [];
