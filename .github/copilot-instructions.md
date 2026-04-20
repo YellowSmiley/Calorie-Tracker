@@ -65,6 +65,12 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Keep changes minimal and aligned with existing project style.
 - Avoid touching unrelated files.
 
+## Documentation Upkeep
+
+- After implementing a feature, security hardening, or architecture change, explicitly check whether `README.md` should be updated in the same change.
+- If user-facing behavior, setup steps, API contracts, or key technical decisions changed, update `README.md` before finalizing.
+- When intentionally not updating `README.md`, briefly explain why in the final response.
+
 ## UI Color Consistency
 
 - Keep UI colors monochrome throughout the app: whites, blacks, and greys only.

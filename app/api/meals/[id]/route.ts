@@ -2,6 +2,10 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import {
+  mealEntryParamsSchema,
+  mealEntryPatchBodySchema,
+} from "@/lib/apiSchemas";
 
 const mealWriteLimiter = new RateLimiterMemory({
   points: 120,
@@ -26,7 +30,12 @@ export async function PATCH(
     );
   }
 
-  const { id } = (await params) as { id: string };
+  const paramsValidation = mealEntryParamsSchema.safeParse(await params);
+  if (!paramsValidation.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const { id } = paramsValidation.data;
   let body: unknown;
   try {
     body = await request.json();
@@ -37,13 +46,12 @@ export async function PATCH(
     );
   }
 
-  const payload =
-    body && typeof body === "object" ? (body as { serving?: unknown }) : {};
-  const serving = payload.serving;
-
-  if (typeof serving !== "number" || serving <= 0 || serving > 1000) {
+  const payloadValidation = mealEntryPatchBodySchema.safeParse(body);
+  if (!payloadValidation.success) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
+
+  const { serving } = payloadValidation.data;
 
   const existing = await prisma.mealEntry.findFirst({
     where: { id, userId: session.user.id },
@@ -101,7 +109,7 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<unknown> },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -117,7 +125,12 @@ export async function DELETE(
     );
   }
 
-  const { id } = await params;
+  const paramsValidation = mealEntryParamsSchema.safeParse(await params);
+  if (!paramsValidation.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const { id } = paramsValidation.data;
   const existing = await prisma.mealEntry.findFirst({
     where: { id, userId: session.user.id },
   });

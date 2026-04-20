@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { Prisma } from "@prisma/client";
 import { MealType as PrismaMealType } from "@prisma/client";
+import {
+  mealFavoriteParamsSchema,
+  mealFavoriteUpdateBodySchema,
+  mealTypeSchema,
+} from "@/lib/apiSchemas";
 
-const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
-const MAX_ITEMS = 100;
-
-const isValidMealType = (
-  mealType: string,
-): mealType is (typeof VALID_MEAL_TYPES)[number] =>
-  VALID_MEAL_TYPES.includes(mealType as (typeof VALID_MEAL_TYPES)[number]);
+const isValidMealType = (mealType: string): mealType is PrismaMealType =>
+  mealTypeSchema.options.includes(mealType as (typeof mealTypeSchema.options)[number]);
 
 type MealFavoriteWithItems = Prisma.MealFavoriteGetPayload<{
   include: {
@@ -92,7 +92,12 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = (await params) as { id: string };
+  const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
+  if (!paramsValidation.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const { id } = paramsValidation.data;
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
@@ -141,7 +146,12 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = (await params) as { id: string };
+  const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
+  if (!paramsValidation.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const { id } = paramsValidation.data;
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
@@ -155,57 +165,45 @@ export async function PUT(
     );
   }
 
-  const body = await request.json();
-  const { name, mealType, items } = body ?? {};
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 },
+    );
+  }
 
-  if (
-    !name ||
-    typeof name !== "string" ||
-    name.trim().length === 0 ||
-    name.trim().length > 100
-  ) {
+  const payloadValidation = mealFavoriteUpdateBodySchema.safeParse(body);
+  if (!payloadValidation.success) {
+    const firstIssue = payloadValidation.error.issues[0];
+    if (firstIssue?.path[0] === "mealType") {
+      return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+    }
+    if (firstIssue?.path[0] === "items") {
+      return NextResponse.json(
+        { error: "Favorites must include between 1 and 100 items" },
+        { status: 400 },
+      );
+    }
     return NextResponse.json(
       { error: "Favorite name is required and must be under 100 characters" },
       { status: 400 },
     );
   }
 
+  const { name, mealType, items } = payloadValidation.data;
+
   if (mealType !== undefined && !isValidMealType(String(mealType))) {
     return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
   }
 
-  if (!Array.isArray(items) || items.length === 0 || items.length > MAX_ITEMS) {
-    return NextResponse.json(
-      { error: "Favorites must include between 1 and 100 items" },
-      { status: 400 },
-    );
-  }
-
-  const normalizedItems = items.map((item: unknown, index: number) => {
-    const typed = item as { foodId?: string; serving?: number };
-    return {
-      foodId: typed.foodId,
-      serving: typed.serving,
-      sortOrder: index,
-    };
-  });
-
-  if (
-    normalizedItems.some(
-      (item) =>
-        !item.foodId ||
-        typeof item.foodId !== "string" ||
-        typeof item.serving !== "number" ||
-        !Number.isFinite(item.serving) ||
-        item.serving <= 0 ||
-        item.serving > 1000,
-    )
-  ) {
-    return NextResponse.json(
-      { error: "Invalid favorite items payload" },
-      { status: 400 },
-    );
-  }
+  const normalizedItems = items.map((item, index) => ({
+    foodId: item.foodId,
+    serving: item.serving,
+    sortOrder: index,
+  }));
 
   const existing = await mealFavorite.findFirst({
     where: { id, userId: session.user.id },
@@ -317,7 +315,12 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = (await params) as { id: string };
+  const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
+  if (!paramsValidation.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const { id } = paramsValidation.data;
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;

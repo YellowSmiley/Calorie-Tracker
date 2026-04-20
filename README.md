@@ -33,6 +33,31 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 - 🎨 **Modern UI** - Tailwind CSS with dark mode support
 - 🧪 **Testing** - Unit tests with Jest and end-to-end tests with Playwright
 
+## Recent Security and Architecture Improvements
+
+The project has recently been hardened and refactored to improve security posture and maintainability.
+
+### Security hardening
+
+- Added API abuse protections on key write endpoints with per-user rate limiting for meal create/update/delete and food reporting routes.
+- Added stricter JSON payload handling for mutation routes to return clean `400` responses on malformed bodies instead of bubbling parsing exceptions.
+- Added global baseline response headers through the proxy layer: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` with restricted camera/microphone/geolocation.
+- Added no-cache controls for sensitive account data export responses.
+
+### Architecture improvements
+
+- Introduced a shared schema validation layer in `lib/apiSchemas.ts` using Zod.
+- Refactored high-churn routes to consume centralized schemas for params, query, and body validation, reducing duplicated manual guards and improving type inference.
+- Added focused schema unit tests in `lib/apiSchemas.test.ts` to validate contracts for meals, body weight, reporting, settings, and meal favorites.
+
+### Why this matters
+
+- Less duplicated route validation logic and more consistent error behavior.
+- Stronger default defenses against malformed requests and write-flood abuse.
+- Faster iteration on API changes thanks to reusable schemas and contract tests.
+
+See also: the codebase instructions in `.github/copilot-instructions.md` for testing and implementation expectations.
+
 ## Tech Stack
 
 - **Framework:** Next.js 16.1.6 (App Router)

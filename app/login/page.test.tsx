@@ -20,6 +20,25 @@ jest.mock("next/link", () => {
   };
 });
 
+// Keep LoginPage tests unit-scoped by avoiding router/loading hook behavior.
+jest.mock("@/app/components/PendingLink", () => {
+  return function MockPendingLink({
+    children,
+    href,
+    className,
+  }: {
+    children: React.ReactNode;
+    href: string;
+    className?: string;
+  }) {
+    return (
+      <a href={href} className={className}>
+        {children}
+      </a>
+    );
+  };
+});
+
 // Mock fetch for check-verified endpoint
 const mockFetch = jest.fn();
 global.fetch = mockFetch;

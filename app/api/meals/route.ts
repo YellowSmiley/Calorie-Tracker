@@ -3,25 +3,20 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import {
+  mealsGetQuerySchema,
+  mealsPostBodySchema,
+  mealTypeSchema,
+} from "@/lib/apiSchemas";
 
-const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
-const MAX_SERVING = 1000;
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-type ValidMealType = (typeof VALID_MEAL_TYPES)[number];
+const MEAL_TYPES = mealTypeSchema.options;
 
 const mealWriteLimiter = new RateLimiterMemory({
   points: 120,
   duration: 60,
 });
 
-const isValidMealType = (value: unknown): value is ValidMealType =>
-  typeof value === "string" &&
-  (VALID_MEAL_TYPES as readonly string[]).includes(value);
-
 const getDateRange = (dateString?: string | null) => {
-  if (dateString && !DATE_REGEX.test(dateString)) {
-    throw new Error("Invalid date format");
-  }
   const baseDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
   if (isNaN(baseDate.getTime())) {
     throw new Error("Invalid date");
@@ -40,7 +35,15 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const date = searchParams.get("date");
+  const queryValidation = mealsGetQuerySchema.safeParse({
+    date: searchParams.get("date") ?? undefined,
+  });
+
+  if (!queryValidation.success) {
+    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+  }
+
+  const { date } = queryValidation.data;
   let start: Date, end: Date;
   try {
     ({ start, end } = getDateRange(date));
@@ -89,7 +92,7 @@ export async function GET(request: Request) {
     };
   }>;
 
-  const meals = VALID_MEAL_TYPES.map((type) => ({
+  const meals = MEAL_TYPES.map((type) => ({
     name: type[0] + type.slice(1).toLowerCase(),
     items: entries
       .filter((entry) => entry.mealType === type)
@@ -148,32 +151,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const payload =
-    body && typeof body === "object"
-      ? (body as {
-          mealType?: unknown;
-          foodId?: unknown;
-          serving?: unknown;
-          date?: unknown;
-        })
-      : {};
-
-  const mealType = payload.mealType;
-  const foodId = payload.foodId;
-  const serving = payload.serving;
-  const date = payload.date;
-
-  if (!mealType || !foodId) {
+  const payloadValidation = mealsPostBodySchema.safeParse(body);
+  if (!payloadValidation.success) {
+    const firstIssue = payloadValidation.error.issues[0];
+    if (firstIssue?.path[0] === "mealType") {
+      return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+    }
+    if (firstIssue?.path[0] === "date") {
+      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  if (!isValidMealType(mealType)) {
-    return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
-  }
-
-  if (typeof foodId !== "string") {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
+  const { mealType, foodId, serving, date } = payloadValidation.data;
 
   const food = await prisma.food.findUnique({
     where: { id: foodId },
@@ -183,16 +173,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Food not found" }, { status: 404 });
   }
 
-  const servingValue =
-    typeof serving === "number" && serving > 0 && serving <= MAX_SERVING
-      ? serving
-      : 1;
+  const servingValue = serving ?? 1;
 
   let mealDate: Date;
   try {
     if (date) {
-      if (typeof date !== "string") throw new Error("Invalid date format");
-      if (!DATE_REGEX.test(date)) throw new Error("Invalid date format");
       mealDate = new Date(`${date}T00:00:00`);
       if (isNaN(mealDate.getTime())) throw new Error("Invalid date");
     } else {

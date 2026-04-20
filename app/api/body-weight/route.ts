@@ -2,16 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/logger";
-
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const MAX_BODY_WEIGHT_KG = 1000;
+import {
+  bodyWeightDateQuerySchema,
+  bodyWeightPutBodySchema,
+} from "@/lib/apiSchemas";
 
 const getEntryDate = (dateString?: string | null) => {
   const safeDate = dateString || new Date().toISOString().split("T")[0];
-
-  if (!DATE_REGEX.test(safeDate)) {
-    throw new Error("Invalid date format");
-  }
 
   const date = new Date(`${safeDate}T00:00:00`);
   if (isNaN(date.getTime())) {
@@ -31,7 +28,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const date = getEntryDate(searchParams.get("date"));
+    const queryValidation = bodyWeightDateQuerySchema.safeParse({
+      date: searchParams.get("date") ?? undefined,
+    });
+
+    if (!queryValidation.success) {
+      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
+
+    const date = getEntryDate(queryValidation.data.date);
 
     const entry = await prisma.weightEntry.findUnique({
       where: {
@@ -65,13 +70,30 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = (await request.json()) as {
-      date?: string;
-      weight?: number | null;
-    };
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 },
+      );
+    }
 
-    const date = getEntryDate(body.date);
-    const weight = body.weight;
+    const payloadValidation = bodyWeightPutBodySchema.safeParse(body);
+    if (!payloadValidation.success) {
+      const firstIssue = payloadValidation.error.issues[0];
+      if (firstIssue?.path[0] === "date") {
+        return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+      }
+      return NextResponse.json(
+        { error: "Body weight must be between 0 and 1000 kg" },
+        { status: 400 },
+      );
+    }
+
+    const { date: rawDate, weight } = payloadValidation.data;
+    const date = getEntryDate(rawDate);
 
     if (weight === null || weight === undefined) {
       await prisma.weightEntry.deleteMany({
@@ -82,18 +104,6 @@ export async function PUT(request: NextRequest) {
       });
 
       return NextResponse.json({ weight: null });
-    }
-
-    if (
-      typeof weight !== "number" ||
-      Number.isNaN(weight) ||
-      weight <= 0 ||
-      weight > MAX_BODY_WEIGHT_KG
-    ) {
-      return NextResponse.json(
-        { error: "Body weight must be between 0 and 1000 kg" },
-        { status: 400 },
-      );
     }
 
     const entry = await prisma.weightEntry.upsert({

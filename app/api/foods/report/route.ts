@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { containsBlockedLanguage } from "@/lib/foodModeration";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { foodReportBodySchema } from "@/lib/apiSchemas";
 
 const reportLimiter = new RateLimiterMemory({
   points: 10,
@@ -25,9 +26,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { foodId?: string; reason?: string };
+  let body: unknown;
   try {
-    body = (await request.json()) as { foodId?: string; reason?: string };
+    body = await request.json();
   } catch {
     return NextResponse.json(
       { error: "Invalid JSON payload." },
@@ -35,24 +36,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const foodId = (body.foodId || "").trim();
-  const reason = (body.reason || "").trim();
-
-  if (!foodId) {
+  const payloadValidation = foodReportBodySchema.safeParse(body);
+  if (!payloadValidation.success) {
     return NextResponse.json(
       { error: "Food id is required." },
       { status: 400 },
     );
   }
 
-  if (reason.length > 250) {
-    return NextResponse.json(
-      { error: "Report reason must be 250 characters or fewer." },
-      { status: 400 },
-    );
-  }
+  const { foodId, reason } = payloadValidation.data;
+  const normalizedReason = reason ?? "";
 
-  if (reason && containsBlockedLanguage(reason)) {
+  if (normalizedReason && containsBlockedLanguage(normalizedReason)) {
     return NextResponse.json(
       { error: "Report reason contains blocked language." },
       { status: 400 },
@@ -92,7 +87,7 @@ export async function POST(request: NextRequest) {
     data: {
       foodId,
       reportedBy: session.user.id,
-      reason: reason || null,
+      reason: normalizedReason || null,
     },
   });
 
