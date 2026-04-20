@@ -3,6 +3,14 @@ import type { NextRequest } from "next/server";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+function withSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  return response;
+}
+
 function checkCsrf(request: NextRequest): NextResponse | null {
   if (!MUTATING_METHODS.has(request.method)) {
     return null;
@@ -56,18 +64,18 @@ export function proxy(request: NextRequest) {
     isStaticAsset ||
     isPwaAsset
   ) {
-    return NextResponse.next();
+    return withSecurityHeaders(NextResponse.next());
   }
 
   // CSRF check on all API mutations (including /api/auth for NextAuth form POSTs)
   if (pathname.startsWith("/api/")) {
     const csrfError = checkCsrf(request);
-    if (csrfError) return csrfError;
+    if (csrfError) return withSecurityHeaders(csrfError);
   }
 
   // Allow auth API routes through (after CSRF check)
   if (pathname.startsWith("/api/auth")) {
-    return NextResponse.next();
+    return withSecurityHeaders(NextResponse.next());
   }
 
   // Fast-path cookie check for page redirects only.
@@ -90,14 +98,16 @@ export function proxy(request: NextRequest) {
   const isPublicPage = isAuthPage || isPrivacyPage || isTermsPage;
 
   if (!sessionToken && !isPublicPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return withSecurityHeaders(
+      NextResponse.redirect(new URL("/login", request.url)),
+    );
   }
 
   if (sessionToken && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return withSecurityHeaders(NextResponse.redirect(new URL("/", request.url)));
   }
 
-  return NextResponse.next();
+  return withSecurityHeaders(NextResponse.next());
 }
 
 export const config = {

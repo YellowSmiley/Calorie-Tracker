@@ -1,6 +1,12 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { RateLimiterMemory } from "rate-limiter-flexible";
+
+const mealWriteLimiter = new RateLimiterMemory({
+  points: 120,
+  duration: 60,
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -11,18 +17,28 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  try {
+    await mealWriteLimiter.consume(session.user.id);
+  } catch {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 },
+    );
+  }
+
   const { id } = (await params) as { id: string };
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 },
+    );
   }
 
   const payload =
-    body && typeof body === "object"
-      ? (body as { serving?: unknown })
-      : {};
+    body && typeof body === "object" ? (body as { serving?: unknown }) : {};
   const serving = payload.serving;
 
   if (typeof serving !== "number" || serving <= 0 || serving > 1000) {
@@ -90,6 +106,15 @@ export async function DELETE(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await mealWriteLimiter.consume(session.user.id);
+  } catch {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 },
+    );
   }
 
   const { id } = await params;

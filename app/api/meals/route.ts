@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
 const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
 const MAX_SERVING = 1000;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 type ValidMealType = (typeof VALID_MEAL_TYPES)[number];
+
+const mealWriteLimiter = new RateLimiterMemory({
+  points: 120,
+  duration: 60,
+});
 
 const isValidMealType = (value: unknown): value is ValidMealType =>
   typeof value === "string" &&
@@ -123,11 +129,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  try {
+    await mealWriteLimiter.consume(session.user.id);
+  } catch {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 },
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 },
+    );
   }
 
   const payload =

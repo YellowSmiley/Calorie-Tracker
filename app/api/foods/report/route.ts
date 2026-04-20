@@ -29,7 +29,10 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as { foodId?: string; reason?: string };
   } catch {
-    return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON payload." },
+      { status: 400 },
+    );
   }
 
   const foodId = (body.foodId || "").trim();

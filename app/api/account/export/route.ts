@@ -144,6 +144,8 @@ export async function GET() {
       headers: {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="calorie-tracker-data-export-${new Date().toISOString().slice(0, 10)}.json"`,
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        Pragma: "no-cache",
       },
     });
   } catch (error) {
