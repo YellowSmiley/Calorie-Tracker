@@ -10,7 +10,9 @@ import {
 } from "@/lib/apiSchemas";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
-  mealTypeSchema.options.includes(mealType as (typeof mealTypeSchema.options)[number]);
+  mealTypeSchema.options.includes(
+    mealType as (typeof mealTypeSchema.options)[number],
+  );
 
 type MealFavoriteDelegate = {
   findMany: (args: Prisma.MealFavoriteFindManyArgs) => Promise<

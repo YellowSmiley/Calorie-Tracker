@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-export const mealTypeSchema = z.enum([
-  "BREAKFAST",
-  "LUNCH",
-  "DINNER",
-  "SNACK",
-]);
+export const mealTypeSchema = z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"]);
 
 const isoDateSchema = z
   .string()

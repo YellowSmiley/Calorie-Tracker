@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (!queryValidation.success) {
-      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid date format" },
+        { status: 400 },
+      );
     }
 
     const date = getEntryDate(queryValidation.data.date);
@@ -84,7 +87,10 @@ export async function PUT(request: NextRequest) {
     if (!payloadValidation.success) {
       const firstIssue = payloadValidation.error.issues[0];
       if (firstIssue?.path[0] === "date") {
-        return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid date format" },
+          { status: 400 },
+        );
       }
       return NextResponse.json(
         { error: "Body weight must be between 0 and 1000 kg" },

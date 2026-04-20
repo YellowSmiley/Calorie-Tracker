@@ -158,7 +158,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
     }
     if (firstIssue?.path[0] === "date") {
-      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid date format" },
+        { status: 400 },
+      );
     }
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }

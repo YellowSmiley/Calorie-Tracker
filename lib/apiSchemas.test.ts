@@ -121,7 +121,9 @@ describe("apiSchemas", () => {
   });
 
   test("rejects meal favorites query with invalid meal type", () => {
-    const result = mealFavoritesGetQuerySchema.safeParse({ mealType: "BRUNCH" });
+    const result = mealFavoritesGetQuerySchema.safeParse({
+      mealType: "BRUNCH",
+    });
     expect(result.success).toBe(false);
   });
 
