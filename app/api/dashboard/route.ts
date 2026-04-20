@@ -1,11 +1,10 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiInternalError,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import { dashboardGetQuerySchema } from "@/lib/apiSchemas";
 
@@ -134,11 +133,11 @@ const getTrendBounds = async (
 };
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const { searchParams } = new URL(request.url);
@@ -162,7 +161,7 @@ export async function GET(request: NextRequest) {
 
     const entries = await prisma.mealEntry.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         date: {
           gte: start,
           lte: end,
@@ -194,7 +193,7 @@ export async function GET(request: NextRequest) {
     }, createEmptyTotals());
 
     const { start: trendStart, end: trendEnd } = await getTrendBounds(
-      session.user.id,
+      user.id,
       chartRange,
       baseDate,
     );
@@ -202,7 +201,7 @@ export async function GET(request: NextRequest) {
     const [trendEntries, weightEntries] = await Promise.all([
       prisma.mealEntry.findMany({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           date: {
             gte: trendStart,
             lte: trendEnd,
@@ -218,7 +217,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.weightEntry.findMany({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           date: {
             gte: trendStart,
             lte: trendEnd,

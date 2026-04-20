@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
+import { requireUser } from "@/lib/apiGuards";
 import {
   containsBlockedLanguage,
   validateFoodNumbersForModeration,
@@ -13,7 +13,6 @@ import {
   apiInternalError,
   apiNotFound,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import {
   adminFoodUpsertBodySchema,
@@ -24,11 +23,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -72,7 +71,7 @@ export async function PUT(
     if (!existingFood) {
       return apiNotFound("Food not found", "FOOD_NOT_FOUND");
     }
-    if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
+    if (!user.isAdmin && existingFood.createdBy !== user.id) {
       return apiForbidden();
     }
 
@@ -177,11 +176,11 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -198,7 +197,7 @@ export async function DELETE(
     if (!existingFood) {
       return apiNotFound("Food not found", "FOOD_NOT_FOUND");
     }
-    if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
+    if (!user.isAdmin && existingFood.createdBy !== user.id) {
       return apiForbidden();
     }
     // Delete food (cascade will handle meal entries)

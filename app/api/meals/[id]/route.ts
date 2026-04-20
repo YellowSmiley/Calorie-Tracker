@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { requireUser } from "@/lib/apiGuards";
 import {
   mealEntryParamsSchema,
   mealEntryPatchBodySchema,
@@ -11,7 +11,6 @@ import {
   apiNotFound,
   apiSuccess,
   apiTooManyRequests,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const mealWriteLimiter = new RateLimiterMemory({
@@ -23,13 +22,14 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
-    await mealWriteLimiter.consume(session.user.id);
+    await mealWriteLimiter.consume(user.id);
   } catch {
     return apiTooManyRequests();
   }
@@ -55,7 +55,7 @@ export async function PATCH(
   const { serving } = payloadValidation.data;
 
   const existing = await prisma.mealEntry.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
     include: { food: true },
   });
 
@@ -112,13 +112,14 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
-    await mealWriteLimiter.consume(session.user.id);
+    await mealWriteLimiter.consume(user.id);
   } catch {
     return apiTooManyRequests();
   }
@@ -130,7 +131,7 @@ export async function DELETE(
 
   const { id } = paramsValidation.data;
   const existing = await prisma.mealEntry.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
   });
 
   if (!existing) {

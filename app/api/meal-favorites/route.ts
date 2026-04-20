@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { MealType as PrismaMealType } from "@prisma/client";
+import { requireUser } from "@/lib/apiGuards";
 import {
   mealFavoriteCreateBodySchema,
   mealFavoritesGetQuerySchema,
@@ -14,7 +14,6 @@ import {
   apiInternalError,
   apiServiceUnavailable,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
@@ -55,10 +54,11 @@ type MealFavoriteDelegate = {
 };
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const { searchParams } = new URL(request.url);
   const mealFavorite = (
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
   const skip = rawSkip ?? 0;
 
   const where: Prisma.MealFavoriteWhereInput = {
-    userId: session.user.id,
+    userId: user.id,
     ...(mealType ? { mealType: mealType as PrismaMealType } : {}),
     ...(search
       ? {
@@ -161,10 +161,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   let body: unknown;
   try {
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
   try {
     const favorite = await mealFavorite.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         name: name.trim(),
         mealType: normalizedMealType,
         items: {

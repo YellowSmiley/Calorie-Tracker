@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { apiBadRequest, apiSuccess, apiUnauthorized } from "@/lib/apiResponse";
+import { requireUser } from "@/lib/apiGuards";
+import { apiBadRequest, apiSuccess } from "@/lib/apiResponse";
 import { mealFavoriteClearMealBodySchema } from "@/lib/apiSchemas";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -24,10 +24,11 @@ const getDateRange = (dateString: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const body = await request.json();
   const parsedBody = mealFavoriteClearMealBodySchema.safeParse(body);
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
   await prisma.mealEntry.deleteMany({
     where: {
-      userId: session.user.id,
+      userId: user.id,
       mealType,
       date: {
         gte: start,

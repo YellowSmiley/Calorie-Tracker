@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { Prisma } from "@prisma/client";
 import { MealType as PrismaMealType } from "@prisma/client";
+import { requireUser } from "@/lib/apiGuards";
 import {
   mealFavoriteParamsSchema,
   mealFavoriteUpdateBodySchema,
@@ -16,7 +16,6 @@ import {
   apiNotFound,
   apiServiceUnavailable,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
@@ -98,10 +97,11 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
@@ -122,7 +122,7 @@ export async function GET(
   const favorite = await mealFavorite.findFirst({
     where: {
       id,
-      userId: session.user.id,
+      userId: user.id,
     },
     include: {
       items: {
@@ -149,10 +149,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
@@ -208,7 +209,7 @@ export async function PUT(
   }));
 
   const existing = await mealFavorite.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId: user.id },
   });
 
   if (!existing) {
@@ -305,10 +306,11 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
@@ -329,7 +331,7 @@ export async function DELETE(
   const existing = await mealFavorite.findFirst({
     where: {
       id,
-      userId: session.user.id,
+      userId: user.id,
     },
   });
 

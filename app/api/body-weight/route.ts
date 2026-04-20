@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/apiGuards";
 import {
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
@@ -9,7 +9,6 @@ import {
   apiBadRequest,
   apiInternalError,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const getEntryDate = (dateString?: string | null) => {
@@ -26,11 +25,11 @@ const getEntryDate = (dateString?: string | null) => {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user } = guard;
 
     const { searchParams } = new URL(request.url);
     const queryValidation = bodyWeightDateQuerySchema.safeParse({
@@ -46,7 +45,7 @@ export async function GET(request: NextRequest) {
     const entry = await prisma.weightEntry.findUnique({
       where: {
         userId_date: {
-          userId: session.user.id,
+          userId: user.id,
           date,
         },
       },
@@ -69,11 +68,11 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user } = guard;
 
     let body: unknown;
     try {
@@ -100,7 +99,7 @@ export async function PUT(request: NextRequest) {
     if (weight === null || weight === undefined) {
       await prisma.weightEntry.deleteMany({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           date,
         },
       });
@@ -111,12 +110,12 @@ export async function PUT(request: NextRequest) {
     const entry = await prisma.weightEntry.upsert({
       where: {
         userId_date: {
-          userId: session.user.id,
+          userId: user.id,
           date,
         },
       },
       create: {
-        userId: session.user.id,
+        userId: user.id,
         date,
         weight,
       },

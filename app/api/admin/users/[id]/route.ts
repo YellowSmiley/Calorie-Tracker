@@ -1,12 +1,11 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { requireAdmin } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiInternalError,
   apiNotFound,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import {
   adminUserPatchBodySchema,
@@ -34,11 +33,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id || !session.user.isAdmin) {
-    return apiUnauthorized();
+  const guard = await requireAdmin();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -66,7 +65,7 @@ export async function PATCH(
 
       if (
         (body.action === "deactivate" || body.action === "addMark") &&
-        userId === session.user.id
+        userId === user.id
       ) {
         return apiBadRequest(
           "You cannot punish or deactivate your own account.",
@@ -246,11 +245,11 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id || !session.user.isAdmin) {
-    return apiUnauthorized();
+  const guard = await requireAdmin();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -261,7 +260,7 @@ export async function DELETE(
     const { id: userId } = parsedParams.data;
 
     // Prevent admin from deleting themselves
-    if (userId === session.user.id) {
+    if (userId === user.id) {
       return apiBadRequest(
         "Cannot delete your own account",
         "SELF_DELETE_BLOCKED",

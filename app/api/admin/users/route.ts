@@ -1,20 +1,18 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiInternalError,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import { findCloseFoodSuggestions } from "../../../../lib/foodSearchSuggestions";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id || !session.user.isAdmin) {
-    return apiUnauthorized();
+  const guard = await requireAdmin();
+  if ("response" in guard) {
+    return guard.response;
   }
 
   try {

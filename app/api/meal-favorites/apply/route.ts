@@ -1,14 +1,13 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { Prisma } from "@prisma/client";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiNotFound,
   apiServiceUnavailable,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import { mealFavoriteApplyBodySchema } from "@/lib/apiSchemas";
 
@@ -47,10 +46,11 @@ const getDateRange = (dateString: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const body = await request.json();
   const parsedBody = mealFavoriteApplyBodySchema.safeParse(body);
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
   const favorite = await mealFavorite.findFirst({
     where: {
       id: favoriteId,
-      userId: session.user.id,
+      userId: user.id,
     },
     include: {
       items: {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
   await prisma.$transaction(async (tx) => {
     await tx.mealEntry.deleteMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         mealType,
         date: {
           gte: start,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     await tx.mealEntry.createMany({
       data: favorite.items.map(
         (item: MealFavoriteWithItems["items"][number]) => ({
-          userId: session.user.id,
+          userId: user.id,
           foodId: item.foodId,
           mealType,
           date: start,
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
   const updatedEntries = await prisma.mealEntry.findMany({
     where: {
-      userId: session.user.id,
+      userId: user.id,
       mealType,
       date: {
         gte: start,

@@ -1,13 +1,12 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Food } from "@prisma/client";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiConflict,
   apiInternalError,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import {
   adminFoodUpsertBodySchema,
@@ -31,11 +30,11 @@ export type FoodWithCreator = Food & {
 };
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const { searchParams } = new URL(request.url);
@@ -59,7 +58,7 @@ export async function GET(request: NextRequest) {
             OR: [{ name: { contains: search, mode: "insensitive" as const } }],
           }
         : {}),
-      ...(!session.user.isAdmin ? { createdBy: session.user.id } : {}),
+      ...(!user.isAdmin ? { createdBy: user.id } : {}),
     };
 
     const matchingFoods = await prisma.food.findMany({
@@ -93,7 +92,7 @@ export async function GET(request: NextRequest) {
         ...food,
         createdByName: creator?.name || "Unknown",
         hasUserReported: reports.some(
-          (report) => report.reportedBy === session.user.id,
+          (report) => report.reportedBy === user.id,
         ),
         reportCount: reports.length,
       }));
@@ -102,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     if (search && total === 0) {
       const suggestionWhere = {
-        ...(!session.user.isAdmin ? { createdBy: session.user.id } : {}),
+        ...(!user.isAdmin ? { createdBy: user.id } : {}),
       };
 
       const suggestionCandidates = await prisma.food.findMany({
@@ -131,11 +130,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
     const parsedBody = adminFoodUpsertBodySchema.safeParse(
@@ -231,7 +230,7 @@ export async function POST(request: NextRequest) {
         sugars: typeof sugars === "number" ? sugars : 0,
         fibre: typeof fibre === "number" ? fibre : 0,
         salt: typeof salt === "number" ? salt : 0,
-        createdBy: session.user.id,
+        createdBy: user.id,
         defaultServingAmount:
           typeof defaultServingAmount === "number" && defaultServingAmount > 0
             ? defaultServingAmount

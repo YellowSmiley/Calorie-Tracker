@@ -1,18 +1,18 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { apiNotFound, apiSuccess, apiUnauthorized } from "@/lib/apiResponse";
+import { requireAdmin } from "@/lib/apiGuards";
+import { apiNotFound, apiSuccess } from "@/lib/apiResponse";
 import { resourceIdParamsSchema } from "@/lib/apiSchemas";
 
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id || !session.user.isAdmin) {
-    return apiUnauthorized();
+  const guard = await requireAdmin();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const parsedParams = resourceIdParamsSchema.safeParse(await params);
   if (!parsedParams.success) {
@@ -34,7 +34,7 @@ export async function POST(
     },
     data: {
       isResolved: true,
-      resolvedBy: session.user.id,
+      resolvedBy: user.id,
       resolvedAt,
     },
   });

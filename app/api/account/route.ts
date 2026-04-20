@@ -1,30 +1,29 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiInternalError,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 // DELETE /api/account - Delete user account and all associated data
 export async function DELETE() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user: authUser } = guard;
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Check if this user is the last admin
-    const user = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { id: userId },
       select: { isAdmin: true },
     });
 
-    if (user?.isAdmin) {
+    if (existingUser?.isAdmin) {
       const adminCount = await prisma.user.count({
         where: { isAdmin: true },
       });

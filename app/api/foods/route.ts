@@ -1,18 +1,19 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { apiBadRequest, apiSuccess, apiUnauthorized } from "@/lib/apiResponse";
+import { apiBadRequest, apiSuccess } from "@/lib/apiResponse";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
+import { requireUser } from "@/lib/apiGuards";
 import {
   findCloseFoodSuggestions,
   sortByRelevanceAndUsage,
 } from "../../../lib/foodSearchSuggestions";
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const { searchParams } = new URL(request.url);
   const parsedQuery = searchPaginationQuerySchema.safeParse(
@@ -67,10 +68,10 @@ export async function GET(request: NextRequest) {
       return {
         ...food,
         hasUserReported: reports.some(
-          (report) => report.reportedBy === session.user.id,
+          (report) => report.reportedBy === user.id,
         ),
         reportCount: reports.length,
-        canUserReport: food.createdBy !== session.user.id,
+        canUserReport: food.createdBy !== user.id,
       };
     });
 

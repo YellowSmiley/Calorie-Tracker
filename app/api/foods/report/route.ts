@@ -1,15 +1,14 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { containsBlockedLanguage } from "@/lib/foodModeration";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { requireUser } from "@/lib/apiGuards";
 import { foodReportBodySchema } from "@/lib/apiSchemas";
 import {
   apiBadRequest,
   apiNotFound,
   apiSuccess,
   apiTooManyRequests,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const reportLimiter = new RateLimiterMemory({
@@ -18,14 +17,14 @@ const reportLimiter = new RateLimiterMemory({
 });
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
-    await reportLimiter.consume(session.user.id);
+    await reportLimiter.consume(user.id);
   } catch {
     return apiTooManyRequests(
       "Too many report attempts. Please try again shortly.",
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
     return apiNotFound("Food not found.", "FOOD_NOT_FOUND");
   }
 
-  if (food.createdBy === session.user.id) {
+  if (food.createdBy === user.id) {
     return apiBadRequest(
       "You cannot report your own food item.",
       "CANNOT_REPORT_OWN_FOOD",
@@ -73,7 +72,7 @@ export async function POST(request: NextRequest) {
   const existing = await prisma.foodReport.findFirst({
     where: {
       foodId,
-      reportedBy: session.user.id,
+      reportedBy: user.id,
       isResolved: false,
     },
     select: { id: true },
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
   await prisma.foodReport.create({
     data: {
       foodId,
-      reportedBy: session.user.id,
+      reportedBy: user.id,
       reason: normalizedReason || null,
     },
   });

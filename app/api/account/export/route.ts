@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiInternalError,
   apiNotFound,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 // GET /api/account/export - Export all user data (GDPR Subject Access Request)
 export async function GET() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user: authUser } = guard;
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
-    const user = await prisma.user.findUnique({
+    const profile = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -42,7 +41,7 @@ export async function GET() {
       },
     });
 
-    if (!user) {
+    if (!profile) {
       return apiNotFound("User not found", "USER_NOT_FOUND");
     }
 
@@ -117,7 +116,7 @@ export async function GET() {
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      profile: user,
+      profile,
       connectedAccounts: accounts.map((a) => ({
         provider: a.provider,
         type: a.type,

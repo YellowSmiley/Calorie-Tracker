@@ -1,7 +1,7 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { requireUser } from "@/lib/apiGuards";
 import {
   mealsGetQuerySchema,
   mealsPostBodySchema,
@@ -12,7 +12,6 @@ import {
   apiNotFound,
   apiSuccess,
   apiTooManyRequests,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 const MEAL_TYPES = mealTypeSchema.options;
@@ -35,10 +34,11 @@ const getDateRange = (dateString?: string | null) => {
 };
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const { searchParams } = new URL(request.url);
   const queryValidation = mealsGetQuerySchema.safeParse({
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
   const entries = (await prisma.mealEntry.findMany({
     where: {
-      userId: session.user.id,
+      userId: user.id,
       date: {
         gte: start,
         lte: end,
@@ -133,13 +133,14 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   try {
-    await mealWriteLimiter.consume(session.user.id);
+    await mealWriteLimiter.consume(user.id);
   } catch {
     return apiTooManyRequests();
   }
@@ -189,7 +190,7 @@ export async function POST(request: Request) {
 
   const entry = await prisma.mealEntry.create({
     data: {
-      userId: session.user.id,
+      userId: user.id,
       foodId: food.id,
       mealType,
       date: mealDate,

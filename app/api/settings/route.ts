@@ -1,26 +1,25 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { settingsPutBodySchema } from "@/lib/apiSchemas";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiInternalError,
   apiNotFound,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 
 // GET /api/settings - Get user settings
 export async function GET() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user } = guard;
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    const settingsUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         calorieGoal: true,
         proteinGoal: true,
@@ -37,11 +36,11 @@ export async function GET() {
       },
     });
 
-    if (!user) {
+    if (!settingsUser) {
       return apiNotFound("User not found", "USER_NOT_FOUND");
     }
 
-    return apiSuccess(user);
+    return apiSuccess(settingsUser);
   } catch (error) {
     return apiInternalError("settings/GET", error, "Failed to fetch settings");
   }
@@ -50,11 +49,11 @@ export async function GET() {
 // PUT /api/settings - Update user settings
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return apiUnauthorized();
+    const guard = await requireUser();
+    if ("response" in guard) {
+      return guard.response;
     }
+    const { user } = guard;
 
     let body: unknown;
     try {
@@ -87,7 +86,7 @@ export async function PUT(request: NextRequest) {
     } = payloadValidation.data;
 
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         calorieGoal,
         proteinGoal,

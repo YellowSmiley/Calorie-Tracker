@@ -1,14 +1,13 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
   apiConflict,
   apiInternalError,
   apiServiceUnavailable,
   apiSuccess,
-  apiUnauthorized,
 } from "@/lib/apiResponse";
 import { mealFavoriteSaveCurrentBodySchema } from "@/lib/apiSchemas";
 
@@ -40,10 +39,11 @@ const getDateRange = (dateString: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return apiUnauthorized();
+  const guard = await requireUser();
+  if ("response" in guard) {
+    return guard.response;
   }
+  const { user } = guard;
 
   const body = await request.json();
   const parsedBody = mealFavoriteSaveCurrentBodySchema.safeParse(body);
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
   const entries = await prisma.mealEntry.findMany({
     where: {
-      userId: session.user.id,
+      userId: user.id,
       mealType,
       date: {
         gte: start,
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
   try {
     const favorite = await mealFavorite.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         name: name.trim(),
         mealType,
         items: {
