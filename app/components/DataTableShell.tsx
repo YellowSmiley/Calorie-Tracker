@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, RefObject, UIEventHandler } from "react";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface DataTableShellProps {
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -41,7 +42,7 @@ export default function DataTableShell({
             role="status"
             aria-label={loadingLabel}
           >
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700 dark:border-zinc-700 dark:border-t-zinc-200" />
+            <LoadingSpinner className="h-5 w-5 text-zinc-700 dark:text-zinc-200" />
             <span className="sr-only">{loadingLabel}</span>
           </div>
         )}

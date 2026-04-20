@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import PendingLink from "@/app/components/PendingLink";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -103,7 +104,7 @@ export default function LoginPage() {
             >
               {isGoogleLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner className="h-5 w-5 text-background" />
                   Signing in...
                 </>
               ) : (

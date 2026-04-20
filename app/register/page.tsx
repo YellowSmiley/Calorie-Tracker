@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import ValidatedTextField from "../components/ValidatedTextField";
 import PendingLink from "@/app/components/PendingLink";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 type RegisterFieldErrors = {
   email?: string;
@@ -172,7 +173,7 @@ export default function RegisterPage() {
                 >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                      <LoadingSpinner className="h-5 w-5 text-background" />
                       Please wait...
                     </>
                   ) : (

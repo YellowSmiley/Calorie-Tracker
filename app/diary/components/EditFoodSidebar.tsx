@@ -648,10 +648,10 @@ export default function EditFoodSidebar({
                     {!canReport
                       ? "Own Food"
                       : hasUserReported
-                      ? "Reported"
-                      : isReporting
-                        ? "Reporting..."
-                        : "Report Food"}
+                        ? "Reported"
+                        : isReporting
+                          ? "Reporting..."
+                          : "Report Food"}
                   </button>
                 </div>
                 <label

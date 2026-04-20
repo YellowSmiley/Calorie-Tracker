@@ -213,7 +213,9 @@ export default function FoodModeration() {
       );
 
       if (!response.ok) {
-        setError(await getApiErrorMessage(response, "Failed to resolve reports"));
+        setError(
+          await getApiErrorMessage(response, "Failed to resolve reports"),
+        );
         return;
       }
 

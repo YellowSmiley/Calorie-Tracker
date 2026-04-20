@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import PendingLink from "@/app/components/PendingLink";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -44,7 +45,7 @@ function VerifyContent() {
         <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 text-center">
           {status === "loading" && (
             <>
-              <div className="w-8 h-8 border-2 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-white rounded-full animate-spin mx-auto mb-4" />
+              <LoadingSpinner className="mx-auto mb-4 h-8 w-8 text-black dark:text-white" />
               <p className="text-black dark:text-zinc-50 font-medium">
                 Verifying your email...
               </p>
@@ -123,7 +124,7 @@ export default function VerifyPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-          <div className="w-8 h-8 border-2 border-zinc-300 border-t-black dark:border-zinc-700 dark:border-t-white rounded-full animate-spin" />
+          <LoadingSpinner className="h-8 w-8 text-black dark:text-white" />
         </div>
       }
     >

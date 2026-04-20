@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import LoadingSpinner from "./LoadingSpinner";
 import {
   getRouteLoadingServerSnapshot,
   getRouteLoadingSnapshot,
@@ -36,7 +37,7 @@ export default function RouteLoadingIndicator() {
         <div className="ct-route-loading-bar h-full w-1/3 animate-[route-loading_1.2s_ease-in-out_infinite]" />
       </div>
       <div className="ct-route-loading-pill mx-auto mt-3 flex w-fit items-center gap-3 rounded-full border px-4 py-2 text-sm shadow-sm backdrop-blur">
-        <div className="ct-route-loading-spinner h-3 w-3 animate-spin rounded-full border" />
+        <LoadingSpinner className="ct-route-loading-spinner h-3 w-3" />
         <span>{routeLoading.label}</span>
       </div>
     </div>
