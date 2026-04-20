@@ -16,6 +16,7 @@ import { getApiErrorMessage } from "@/lib/apiError";
 import SearchInput from "./SearchInput";
 import DataTableShell from "./DataTableShell";
 import LoadingButton from "./LoadingButton";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -359,7 +360,7 @@ export default function FoodTable({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-black dark:text-zinc-50">
-                    {food.name}
+                    {formatFoodNameForDisplay(food.name)}
                   </p>
                   {food.isApproved ? (
                     <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
@@ -472,7 +473,14 @@ export default function FoodTable({
 
       <DeleteFoodModal
         isOpen={showDeleteModal}
-        item={deleteTarget}
+        item={
+          deleteTarget
+            ? {
+                ...deleteTarget,
+                name: formatFoodNameForDisplay(deleteTarget.name),
+              }
+            : null
+        }
         mealName={"My Foods"}
         onConfirm={handleDeleteFood}
         onCancel={() => {

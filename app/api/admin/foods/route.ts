@@ -18,6 +18,7 @@ export type FoodWithCreator = Food & {
   createdByName?: string;
   hasUserReported?: boolean;
   reportCount?: number;
+  canUserReport?: boolean;
 };
 
 export async function GET(request: NextRequest) {

@@ -19,6 +19,7 @@ import {
 } from "../../settings/types";
 import ValidatedNumberField from "./ValidatedNumberField";
 import LoadingButton from "@/app/components/LoadingButton";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -28,9 +29,10 @@ interface EditFoodSidebarProps {
   userSettings: UserSettings;
   isLoading?: boolean;
   isAdd?: boolean;
-  onReport?: (foodId: string) => void;
+  onReport?: (foodId: string, reason?: string) => void;
   isReporting?: boolean;
   hasUserReported?: boolean;
+  canReport?: boolean;
 }
 
 export default function EditFoodSidebar({
@@ -44,6 +46,7 @@ export default function EditFoodSidebar({
   onReport,
   isReporting = false,
   hasUserReported = false,
+  canReport = true,
 }: EditFoodSidebarProps) {
   type FieldErrors = {
     servingSize?: string;
@@ -69,6 +72,7 @@ export default function EditFoodSidebar({
 
   const [servingSize, setServingSize] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [reportReason, setReportReason] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const validateServingSize = (value: string) => {
@@ -95,6 +99,7 @@ export default function EditFoodSidebar({
 
   if (currentKey !== prevKey && food && isOpen) {
     setPrevKey(currentKey);
+    setReportReason("");
     if (isAdd) {
       setServingSize(String(defaultServing.toFixed(2)));
       setQuantity("1");
@@ -248,7 +253,7 @@ export default function EditFoodSidebar({
             {/* Food Name - Centered */}
             <div className="text-center">
               <h3 className="text-2xl font-bold text-black dark:text-zinc-50 mb-1">
-                {food?.name || ""}
+                {food ? formatFoodNameForDisplay(food.name) : ""}
               </h3>
               {food?.defaultServingDescription && (
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -633,18 +638,43 @@ export default function EditFoodSidebar({
                   </p>
                   <button
                     type="button"
-                    onClick={() => onReport?.(food.id)}
-                    disabled={isReporting || hasUserReported}
+                    onClick={() =>
+                      onReport?.(food.id, reportReason.trim() || undefined)
+                    }
+                    disabled={isReporting || hasUserReported || !canReport}
                     className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
                     data-testid="add-food-report-button"
                   >
-                    {hasUserReported
+                    {!canReport
+                      ? "Own Food"
+                      : hasUserReported
                       ? "Reported"
                       : isReporting
                         ? "Reporting..."
                         : "Report Food"}
                   </button>
                 </div>
+                <label
+                  htmlFor="add-food-report-reason"
+                  className="mt-3 block text-xs text-zinc-600 dark:text-zinc-400"
+                >
+                  Optional detail for admins (max 250 chars)
+                </label>
+                <textarea
+                  id="add-food-report-reason"
+                  value={reportReason}
+                  onChange={(event) =>
+                    setReportReason(event.target.value.slice(0, 250))
+                  }
+                  disabled={isReporting || hasUserReported || !canReport}
+                  className="mt-1 w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 text-sm text-black dark:border-zinc-700 dark:text-zinc-50"
+                  rows={3}
+                  placeholder="e.g. Nutrition values look unrealistic"
+                  data-testid="add-food-report-reason"
+                />
+                <p className="mt-1 text-right text-xs text-zinc-500 dark:text-zinc-400">
+                  {reportReason.length}/250
+                </p>
               </div>
             ) : null}
           </div>

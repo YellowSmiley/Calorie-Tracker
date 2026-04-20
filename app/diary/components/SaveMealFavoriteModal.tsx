@@ -8,6 +8,7 @@ import {
   getVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 import HelpButton from "@/app/components/HelpButton";
 import LoadingButton from "@/app/components/LoadingButton";
 import AppModal from "@/app/components/AppModal";
@@ -177,7 +178,7 @@ export default function SaveMealFavoriteModal({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium text-black dark:text-zinc-50">
-                        {item.name}
+                        {formatFoodNameForDisplay(item.name)}
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
                         Serving: {amountStr}

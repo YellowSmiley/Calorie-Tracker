@@ -28,6 +28,7 @@ export interface FoodItem {
   isApproved?: boolean;
   hasUserReported?: boolean;
   reportCount?: number;
+  canUserReport?: boolean;
 }
 
 export interface Meal {

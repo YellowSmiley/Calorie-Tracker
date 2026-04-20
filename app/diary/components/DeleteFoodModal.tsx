@@ -9,6 +9,7 @@ import HelpButton from "../../components/HelpButton";
 import { UserSettings } from "../../settings/types";
 import LoadingButton from "@/app/components/LoadingButton";
 import AppModal from "@/app/components/AppModal";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 type DeleteFoodModalItem = {
   name: string;
@@ -113,7 +114,7 @@ export default function DeleteFoodModal({
         <div className="flex justify-between items-start">
           <div>
             <p className="font-medium text-black dark:text-zinc-50">
-              {item.name}
+              {formatFoodNameForDisplay(item.name)}
             </p>
             <p
               className="text-sm text-zinc-600 dark:text-zinc-400 mt-1"

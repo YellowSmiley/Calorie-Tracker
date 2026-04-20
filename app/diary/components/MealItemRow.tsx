@@ -7,6 +7,7 @@ import {
   getVolumeForDisplay,
   getWeightForDisplay,
 } from "@/lib/unitConversions";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 interface MealItemRowProps {
   item: FoodItem;
@@ -53,7 +54,9 @@ export default function MealItemRow({
       className="cursor-pointer border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
     >
       <td className="px-4 py-3" data-testid={`diary-food-name-${item.id}`}>
-        <p className="text-black dark:text-zinc-50 font-medium">{item.name}</p>
+        <p className="text-black dark:text-zinc-50 font-medium">
+          {formatFoodNameForDisplay(item.name)}
+        </p>
         <p
           className="text-sm text-zinc-500 dark:text-zinc-400"
           data-testid={`diary-food-serving-${item.id}`}

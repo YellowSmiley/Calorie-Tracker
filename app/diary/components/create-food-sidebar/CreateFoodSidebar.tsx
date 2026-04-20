@@ -41,6 +41,9 @@ interface CreateFoodSidebarProps {
   editingDetails?: {
     createdByName?: string;
     createdAt?: string | Date | null;
+    reportCount?: number;
+    lastReportedAt?: string | Date | null;
+    reportReasons?: string[];
   };
   adminActions?: ReactNode;
   error?: string | null;
@@ -412,31 +415,86 @@ export default function CreateFoodSidebar({
         <div className="flex-1 overflow-y-auto p-4 pb-24">
           <div className="mx-auto w-full max-w-6xl rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
             {editingFood && editingDetails ? (
-              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
-                    Created by
-                  </label>
-                  <input
-                    value={editingDetails.createdByName || "Unknown"}
-                    readOnly
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
-                  />
+              <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                      Created by
+                    </label>
+                    <input
+                      value={editingDetails.createdByName || "Unknown"}
+                      readOnly
+                      className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                      Created date/time
+                    </label>
+                    <input
+                      value={
+                        editingDetails.createdAt
+                          ? new Date(editingDetails.createdAt).toLocaleString()
+                          : "Unknown"
+                      }
+                      readOnly
+                      className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
-                    Created date/time
-                  </label>
-                  <input
-                    value={
-                      editingDetails.createdAt
-                        ? new Date(editingDetails.createdAt).toLocaleString()
-                        : "Unknown"
-                    }
-                    readOnly
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
-                  />
-                </div>
+
+                {typeof editingDetails.reportCount === "number" ? (
+                  <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+                    <h3 className="mb-3 text-sm font-semibold text-black dark:text-zinc-50">
+                      Report Details
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                          Open reports
+                        </label>
+                        <input
+                          value={String(editingDetails.reportCount)}
+                          readOnly
+                          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                          Last reported at
+                        </label>
+                        <input
+                          value={
+                            editingDetails.lastReportedAt
+                              ? new Date(
+                                  editingDetails.lastReportedAt,
+                                ).toLocaleString()
+                              : "Unknown"
+                          }
+                          readOnly
+                          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="mb-1 block text-sm font-medium text-black dark:text-zinc-50">
+                        Reported details
+                      </label>
+                      <textarea
+                        readOnly
+                        value={
+                          editingDetails.reportReasons &&
+                          editingDetails.reportReasons.length > 0
+                            ? editingDetails.reportReasons.join("\n")
+                            : "No additional detail provided."
+                        }
+                        rows={4}
+                        className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-black dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+                      />
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

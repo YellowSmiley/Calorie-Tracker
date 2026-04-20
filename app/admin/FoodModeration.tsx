@@ -11,6 +11,7 @@ import CreateFoodSidebar, {
 import { Food } from "@prisma/client";
 import DeleteFoodModal from "@/app/diary/components/DeleteFoodModal";
 import type { UserSettings } from "@/app/settings/types";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 type ModerationItem = {
   id: string;
@@ -50,6 +51,7 @@ export default function FoodModeration() {
   const [error, setError] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [punishingId, setPunishingId] = useState<string | null>(null);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<ModerationItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ModerationItem | null>(null);
@@ -198,6 +200,33 @@ export default function FoodModeration() {
     }
   };
 
+  const resolveReports = async (foodId: string) => {
+    setResolvingId(foodId);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/admin/foods/${foodId}/resolve-reports`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        setError(await getApiErrorMessage(response, "Failed to resolve reports"));
+        return;
+      }
+
+      setItems((prev) => prev.filter((item) => item.id !== foodId));
+      setTotal((prev) => Math.max(prev - 1, 0));
+      setEditingItem((prev) => (prev?.id === foodId ? null : prev));
+    } catch {
+      setError("Failed to resolve reports");
+    } finally {
+      setResolvingId(null);
+    }
+  };
+
   const handleEditSubmit = async (formData: CreateFoodSidebarOnSubmitData) => {
     if (!editingItem) {
       return;
@@ -329,7 +358,7 @@ export default function FoodModeration() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-medium text-black dark:text-zinc-50">
-                    {item.name}
+                    {formatFoodNameForDisplay(item.name)}
                   </p>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     {item.calories} kcal · {item.measurementAmount}
@@ -339,11 +368,6 @@ export default function FoodModeration() {
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                     {item.reportCount} report{item.reportCount === 1 ? "" : "s"}
                   </p>
-                  {item.reasons.length > 0 && (
-                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                      Recent reasons: {item.reasons.join("; ")}
-                    </p>
-                  )}
                 </div>
                 <div
                   className="flex items-center gap-2"
@@ -367,6 +391,16 @@ export default function FoodModeration() {
                   >
                     Delete
                   </button>
+                  <LoadingButton
+                    onClick={() => resolveReports(item.id)}
+                    isLoading={resolvingId === item.id}
+                    loadingLabel="Resolving..."
+                    spinnerClassName="h-4 w-4"
+                    className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                    data-testid={`resolve-reports-${item.id}`}
+                  >
+                    Undo Report
+                  </LoadingButton>
                   <LoadingButton
                     onClick={() => approveFood(item.id, item.isApproved)}
                     isLoading={approvingId === item.id}
@@ -403,12 +437,15 @@ export default function FoodModeration() {
             ? {
                 createdByName: editingItem.createdByName,
                 createdAt: editingItem.createdAt,
+                reportCount: editingItem.reportCount,
+                lastReportedAt: editingItem.lastReportedAt,
+                reportReasons: editingItem.reasons,
               }
             : undefined
         }
         adminActions={
           editingItem ? (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
               <LoadingButton
                 type="button"
                 onClick={() => punishCreator(editingItem.id)}
@@ -428,6 +465,17 @@ export default function FoodModeration() {
               >
                 Delete
               </button>
+              <LoadingButton
+                type="button"
+                onClick={() => resolveReports(editingItem.id)}
+                isLoading={resolvingId === editingItem.id}
+                loadingLabel="Resolving..."
+                spinnerClassName="h-4 w-4"
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-900"
+                data-testid="edit-sidebar-resolve-reports"
+              >
+                Undo Report
+              </LoadingButton>
               <LoadingButton
                 type="button"
                 onClick={() =>
@@ -459,7 +507,7 @@ export default function FoodModeration() {
         item={
           deleteTarget
             ? {
-                name: deleteTarget.name,
+                name: formatFoodNameForDisplay(deleteTarget.name),
                 measurementType: deleteTarget.measurementType,
                 measurementAmount: deleteTarget.measurementAmount,
                 calories: deleteTarget.calories,

@@ -14,6 +14,7 @@ import EditFoodSidebar from "./EditFoodSidebar";
 import { UserSettings } from "../../settings/types";
 import { Food } from "@prisma/client";
 import { FoodWithCreator } from "../../api/admin/foods/route";
+import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 
 interface FoodListSidebarProps {
   isOpen: boolean;
@@ -54,6 +55,7 @@ const mapFood = (food: FoodWithCreator): FoodItem => ({
   isApproved: food.isApproved,
   hasUserReported: food.hasUserReported,
   reportCount: food.reportCount,
+  canUserReport: food.canUserReport,
 });
 
 export default function FoodListSidebar({
@@ -99,6 +101,7 @@ export default function FoodListSidebar({
               isApproved?: boolean;
               hasUserReported?: boolean;
               reportCount?: number;
+              canUserReport?: boolean;
             }
           >;
           total: number;
@@ -170,7 +173,7 @@ export default function FoodListSidebar({
     setShowEditForm(true);
   };
 
-  const handleReportFood = async (foodId: string) => {
+  const handleReportFood = async (foodId: string, reason?: string) => {
     setReportingFoodId(foodId);
     setReportError(null);
 
@@ -178,7 +181,7 @@ export default function FoodListSidebar({
       const response = await fetch("/api/foods/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ foodId }),
+        body: JSON.stringify({ foodId, reason }),
       });
 
       if (!response.ok) {
@@ -341,7 +344,7 @@ export default function FoodListSidebar({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-black dark:text-zinc-50">
-                      {food.name}
+                      {formatFoodNameForDisplay(food.name)}
                     </p>
                     {food.isApproved ? (
                       <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
@@ -391,6 +394,7 @@ export default function FoodListSidebar({
           selectedFood && reportingFoodId === selectedFood.id,
         )}
         hasUserReported={Boolean(selectedFood?.hasUserReported)}
+        canReport={selectedFood?.canUserReport !== false}
         userSettings={userSettings}
         isAdd
       />

@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
           (report) => report.reportedBy === session.user.id,
         ),
         reportCount: reports.length,
+        canUserReport: food.createdBy !== session.user.id,
       };
     });
 
