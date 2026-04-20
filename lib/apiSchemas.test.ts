@@ -1,14 +1,24 @@
 import {
+  adminFoodUpsertBodySchema,
+  adminUserPatchBodySchema,
+  authRegisterBodySchema,
+  authResetPasswordBodySchema,
+  authVerifyQuerySchema,
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
+  dashboardGetQuerySchema,
   foodReportBodySchema,
   mealEntryParamsSchema,
   mealEntryPatchBodySchema,
+  mealFavoriteApplyBodySchema,
+  mealFavoriteClearMealBodySchema,
   mealFavoriteCreateBodySchema,
   mealFavoriteParamsSchema,
+  mealFavoriteSaveCurrentBodySchema,
   mealFavoritesGetQuerySchema,
   mealsGetQuerySchema,
   mealsPostBodySchema,
+  searchPaginationQuerySchema,
   settingsPutBodySchema,
 } from "./apiSchemas";
 
@@ -130,5 +140,118 @@ describe("apiSchemas", () => {
   test("rejects empty meal favorite params id", () => {
     const result = mealFavoriteParamsSchema.safeParse({ id: "" });
     expect(result.success).toBe(false);
+  });
+
+  test("accepts valid paginated search query", () => {
+    const result = searchPaginationQuerySchema.safeParse({
+      search: "oats",
+      take: "25",
+      skip: "0",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid dashboard query", () => {
+    const result = dashboardGetQuerySchema.safeParse({
+      range: "week",
+      chartRange: "3m",
+      date: "2026-04-20",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid register payload", () => {
+    const result = authRegisterBodySchema.safeParse({
+      name: "Alex",
+      email: "alex@example.com",
+      password: "Password1!",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("rejects register payload with invalid email", () => {
+    const result = authRegisterBodySchema.safeParse({
+      email: "not-an-email",
+      password: "Password1!",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  test("accepts valid reset password payload", () => {
+    const result = authResetPasswordBodySchema.safeParse({
+      email: "alex@example.com",
+      token: "abcd1234",
+      password: "Password1!",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid verify query", () => {
+    const result = authVerifyQuerySchema.safeParse({
+      token: "abcd1234",
+      email: "alex@example.com",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid admin food upsert payload", () => {
+    const result = adminFoodUpsertBodySchema.safeParse({
+      name: "Oats",
+      measurementType: "weight",
+      measurementAmount: 100,
+      calories: 370,
+      protein: 13.5,
+      carbs: 60,
+      fat: 7,
+      saturates: 1,
+      sugars: 1,
+      fibre: 10,
+      salt: 0.1,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid admin user patch action", () => {
+    const result = adminUserPatchBodySchema.safeParse({
+      action: "addMark",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid meal favorite apply payload", () => {
+    const result = mealFavoriteApplyBodySchema.safeParse({
+      favoriteId: "fav_1",
+      date: "2026-04-20",
+      mealType: "DINNER",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid meal favorite save current payload", () => {
+    const result = mealFavoriteSaveCurrentBodySchema.safeParse({
+      name: "Dinner",
+      mealType: "DINNER",
+      date: "2026-04-20",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts valid meal favorite clear meal payload", () => {
+    const result = mealFavoriteClearMealBodySchema.safeParse({
+      mealType: "DINNER",
+      date: "2026-04-20",
+    });
+
+    expect(result.success).toBe(true);
   });
 });

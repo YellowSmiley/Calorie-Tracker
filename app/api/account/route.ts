@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 // DELETE /api/account - Delete user account and all associated data
 export async function DELETE() {
@@ -9,7 +13,7 @@ export async function DELETE() {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiUnauthorized();
     }
 
     const userId = session.user.id;
@@ -26,12 +30,9 @@ export async function DELETE() {
       });
 
       if (adminCount <= 1) {
-        return NextResponse.json(
-          {
-            error:
-              "Cannot delete the last admin account. Please assign another admin first.",
-          },
-          { status: 400 },
+        return apiBadRequest(
+          "Cannot delete the last admin account. Please assign another admin first.",
+          "LAST_ADMIN_DELETE_BLOCKED",
         );
       }
     }
@@ -45,12 +46,12 @@ export async function DELETE() {
       where: { id: userId },
     });
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    logError("account/DELETE", error);
-    return NextResponse.json(
-      { error: "Failed to delete account" },
-      { status: 500 },
+    return apiInternalError(
+      "account/DELETE",
+      error,
+      "Failed to delete account",
     );
   }
 }

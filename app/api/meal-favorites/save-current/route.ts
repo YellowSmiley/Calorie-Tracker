@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import {
+  apiBadRequest,
+  apiConflict,
+  apiInternalError,
+  apiServiceUnavailable,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import { mealFavoriteSaveCurrentBodySchema } from "@/lib/apiSchemas";
 
-const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-const isValidMealType = (
-  mealType: string,
-): mealType is (typeof VALID_MEAL_TYPES)[number] =>
-  VALID_MEAL_TYPES.includes(mealType as (typeof VALID_MEAL_TYPES)[number]);
 
 type MealFavoriteDelegate = {
   create: (args: Prisma.MealFavoriteCreateArgs) => Promise<
@@ -39,51 +42,35 @@ const getDateRange = (dateString: string) => {
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const body = await request.json();
+  const parsedBody = mealFavoriteSaveCurrentBodySchema.safeParse(body);
+  if (!parsedBody.success) {
+    return apiBadRequest("Invalid request payload", "VALIDATION_ERROR", {
+      issues: parsedBody.error.issues,
+    });
+  }
+
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
   if (!mealFavorite) {
-    return NextResponse.json(
-      {
-        error:
-          "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
-      },
-      { status: 503 },
+    return apiServiceUnavailable(
+      "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
+      "MEAL_FAVORITES_UNAVAILABLE",
     );
   }
 
-  const { name, mealType, date } = body ?? {};
-
-  if (
-    !name ||
-    typeof name !== "string" ||
-    name.trim().length === 0 ||
-    name.trim().length > 100
-  ) {
-    return NextResponse.json(
-      { error: "Favorite name is required and must be under 100 characters" },
-      { status: 400 },
-    );
-  }
-
-  if (!mealType || typeof mealType !== "string" || !isValidMealType(mealType)) {
-    return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
-  }
-
-  if (!date || typeof date !== "string") {
-    return NextResponse.json({ error: "Date is required" }, { status: 400 });
-  }
+  const { name, mealType, date } = parsedBody.data;
 
   let start: Date;
   let end: Date;
   try {
     ({ start, end } = getDateRange(date));
   } catch {
-    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
 
   const entries = await prisma.mealEntry.findMany({
@@ -103,10 +90,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (entries.length === 0) {
-    return NextResponse.json(
-      { error: "No items in this meal to save" },
-      { status: 400 },
-    );
+    return apiBadRequest("No items in this meal to save", "EMPTY_MEAL");
   }
 
   try {
@@ -130,13 +114,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      id: favorite.id,
-      name: favorite.name,
-      mealType: favorite.mealType,
-      updatedAt: favorite.updatedAt,
-      itemCount: favorite._count.items,
-    });
+    return apiSuccess(
+      {
+        id: favorite.id,
+        name: favorite.name,
+        mealType: favorite.mealType,
+        updatedAt: favorite.updatedAt,
+        itemCount: favorite._count.items,
+      },
+      201,
+    );
   } catch (error) {
     if (
       typeof error === "object" &&
@@ -144,17 +131,16 @@ export async function POST(request: NextRequest) {
       "code" in error &&
       (error as { code?: string }).code === "P2002"
     ) {
-      return NextResponse.json(
-        {
-          error: "A favorite with this name already exists for this meal type",
-        },
-        { status: 409 },
+      return apiConflict(
+        "A favorite with this name already exists for this meal type",
+        "DUPLICATE_FAVORITE_NAME",
       );
     }
 
-    return NextResponse.json(
-      { error: "Failed to save favorite" },
-      { status: 500 },
+    return apiInternalError(
+      "meal-favorites/save-current/POST",
+      error,
+      "Failed to save favorite",
     );
   }
 }

@@ -1,9 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { containsBlockedLanguage } from "@/lib/foodModeration";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { foodReportBodySchema } from "@/lib/apiSchemas";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiSuccess,
+  apiTooManyRequests,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 const reportLimiter = new RateLimiterMemory({
   points: 10,
@@ -14,15 +21,14 @@ export async function POST(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     await reportLimiter.consume(session.user.id);
   } catch {
-    return NextResponse.json(
-      { error: "Too many report attempts. Please try again shortly." },
-      { status: 429 },
+    return apiTooManyRequests(
+      "Too many report attempts. Please try again shortly.",
     );
   }
 
@@ -30,27 +36,21 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload." },
-      { status: 400 },
-    );
+    return apiBadRequest("Invalid JSON payload.", "INVALID_JSON");
   }
 
   const payloadValidation = foodReportBodySchema.safeParse(body);
   if (!payloadValidation.success) {
-    return NextResponse.json(
-      { error: "Food id is required." },
-      { status: 400 },
-    );
+    return apiBadRequest("Food id is required.", "INVALID_FOOD_REPORT");
   }
 
   const { foodId, reason } = payloadValidation.data;
   const normalizedReason = reason ?? "";
 
   if (normalizedReason && containsBlockedLanguage(normalizedReason)) {
-    return NextResponse.json(
-      { error: "Report reason contains blocked language." },
-      { status: 400 },
+    return apiBadRequest(
+      "Report reason contains blocked language.",
+      "BLOCKED_LANGUAGE",
     );
   }
 
@@ -60,13 +60,13 @@ export async function POST(request: NextRequest) {
   });
 
   if (!food) {
-    return NextResponse.json({ error: "Food not found." }, { status: 404 });
+    return apiNotFound("Food not found.", "FOOD_NOT_FOUND");
   }
 
   if (food.createdBy === session.user.id) {
-    return NextResponse.json(
-      { error: "You cannot report your own food item." },
-      { status: 400 },
+    return apiBadRequest(
+      "You cannot report your own food item.",
+      "CANNOT_REPORT_OWN_FOOD",
     );
   }
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (existing) {
-    return NextResponse.json({ success: true, alreadyReported: true });
+    return apiSuccess({ success: true, alreadyReported: true });
   }
 
   await prisma.foodReport.create({
@@ -91,5 +91,5 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({ success: true, alreadyReported: false });
+  return apiSuccess({ success: true, alreadyReported: false });
 }

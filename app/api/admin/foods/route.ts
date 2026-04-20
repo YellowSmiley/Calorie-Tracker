@@ -1,9 +1,18 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
 import { Food } from "@prisma/client";
-import { FoodItem } from "@/app/diary/types";
+import {
+  apiBadRequest,
+  apiConflict,
+  apiInternalError,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import {
+  adminFoodUpsertBodySchema,
+  searchPaginationQuerySchema,
+} from "@/lib/apiSchemas";
 import {
   findCloseFoodSuggestions,
   sortByRelevanceAndUsage,
@@ -25,19 +34,24 @@ export async function GET(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     const { searchParams } = new URL(request.url);
-    const search = (searchParams.get("search") || "")
-      .replace(/\s+/g, " ")
-      .trim();
-    const take = Math.min(
-      parseInt(searchParams.get("take") || "50") || 50,
-      200,
+    const parsedQuery = searchPaginationQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries()),
     );
-    const skip = parseInt(searchParams.get("skip") || "0") || 0;
+
+    if (!parsedQuery.success) {
+      return apiBadRequest("Invalid query parameters", "VALIDATION_ERROR", {
+        issues: parsedQuery.error.issues,
+      });
+    }
+
+    const search = (parsedQuery.data.search || "").replace(/\s+/g, " ").trim();
+    const take = parsedQuery.data.take ?? 50;
+    const skip = parsedQuery.data.skip ?? 0;
 
     const where = {
       ...(search
@@ -104,7 +118,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       foods: foodsWithCreator,
       total,
       take,
@@ -112,11 +126,7 @@ export async function GET(request: NextRequest) {
       suggestions,
     });
   } catch (error) {
-    logError("admin/foods/GET", error);
-    return NextResponse.json(
-      { error: "Failed to fetch foods" },
-      { status: 500 },
-    );
+    return apiInternalError("admin/foods/GET", error, "Failed to fetch foods");
   }
 }
 
@@ -124,11 +134,19 @@ export async function POST(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
-    const body = await request.json();
+    const parsedBody = adminFoodUpsertBodySchema.safeParse(
+      await request.json(),
+    );
+    if (!parsedBody.success) {
+      return apiBadRequest("Invalid food payload", "VALIDATION_ERROR", {
+        issues: parsedBody.error.issues,
+      });
+    }
+
     const {
       name,
       measurementType,
@@ -143,63 +161,12 @@ export async function POST(request: NextRequest) {
       salt,
       defaultServingAmount,
       defaultServingDescription,
-    } = body as Partial<FoodItem>;
-
-    if (
-      !name ||
-      typeof name !== "string" ||
-      name.trim().length === 0 ||
-      name.length > 200
-    ) {
-      return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
-    }
-    if (measurementType !== "volume" && measurementType !== "weight") {
-      return NextResponse.json(
-        { error: "Invalid measurement type" },
-        { status: 400 },
-      );
-    }
-    if (
-      measurementAmount === undefined ||
-      typeof measurementAmount !== "number"
-    ) {
-      return NextResponse.json(
-        { error: "Invalid measurement amount" },
-        { status: 400 },
-      );
-    }
-    if (typeof calories !== "number" || calories < 0 || calories > 99999) {
-      return NextResponse.json(
-        { error: "Invalid calorie value" },
-        { status: 400 },
-      );
-    }
-    if (
-      typeof protein !== "number" ||
-      protein < 0 ||
-      typeof carbs !== "number" ||
-      carbs < 0 ||
-      typeof fat !== "number" ||
-      fat < 0 ||
-      typeof saturates !== "number" ||
-      saturates < 0 ||
-      typeof sugars !== "number" ||
-      sugars < 0 ||
-      typeof fibre !== "number" ||
-      fibre < 0 ||
-      typeof salt !== "number" ||
-      salt < 0
-    ) {
-      return NextResponse.json(
-        { error: "Invalid macro values" },
-        { status: 400 },
-      );
-    }
+    } = parsedBody.data;
 
     if (containsBlockedLanguage(name)) {
-      return NextResponse.json(
-        { error: "Food name contains blocked language." },
-        { status: 400 },
+      return apiBadRequest(
+        "Food name contains blocked language.",
+        "FOOD_NAME_BLOCKED",
       );
     }
 
@@ -207,9 +174,9 @@ export async function POST(request: NextRequest) {
       typeof defaultServingDescription === "string" &&
       containsBlockedLanguage(defaultServingDescription)
     ) {
-      return NextResponse.json(
-        { error: "Serving description contains blocked language." },
-        { status: 400 },
+      return apiBadRequest(
+        "Serving description contains blocked language.",
+        "SERVING_DESCRIPTION_BLOCKED",
       );
     }
 
@@ -225,10 +192,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (moderationNumberError) {
-      return NextResponse.json(
-        { error: moderationNumberError },
-        { status: 400 },
-      );
+      return apiBadRequest(moderationNumberError, "FOOD_NUMBERS_INVALID");
     }
 
     const duplicate = await findLikelyDuplicateFood({
@@ -247,13 +211,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (duplicate) {
-      return NextResponse.json(
-        {
-          error: `Food appears to be a duplicate of \"${duplicate.name}\". Please review before creating another item.`,
-          duplicateFoodId: duplicate.id,
-          duplicateFoodName: duplicate.name,
-        },
-        { status: 409 },
+      return apiConflict(
+        `Food appears to be a duplicate of \"${duplicate.name}\". Please review before creating another item.`,
+        "DUPLICATE_FOOD",
       );
     }
 
@@ -287,12 +247,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(newFood);
+    return apiSuccess(newFood, 201);
   } catch (error) {
-    logError("admin/foods/POST", error);
-    return NextResponse.json(
-      { error: "Failed to create food" },
-      { status: 500 },
-    );
+    return apiInternalError("admin/foods/POST", error, "Failed to create food");
   }
 }

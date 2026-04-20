@@ -1,77 +1,81 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createHash } from "crypto";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
+import { authVerifyQuerySchema } from "@/lib/apiSchemas";
 
 export async function GET(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const token = searchParams.get("token");
-        const email = searchParams.get("email");
+  try {
+    const { searchParams } = new URL(request.url);
+    const parsedQuery = authVerifyQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries()),
+    );
 
-        if (!token || !email) {
-            return NextResponse.json(
-                { error: "Missing token or email" },
-                { status: 400 }
-            );
-        }
-
-        const normalizedEmail = email.toLowerCase().trim();
-        const tokenHash = createHash("sha256").update(token).digest("hex");
-
-        // Look up the verification token by hash
-        const record = await prisma.verificationToken.findUnique({
-            where: {
-                identifier_token: {
-                    identifier: normalizedEmail,
-                    token: tokenHash,
-                },
-            },
-        });
-
-        if (!record) {
-            return NextResponse.json(
-                { error: "Invalid or expired verification link" },
-                { status: 400 }
-            );
-        }
-
-        if (record.expires < new Date()) {
-            // Clean up expired token
-            await prisma.verificationToken.delete({
-                where: {
-                    identifier_token: {
-                        identifier: normalizedEmail,
-                        token: tokenHash,
-                    },
-                },
-            });
-            return NextResponse.json(
-                { error: "Verification link has expired. Please register again." },
-                { status: 400 }
-            );
-        }
-
-        // Mark user as verified and delete the token
-        await prisma.$transaction([
-            prisma.user.update({
-                where: { email: normalizedEmail },
-                data: { emailVerified: new Date() },
-            }),
-            prisma.verificationToken.delete({
-                where: {
-                    identifier_token: {
-                        identifier: normalizedEmail,
-                        token: tokenHash,
-                    },
-                },
-            }),
-        ]);
-
-        return NextResponse.json({ success: true });
-    } catch {
-        return NextResponse.json(
-            { error: "Something went wrong. Please try again." },
-            { status: 500 }
-        );
+    if (!parsedQuery.success) {
+      return apiBadRequest("Invalid verification link", "VALIDATION_ERROR", {
+        issues: parsedQuery.error.issues,
+      });
     }
+
+    const { token, email } = parsedQuery.data;
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+
+    // Look up the verification token by hash
+    const record = await prisma.verificationToken.findUnique({
+      where: {
+        identifier_token: {
+          identifier: normalizedEmail,
+          token: tokenHash,
+        },
+      },
+    });
+
+    if (!record) {
+      return apiBadRequest(
+        "Invalid or expired verification link",
+        "INVALID_VERIFICATION_LINK",
+      );
+    }
+
+    if (record.expires < new Date()) {
+      // Clean up expired token
+      await prisma.verificationToken.delete({
+        where: {
+          identifier_token: {
+            identifier: normalizedEmail,
+            token: tokenHash,
+          },
+        },
+      });
+      return apiBadRequest(
+        "Verification link has expired. Please register again.",
+        "VERIFICATION_LINK_EXPIRED",
+      );
+    }
+
+    // Mark user as verified and delete the token
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { email: normalizedEmail },
+        data: { emailVerified: new Date() },
+      }),
+      prisma.verificationToken.delete({
+        where: {
+          identifier_token: {
+            identifier: normalizedEmail,
+            token: tokenHash,
+          },
+        },
+      }),
+    ]);
+
+    return apiSuccess({ success: true });
+  } catch (error) {
+    return apiInternalError(
+      "auth/verify/GET",
+      error,
+      "Something went wrong. Please try again.",
+    );
+  }
 }

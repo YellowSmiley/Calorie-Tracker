@@ -1,15 +1,17 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
 import bcrypt from "bcryptjs";
-
-type ModerationAction =
-  | "addMark"
-  | "removeMark"
-  | "activate"
-  | "deactivate"
-  | "clearPunishments";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiNotFound,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import {
+  adminUserPatchBodySchema,
+  resourceIdParamsSchema,
+} from "@/lib/apiSchemas";
 
 async function selectUserForAdmin(userId: string) {
   return prisma.user.findUnique({
@@ -35,32 +37,40 @@ export async function PATCH(
   const session = await auth();
 
   if (!session?.user?.id || !session.user.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
-    const { id: userId } = (await params) as { id: string };
-    const body = (await request.json()) as {
-      name?: string;
-      email?: string;
-      password?: string;
-      action?: ModerationAction;
-    };
+    const parsedParams = resourceIdParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+      return apiNotFound("User not found", "USER_NOT_FOUND");
+    }
+
+    const { id: userId } = parsedParams.data;
+
+    const parsedBody = adminUserPatchBodySchema.safeParse(await request.json());
+    if (!parsedBody.success) {
+      return apiBadRequest("Invalid update payload", "VALIDATION_ERROR", {
+        issues: parsedBody.error.issues,
+      });
+    }
+
+    const body = parsedBody.data;
 
     if (body.action) {
       const targetUser = await selectUserForAdmin(userId);
 
       if (!targetUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return apiNotFound("User not found", "USER_NOT_FOUND");
       }
 
       if (
         (body.action === "deactivate" || body.action === "addMark") &&
         userId === session.user.id
       ) {
-        return NextResponse.json(
-          { error: "You cannot punish or deactivate your own account." },
-          { status: 400 },
+        return apiBadRequest(
+          "You cannot punish or deactivate your own account.",
+          "SELF_PUNISH_BLOCKED",
         );
       }
 
@@ -187,10 +197,10 @@ export async function PATCH(
       });
 
       if (!updatedUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return apiNotFound("User not found", "USER_NOT_FOUND");
       }
 
-      return NextResponse.json({ success: true, user: updatedUser });
+      return apiSuccess({ success: true, user: updatedUser });
     }
 
     const { name, email, password } = body;
@@ -204,10 +214,7 @@ export async function PATCH(
     }
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: "No valid fields to update" },
-        { status: 400 },
-      );
+      return apiBadRequest("No valid fields to update", "NO_VALID_FIELDS");
     }
 
     const updatedUser = await prisma.user.update({
@@ -225,12 +232,12 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ success: true, user: updatedUser });
+    return apiSuccess({ success: true, user: updatedUser });
   } catch (error) {
-    logError("admin/users/PATCH", error);
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 },
+    return apiInternalError(
+      "admin/users/PATCH",
+      error,
+      "Failed to update user",
     );
   }
 }
@@ -242,17 +249,22 @@ export async function DELETE(
   const session = await auth();
 
   if (!session?.user?.id || !session.user.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
-    const { id: userId } = (await params) as { id: string };
+    const parsedParams = resourceIdParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+      return apiNotFound("User not found", "USER_NOT_FOUND");
+    }
+
+    const { id: userId } = parsedParams.data;
 
     // Prevent admin from deleting themselves
     if (userId === session.user.id) {
-      return NextResponse.json(
-        { error: "Cannot delete your own account" },
-        { status: 400 },
+      return apiBadRequest(
+        "Cannot delete your own account",
+        "SELF_DELETE_BLOCKED",
       );
     }
 
@@ -264,9 +276,9 @@ export async function DELETE(
     if (targetUser?.isAdmin) {
       const adminCount = await prisma.user.count({ where: { isAdmin: true } });
       if (adminCount <= 1) {
-        return NextResponse.json(
-          { error: "Cannot delete the last admin" },
-          { status: 400 },
+        return apiBadRequest(
+          "Cannot delete the last admin",
+          "LAST_ADMIN_DELETE_BLOCKED",
         );
       }
     }
@@ -276,12 +288,12 @@ export async function DELETE(
       where: { id: userId },
     });
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    logError("admin/users/DELETE", error);
-    return NextResponse.json(
-      { error: "Failed to delete user" },
-      { status: 500 },
+    return apiInternalError(
+      "admin/users/DELETE",
+      error,
+      "Failed to delete user",
     );
   }
 }

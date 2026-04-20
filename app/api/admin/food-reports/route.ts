@@ -1,18 +1,30 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { apiBadRequest, apiSuccess, apiUnauthorized } from "@/lib/apiResponse";
+import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id || !session.user.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const { searchParams } = new URL(request.url);
-  const search = (searchParams.get("search") || "").replace(/\s+/g, " ").trim();
-  const take = Math.min(parseInt(searchParams.get("take") || "50") || 50, 200);
-  const skip = parseInt(searchParams.get("skip") || "0") || 0;
+  const parsedQuery = searchPaginationQuerySchema.safeParse(
+    Object.fromEntries(searchParams.entries()),
+  );
+
+  if (!parsedQuery.success) {
+    return apiBadRequest("Invalid query parameters", "VALIDATION_ERROR", {
+      issues: parsedQuery.error.issues,
+    });
+  }
+
+  const search = (parsedQuery.data.search || "").replace(/\s+/g, " ").trim();
+  const take = parsedQuery.data.take ?? 50;
+  const skip = parsedQuery.data.skip ?? 0;
 
   const where = {
     isResolved: false,
@@ -104,7 +116,7 @@ export async function GET(request: NextRequest) {
     })
     .filter(Boolean);
 
-  return NextResponse.json({
+  return apiSuccess({
     items: responseItems,
     total,
     take,

@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { Prisma } from "@prisma/client";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiServiceUnavailable,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import { mealFavoriteApplyBodySchema } from "@/lib/apiSchemas";
 
-const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-const isValidMealType = (
-  mealType: string,
-): mealType is (typeof VALID_MEAL_TYPES)[number] =>
-  VALID_MEAL_TYPES.includes(mealType as (typeof VALID_MEAL_TYPES)[number]);
 
 type MealFavoriteWithItems = Prisma.MealFavoriteGetPayload<{
   include: {
@@ -47,49 +49,35 @@ const getDateRange = (dateString: string) => {
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const body = await request.json();
+  const parsedBody = mealFavoriteApplyBodySchema.safeParse(body);
+  if (!parsedBody.success) {
+    return apiBadRequest("Invalid request payload", "VALIDATION_ERROR", {
+      issues: parsedBody.error.issues,
+    });
+  }
+
   const mealFavorite = (
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
   if (!mealFavorite) {
-    return NextResponse.json(
-      {
-        error:
-          "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
-      },
-      { status: 503 },
+    return apiServiceUnavailable(
+      "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
+      "MEAL_FAVORITES_UNAVAILABLE",
     );
   }
 
-  const { favoriteId, date, mealType: targetMealType } = body ?? {};
-
-  if (!favoriteId || typeof favoriteId !== "string") {
-    return NextResponse.json(
-      { error: "Favorite id is required" },
-      { status: 400 },
-    );
-  }
-
-  if (!date || typeof date !== "string") {
-    return NextResponse.json({ error: "Date is required" }, { status: 400 });
-  }
-
-  if (
-    targetMealType &&
-    (typeof targetMealType !== "string" || !isValidMealType(targetMealType))
-  ) {
-    return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
-  }
+  const { favoriteId, date, mealType: targetMealType } = parsedBody.data;
 
   let start: Date;
   let end: Date;
   try {
     ({ start, end } = getDateRange(date));
   } catch {
-    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
 
   const favorite = await mealFavorite.findFirst({
@@ -106,14 +94,11 @@ export async function POST(request: NextRequest) {
   });
 
   if (!favorite) {
-    return NextResponse.json({ error: "Favorite not found" }, { status: 404 });
+    return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
   }
 
   if (favorite.items.length === 0) {
-    return NextResponse.json(
-      { error: "Favorite has no items" },
-      { status: 400 },
-    );
+    return apiBadRequest("Favorite has no items", "EMPTY_FAVORITE");
   }
 
   const mealType = targetMealType ?? favorite.mealType;
@@ -173,7 +158,7 @@ export async function POST(request: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json({
+  return apiSuccess({
     mealType,
     items: updatedEntries.map((entry) => ({
       id: entry.id,

@@ -1,24 +1,37 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 import { findCloseFoodSuggestions } from "../../../../lib/foodSearchSuggestions";
+import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id || !session.user.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search") || "";
-    const take = Math.min(
-      parseInt(searchParams.get("take") || "50") || 50,
-      200,
+    const parsedQuery = searchPaginationQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries()),
     );
-    const skip = parseInt(searchParams.get("skip") || "0") || 0;
+
+    if (!parsedQuery.success) {
+      return apiBadRequest("Invalid query parameters", "VALIDATION_ERROR", {
+        issues: parsedQuery.error.issues,
+      });
+    }
+
+    const search = (parsedQuery.data.search || "").trim();
+    const take = parsedQuery.data.take ?? 50;
+    const skip = parsedQuery.data.skip ?? 0;
 
     const where = search
       ? {
@@ -69,12 +82,8 @@ export async function GET(request: NextRequest) {
       suggestions = findCloseFoodSuggestions(search, candidateValues);
     }
 
-    return NextResponse.json({ users, total, take, skip, suggestions });
+    return apiSuccess({ users, total, take, skip, suggestions });
   } catch (error) {
-    logError("admin/users/GET", error);
-    return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 },
-    );
+    return apiInternalError("admin/users/GET", error, "Failed to fetch users");
   }
 }

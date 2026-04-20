@@ -11,8 +11,9 @@
 When making code changes, run these checks in this order when feasible:
 
 1. `npm run lint`
-2. `npm run test:ci`
-3. `npm run test:e2e`
+2. `npx tsc --noEmit`
+3. `npm run test:ci`
+4. `npm run test:e2e`
 
 If a full Playwright run is too slow for the task, run the most relevant Playwright spec(s) first, then call out that full `npm run test:e2e` is still recommended.
 For this workspace, local Playwright is only reliable when tests are run one at a time and not in headless mode. Prefer a single spec, single project, headed run such as `npm run test:e2e -- e2e/diary.spec.ts --project=chromium --workers=1 --headed`.
@@ -37,6 +38,12 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - For any user-triggered action, provide clear feedback as appropriate: loading state, success confirmation, and error messaging.
 - Do not rely on silent updates for important user actions; users should be able to tell what happened.
 - Add validation for all inputs that submit data, with visible and accessible error messaging.
+
+## API Validation and Contract Rules
+
+- Centralize API validation with shared schemas in `lib/apiSchemas.ts` instead of duplicating ad-hoc parsing/guards in each route.
+- Standardize API success and error contracts using shared helpers in `lib/apiResponse.ts` (consistent `ok/status/data` and `code/message/error` patterns).
+- When adding or changing schemas or response helpers, update the relevant Jest tests in `lib/apiSchemas.test.ts` and/or `lib/apiResponse.test.ts` in the same change.
 
 ## Jest Scope Rules
 

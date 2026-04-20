@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { RateLimiterMemory } from "rate-limiter-flexible";
@@ -6,6 +6,13 @@ import {
   mealEntryParamsSchema,
   mealEntryPatchBodySchema,
 } from "@/lib/apiSchemas";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiSuccess,
+  apiTooManyRequests,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 const mealWriteLimiter = new RateLimiterMemory({
   points: 120,
@@ -18,21 +25,18 @@ export async function PATCH(
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     await mealWriteLimiter.consume(session.user.id);
   } catch {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again shortly." },
-      { status: 429 },
-    );
+    return apiTooManyRequests();
   }
 
   const paramsValidation = mealEntryParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { id } = paramsValidation.data;
@@ -40,15 +44,12 @@ export async function PATCH(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
+    return apiBadRequest("Invalid JSON payload", "INVALID_JSON");
   }
 
   const payloadValidation = mealEntryPatchBodySchema.safeParse(body);
   if (!payloadValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { serving } = payloadValidation.data;
@@ -59,7 +60,7 @@ export async function PATCH(
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+    return apiNotFound("Entry not found", "MEAL_ENTRY_NOT_FOUND");
   }
 
   const updated = await prisma.mealEntry.update({
@@ -78,7 +79,7 @@ export async function PATCH(
     include: { food: true },
   });
 
-  return NextResponse.json({
+  return apiSuccess({
     item: {
       id: updated.id,
       name: updated.food.name,
@@ -113,21 +114,18 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     await mealWriteLimiter.consume(session.user.id);
   } catch {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again shortly." },
-      { status: 429 },
-    );
+    return apiTooManyRequests();
   }
 
   const paramsValidation = mealEntryParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { id } = paramsValidation.data;
@@ -136,12 +134,12 @@ export async function DELETE(
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+    return apiNotFound("Entry not found", "MEAL_ENTRY_NOT_FOUND");
   }
 
   await prisma.mealEntry.delete({
     where: { id: existing.id },
   });
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

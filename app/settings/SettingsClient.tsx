@@ -17,6 +17,8 @@ import {
   convertWeightForDisplay,
   convertWeightFromInput,
 } from "@/lib/unitConversions";
+import { getApiErrorMessage } from "@/lib/apiError";
+import { unwrapApiData } from "@/lib/apiClient";
 import LoadingButton from "@/app/components/LoadingButton";
 import AppHeader from "../components/AppHeader";
 
@@ -221,17 +223,17 @@ export default function SettingsClient({
       });
 
       if (response.ok) {
-        const updated = (await response.json()) as SettingsData;
+        const payload = await response.json();
+        const updated = unwrapApiData<SettingsData>(payload);
         setSettings(convertBackSettings(updated));
         setSaveMessage({
           type: "success",
           text: "Settings saved successfully!",
         });
       } else {
-        const error = (await response.json()) as { error?: string };
         setSaveMessage({
           type: "error",
-          text: error.error || "Failed to save settings",
+          text: await getApiErrorMessage(response, "Failed to save settings"),
         });
       }
     } catch (error) {
@@ -314,10 +316,9 @@ export default function SettingsClient({
     try {
       const response = await fetch("/api/account", { method: "DELETE" });
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
         setDeleteMessage({
           type: "error",
-          text: data.error || "Failed to delete account",
+          text: await getApiErrorMessage(response, "Failed to delete account"),
         });
         setShowDeleteConfirm(false);
         return;

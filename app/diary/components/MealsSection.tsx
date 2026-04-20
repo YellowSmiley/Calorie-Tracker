@@ -6,6 +6,7 @@ import CreateFoodSidebar, {
   CreateFoodSidebarOnSubmitData,
 } from "./create-food-sidebar/CreateFoodSidebar";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { unwrapApiData } from "@/lib/apiClient";
 import EditFoodSidebar from "./EditFoodSidebar";
 import DeleteFoodModal from "./DeleteFoodModal";
 import MealItemRow from "./MealItemRow";
@@ -125,10 +126,12 @@ export default function MealsSection({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add food to meal");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to add food to meal"),
+        );
       }
 
-      const data = (await response.json()) as { item: FoodItem };
+      const data = unwrapApiData<{ item: FoodItem }>(await response.json());
       if (data.item) {
         setMeals((prev) =>
           prev.map((meal, index) =>
@@ -167,7 +170,9 @@ export default function MealsSection({
         );
       }
 
-      const created = (await createResponse.json()) as FoodWithCreator;
+      const created = unwrapApiData<FoodWithCreator>(
+        await createResponse.json(),
+      );
 
       if (created.id) {
         let servingMultiplier = 1;
@@ -188,10 +193,17 @@ export default function MealsSection({
         });
 
         if (!entryResponse.ok) {
-          throw new Error("Failed to add food to meal");
+          throw new Error(
+            await getApiErrorMessage(
+              entryResponse,
+              "Failed to add food to meal",
+            ),
+          );
         }
 
-        const data = await entryResponse.json();
+        const data = unwrapApiData<{ item: FoodItem }>(
+          await entryResponse.json(),
+        );
         if (data.item) {
           setMeals((prev) =>
             prev.map((meal, index) =>
@@ -227,10 +239,12 @@ export default function MealsSection({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update serving size");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to update serving size"),
+        );
       }
 
-      const data = (await response.json()) as { item: FoodItem };
+      const data = unwrapApiData<{ item: FoodItem }>(await response.json());
       if (data.item) {
         setMeals((prev) =>
           prev.map((meal, index) =>
@@ -273,9 +287,12 @@ export default function MealsSection({
 
       if (!response.ok) {
         throw new Error(
-          currentlyApproved
-            ? "Failed to unapprove food"
-            : "Failed to approve food",
+          await getApiErrorMessage(
+            response,
+            currentlyApproved
+              ? "Failed to unapprove food"
+              : "Failed to approve food",
+          ),
         );
       }
 
@@ -309,7 +326,9 @@ export default function MealsSection({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to remove food");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to remove food"),
+        );
       }
 
       setMeals((prev) =>
@@ -353,9 +372,11 @@ export default function MealsSection({
   const refreshMealsForDate = async () => {
     const response = await fetch(`/api/meals?date=${currentDate}`);
     if (!response.ok) {
-      throw new Error("Failed to refresh meals");
+      throw new Error(
+        await getApiErrorMessage(response, "Failed to refresh meals"),
+      );
     }
-    const data = (await response.json()) as { meals: Meal[] };
+    const data = unwrapApiData<{ meals: Meal[] }>(await response.json());
     setMeals(data.meals);
   };
 
@@ -375,8 +396,9 @@ export default function MealsSection({
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || "Failed to save favorite");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to save favorite"),
+        );
       }
 
       setSaveFavoriteMealIndex(null);
@@ -405,8 +427,9 @@ export default function MealsSection({
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || "Failed to clear meal");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to clear meal"),
+        );
       }
 
       setMeals((prev) =>

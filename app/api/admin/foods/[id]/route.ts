@@ -1,13 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
-import { FoodItem } from "@/app/diary/types";
 import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 import {
   containsBlockedLanguage,
   validateFoodNumbersForModeration,
 } from "@/lib/foodModeration";
+import {
+  apiBadRequest,
+  apiConflict,
+  apiForbidden,
+  apiInternalError,
+  apiNotFound,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import {
+  adminFoodUpsertBodySchema,
+  resourceIdParamsSchema,
+} from "@/lib/apiSchemas";
 
 export async function PUT(
   request: NextRequest,
@@ -16,116 +27,31 @@ export async function PUT(
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
-    const { id: foodId } = (await params) as { id: string };
-    const body = (await request.json()) as FoodItem;
+    const parsedParams = resourceIdParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+      return apiNotFound("Food not found", "FOOD_NOT_FOUND");
+    }
 
-    // Validate input (same rules as POST)
-    if (
-      !body.name ||
-      typeof body.name !== "string" ||
-      body.name.trim().length === 0 ||
-      body.name.length > 200
-    ) {
-      return NextResponse.json({ error: "Invalid food name" }, { status: 400 });
+    const { id: foodId } = parsedParams.data;
+    const parsedBody = adminFoodUpsertBodySchema.safeParse(
+      await request.json(),
+    );
+    if (!parsedBody.success) {
+      return apiBadRequest("Invalid food payload", "VALIDATION_ERROR", {
+        issues: parsedBody.error.issues,
+      });
     }
-    if (
-      typeof body.calories !== "number" ||
-      body.calories < 0 ||
-      body.calories > 99999
-    ) {
-      return NextResponse.json(
-        { error: "Invalid calorie value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.measurementType &&
-      body.measurementType !== "weight" &&
-      body.measurementType !== "volume"
-    ) {
-      return NextResponse.json(
-        { error: "Invalid measurement type" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.measurementAmount !== undefined &&
-      typeof body.measurementAmount !== "number"
-    ) {
-      return NextResponse.json(
-        { error: "Invalid measurement amount" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.protein !== undefined &&
-      (typeof body.protein !== "number" || body.protein < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid protein value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.carbs !== undefined &&
-      (typeof body.carbs !== "number" || body.carbs < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid carbs value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.fat !== undefined &&
-      (typeof body.fat !== "number" || body.fat < 0)
-    ) {
-      return NextResponse.json({ error: "Invalid fat value" }, { status: 400 });
-    }
-    if (
-      body.saturates !== undefined &&
-      (typeof body.saturates !== "number" || body.saturates < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid saturates value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.sugars !== undefined &&
-      (typeof body.sugars !== "number" || body.sugars < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid sugars value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.fibre !== undefined &&
-      (typeof body.fibre !== "number" || body.fibre < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid fibre value" },
-        { status: 400 },
-      );
-    }
-    if (
-      body.salt !== undefined &&
-      (typeof body.salt !== "number" || body.salt < 0)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid salt value" },
-        { status: 400 },
-      );
-    }
+
+    const body = parsedBody.data;
 
     if (containsBlockedLanguage(body.name)) {
-      return NextResponse.json(
-        { error: "Food name contains blocked language." },
-        { status: 400 },
+      return apiBadRequest(
+        "Food name contains blocked language.",
+        "FOOD_NAME_BLOCKED",
       );
     }
 
@@ -133,9 +59,9 @@ export async function PUT(
       typeof body.defaultServingDescription === "string" &&
       containsBlockedLanguage(body.defaultServingDescription)
     ) {
-      return NextResponse.json(
-        { error: "Serving description contains blocked language." },
-        { status: 400 },
+      return apiBadRequest(
+        "Serving description contains blocked language.",
+        "SERVING_DESCRIPTION_BLOCKED",
       );
     }
 
@@ -144,10 +70,10 @@ export async function PUT(
       where: { id: foodId },
     });
     if (!existingFood) {
-      return NextResponse.json({ error: "Food not found" }, { status: 404 });
+      return apiNotFound("Food not found", "FOOD_NOT_FOUND");
     }
     if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return apiForbidden();
     }
 
     const mergedFoodForDuplicateCheck = {
@@ -180,13 +106,9 @@ export async function PUT(
       mergedFoodForDuplicateCheck,
     );
     if (duplicate) {
-      return NextResponse.json(
-        {
-          error: `Food appears to be a duplicate of \"${duplicate.name}\". Please review before saving.`,
-          duplicateFoodId: duplicate.id,
-          duplicateFoodName: duplicate.name,
-        },
-        { status: 409 },
+      return apiConflict(
+        `Food appears to be a duplicate of \"${duplicate.name}\". Please review before saving.`,
+        "DUPLICATE_FOOD",
       );
     }
 
@@ -202,10 +124,7 @@ export async function PUT(
     });
 
     if (moderationNumberError) {
-      return NextResponse.json(
-        { error: moderationNumberError },
-        { status: 400 },
-      );
+      return apiBadRequest(moderationNumberError, "FOOD_NUMBERS_INVALID");
     }
 
     const updated = await prisma.food.update({
@@ -245,16 +164,12 @@ export async function PUT(
         })
       : null;
 
-    return NextResponse.json({
+    return apiSuccess({
       ...updated,
       createdByName: creator?.name || "Unknown",
     });
   } catch (error) {
-    logError("admin/foods/PUT", error);
-    return NextResponse.json(
-      { error: "Failed to update food" },
-      { status: 500 },
-    );
+    return apiInternalError("admin/foods/PUT", error, "Failed to update food");
   }
 }
 
@@ -265,33 +180,38 @@ export async function DELETE(
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
-    const { id: foodId } = (await params) as { id: string };
+    const parsedParams = resourceIdParamsSchema.safeParse(await params);
+    if (!parsedParams.success) {
+      return apiNotFound("Food not found", "FOOD_NOT_FOUND");
+    }
+
+    const { id: foodId } = parsedParams.data;
 
     // Ownership check
     const existingFood = await prisma.food.findUnique({
       where: { id: foodId },
     });
     if (!existingFood) {
-      return NextResponse.json({ error: "Food not found" }, { status: 404 });
+      return apiNotFound("Food not found", "FOOD_NOT_FOUND");
     }
     if (!session.user.isAdmin && existingFood.createdBy !== session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return apiForbidden();
     }
     // Delete food (cascade will handle meal entries)
     await prisma.food.delete({
       where: { id: foodId },
     });
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    logError("admin/foods/DELETE", error);
-    return NextResponse.json(
-      { error: "Failed to delete food" },
-      { status: 500 },
+    return apiInternalError(
+      "admin/foods/DELETE",
+      error,
+      "Failed to delete food",
     );
   }
 }

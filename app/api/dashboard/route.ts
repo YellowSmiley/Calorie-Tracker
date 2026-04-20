@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import { dashboardGetQuerySchema } from "@/lib/apiSchemas";
 
 type NutritionTotals = {
   calories: number;
@@ -15,7 +21,6 @@ type NutritionTotals = {
 };
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const CHART_RANGES = new Set(["1m", "3m", "6m", "1y", "all"]);
 
 const createEmptyTotals = (): NutritionTotals => ({
   calories: 0,
@@ -132,18 +137,25 @@ export async function GET(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     const { searchParams } = new URL(request.url);
-    const range = searchParams.get("range") || "day";
-    const chartRangeParam = searchParams.get("chartRange") || "6m";
+    const parsedQuery = dashboardGetQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries()),
+    );
+
+    if (!parsedQuery.success) {
+      return apiBadRequest("Invalid query parameters", "VALIDATION_ERROR", {
+        issues: parsedQuery.error.issues,
+      });
+    }
+
+    const range = parsedQuery.data.range ?? "day";
+    const chartRange = parsedQuery.data.chartRange ?? "6m";
     const dateString =
-      searchParams.get("date") || new Date().toISOString().split("T")[0];
-    const chartRange = CHART_RANGES.has(chartRangeParam)
-      ? chartRangeParam
-      : "6m";
+      parsedQuery.data.date ?? new Date().toISOString().split("T")[0];
 
     const baseDate = getBaseDate(dateString);
     const { start, end } = getRangeBounds(range, baseDate);
@@ -266,19 +278,19 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
+    return apiSuccess({
       totals,
       trend: Array.from(trendMap.values()),
     });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return apiBadRequest(error.message, "INVALID_DATE");
     }
 
-    logError("dashboard/GET", error);
-    return NextResponse.json(
-      { error: "Failed to fetch dashboard data" },
-      { status: 500 },
+    return apiInternalError(
+      "dashboard/GET",
+      error,
+      "Failed to fetch dashboard data",
     );
   }
 }

@@ -1,23 +1,20 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 import { checkRegisterRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
 import crypto, { createHash } from "crypto";
 import { getClientIp } from "@/lib/blacklist";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
+import { authRegisterBodySchema } from "@/lib/apiSchemas";
 
 const SALT_ROUNDS = 12;
-const MIN_PASSWORD_LENGTH = 8;
 const TOKEN_EXPIRY_HOURS = 24;
 
 const SUCCESS_MESSAGE =
   "If that email is available, you will receive a verification link shortly.";
 
 function successResponse() {
-  return NextResponse.json(
-    { success: true, message: SUCCESS_MESSAGE },
-    { status: 201 },
-  );
+  return apiSuccess({ success: true, message: SUCCESS_MESSAGE }, 201);
 }
 
 export async function POST(request: Request) {
@@ -25,14 +22,16 @@ export async function POST(request: Request) {
   if (rateLimited) return rateLimited;
 
   try {
-    const { name, email, password } = await request.json();
+    const payload = await request.json();
+    const parsedBody = authRegisterBodySchema.safeParse(payload);
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
-      );
+    if (!parsedBody.success) {
+      return apiBadRequest("Invalid registration payload", "VALIDATION_ERROR", {
+        issues: parsedBody.error.issues,
+      });
     }
+
+    const { name, email, password } = parsedBody.data;
 
     const normalizedEmail = email.toLowerCase().trim();
     const ip = getClientIp(request.headers);
@@ -61,22 +60,6 @@ export async function POST(request: Request) {
       if (ipBlocked) {
         return successResponse();
       }
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      return NextResponse.json(
-        { error: "Invalid email address" },
-        { status: 400 },
-      );
-    }
-
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      return NextResponse.json(
-        {
-          error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
-        },
-        { status: 400 },
-      );
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -117,9 +100,10 @@ export async function POST(request: Request) {
 
     return successResponse();
   } catch {
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 },
+    return apiInternalError(
+      "auth/register/POST",
+      null,
+      "Something went wrong. Please try again.",
     );
   }
 }

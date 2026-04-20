@@ -1,11 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
 import {
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
 } from "@/lib/apiSchemas";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 const getEntryDate = (dateString?: string | null) => {
   const safeDate = dateString || new Date().toISOString().split("T")[0];
@@ -24,7 +29,7 @@ export async function GET(request: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiUnauthorized();
     }
 
     const { searchParams } = new URL(request.url);
@@ -33,10 +38,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!queryValidation.success) {
-      return NextResponse.json(
-        { error: "Invalid date format" },
-        { status: 400 },
-      );
+      return apiBadRequest("Invalid date format", "INVALID_DATE");
     }
 
     const date = getEntryDate(queryValidation.data.date);
@@ -51,16 +53,16 @@ export async function GET(request: NextRequest) {
       select: { weight: true },
     });
 
-    return NextResponse.json({ weight: entry?.weight ?? null });
+    return apiSuccess({ weight: entry?.weight ?? null });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return apiBadRequest(error.message, "INVALID_DATE");
     }
 
-    logError("body-weight/GET", error);
-    return NextResponse.json(
-      { error: "Failed to fetch body weight" },
-      { status: 500 },
+    return apiInternalError(
+      "body-weight/GET",
+      error,
+      "Failed to fetch body weight",
     );
   }
 }
@@ -70,31 +72,25 @@ export async function PUT(request: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiUnauthorized();
     }
 
     let body: unknown;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON payload" },
-        { status: 400 },
-      );
+      return apiBadRequest("Invalid JSON payload", "INVALID_JSON");
     }
 
     const payloadValidation = bodyWeightPutBodySchema.safeParse(body);
     if (!payloadValidation.success) {
       const firstIssue = payloadValidation.error.issues[0];
       if (firstIssue?.path[0] === "date") {
-        return NextResponse.json(
-          { error: "Invalid date format" },
-          { status: 400 },
-        );
+        return apiBadRequest("Invalid date format", "INVALID_DATE");
       }
-      return NextResponse.json(
-        { error: "Body weight must be between 0 and 1000 kg" },
-        { status: 400 },
+      return apiBadRequest(
+        "Body weight must be between 0 and 1000 kg",
+        "INVALID_BODY_WEIGHT",
       );
     }
 
@@ -109,7 +105,7 @@ export async function PUT(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ weight: null });
+      return apiSuccess({ weight: null });
     }
 
     const entry = await prisma.weightEntry.upsert({
@@ -132,16 +128,16 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ weight: entry.weight });
+    return apiSuccess({ weight: entry.weight });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return apiBadRequest(error.message, "INVALID_DATE");
     }
 
-    logError("body-weight/PUT", error);
-    return NextResponse.json(
-      { error: "Failed to save body weight" },
-      { status: 500 },
+    return apiInternalError(
+      "body-weight/PUT",
+      error,
+      "Failed to save body weight",
     );
   }
 }

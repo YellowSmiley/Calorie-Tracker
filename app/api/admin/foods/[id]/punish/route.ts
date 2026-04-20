@@ -1,6 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
+import { resourceIdParamsSchema } from "@/lib/apiSchemas";
 
 export async function POST(
   _request: NextRequest,
@@ -9,10 +16,15 @@ export async function POST(
   const session = await auth();
 
   if (!session?.user?.id || !session.user.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
-  const { id: foodId } = (await params) as { id: string };
+  const parsedParams = resourceIdParamsSchema.safeParse(await params);
+  if (!parsedParams.success) {
+    return apiNotFound("Food not found", "FOOD_NOT_FOUND");
+  }
+
+  const { id: foodId } = parsedParams.data;
 
   const food = await prisma.food.findUnique({
     where: { id: foodId },
@@ -20,13 +32,13 @@ export async function POST(
   });
 
   if (!food) {
-    return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    return apiNotFound("Food not found", "FOOD_NOT_FOUND");
   }
 
   if (!food.createdBy) {
-    return NextResponse.json(
-      { error: "Food creator not available for punishment." },
-      { status: 400 },
+    return apiBadRequest(
+      "Food creator not available for punishment.",
+      "FOOD_CREATOR_UNAVAILABLE",
     );
   }
 
@@ -100,5 +112,5 @@ export async function POST(
     };
   });
 
-  return NextResponse.json({ success: true, ...result });
+  return apiSuccess({ success: true, ...result });
 }

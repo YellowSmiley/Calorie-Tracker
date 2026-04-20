@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkAuthRateLimit } from "@/lib/rateLimit";
 import { createHash } from "crypto";
-import { logError } from "@/lib/logger";
 import bcrypt from "bcryptjs";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
+import { authResetPasswordBodySchema } from "@/lib/apiSchemas";
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -13,14 +13,15 @@ export async function POST(request: Request) {
   if (rateLimited) return rateLimited;
 
   try {
-    const { email, token, password } = await request.json();
-
-    if (!email || !token || !password) {
-      return NextResponse.json(
-        { error: "Email, token, and new password are required" },
-        { status: 400 },
-      );
+    const payload = await request.json();
+    const parsedBody = authResetPasswordBodySchema.safeParse(payload);
+    if (!parsedBody.success) {
+      return apiBadRequest("Invalid reset payload", "VALIDATION_ERROR", {
+        issues: parsedBody.error.issues,
+      });
     }
+
+    const { email, token, password } = parsedBody.data;
 
     // Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
     const passwordRequirements = [
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
     ];
     for (const req of passwordRequirements) {
       if (!req.regex.test(password)) {
-        return NextResponse.json({ error: req.message }, { status: 400 });
+        return apiBadRequest(req.message, "WEAK_PASSWORD");
       }
     }
 
@@ -61,9 +62,9 @@ export async function POST(request: Request) {
     });
 
     if (!record) {
-      return NextResponse.json(
-        { error: "Invalid or expired reset link" },
-        { status: 400 },
+      return apiBadRequest(
+        "Invalid or expired reset link",
+        "INVALID_RESET_LINK",
       );
     }
 
@@ -76,9 +77,9 @@ export async function POST(request: Request) {
           },
         },
       });
-      return NextResponse.json(
-        { error: "Reset link has expired. Please request a new one." },
-        { status: 400 },
+      return apiBadRequest(
+        "Reset link has expired. Please request a new one.",
+        "RESET_LINK_EXPIRED",
       );
     }
 
@@ -99,12 +100,12 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    logError("auth/reset-password", error);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 },
+    return apiInternalError(
+      "auth/reset-password",
+      error,
+      "Something went wrong. Please try again.",
     );
   }
 }

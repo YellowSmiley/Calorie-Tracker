@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
@@ -9,6 +9,15 @@ import {
   mealFavoriteUpdateBodySchema,
   mealTypeSchema,
 } from "@/lib/apiSchemas";
+import {
+  apiBadRequest,
+  apiConflict,
+  apiInternalError,
+  apiNotFound,
+  apiServiceUnavailable,
+  apiSuccess,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
   mealTypeSchema.options.includes(
@@ -91,12 +100,12 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { id } = paramsValidation.data;
@@ -104,12 +113,9 @@ export async function GET(
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
   if (!mealFavorite) {
-    return NextResponse.json(
-      {
-        error:
-          "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
-      },
-      { status: 503 },
+    return apiServiceUnavailable(
+      "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
+      "MEAL_FAVORITES_UNAVAILABLE",
     );
   }
 
@@ -127,10 +133,10 @@ export async function GET(
   });
 
   if (!favorite) {
-    return NextResponse.json({ error: "Favorite not found" }, { status: 404 });
+    return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
   }
 
-  return NextResponse.json({
+  return apiSuccess({
     id: favorite.id,
     name: favorite.name,
     mealType: favorite.mealType,
@@ -145,12 +151,12 @@ export async function PUT(
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { id } = paramsValidation.data;
@@ -158,12 +164,9 @@ export async function PUT(
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
   if (!mealFavorite) {
-    return NextResponse.json(
-      {
-        error:
-          "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
-      },
-      { status: 503 },
+    return apiServiceUnavailable(
+      "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
+      "MEAL_FAVORITES_UNAVAILABLE",
     );
   }
 
@@ -171,34 +174,31 @@ export async function PUT(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
+    return apiBadRequest("Invalid JSON payload", "INVALID_JSON");
   }
 
   const payloadValidation = mealFavoriteUpdateBodySchema.safeParse(body);
   if (!payloadValidation.success) {
     const firstIssue = payloadValidation.error.issues[0];
     if (firstIssue?.path[0] === "mealType") {
-      return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+      return apiBadRequest("Invalid meal type", "INVALID_MEAL_TYPE");
     }
     if (firstIssue?.path[0] === "items") {
-      return NextResponse.json(
-        { error: "Favorites must include between 1 and 100 items" },
-        { status: 400 },
+      return apiBadRequest(
+        "Favorites must include between 1 and 100 items",
+        "INVALID_FAVORITE_ITEMS",
       );
     }
-    return NextResponse.json(
-      { error: "Favorite name is required and must be under 100 characters" },
-      { status: 400 },
+    return apiBadRequest(
+      "Favorite name is required and must be under 100 characters",
+      "INVALID_FAVORITE_NAME",
     );
   }
 
   const { name, mealType, items } = payloadValidation.data;
 
   if (mealType !== undefined && !isValidMealType(String(mealType))) {
-    return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+    return apiBadRequest("Invalid meal type", "INVALID_MEAL_TYPE");
   }
 
   const normalizedItems = items.map((item, index) => ({
@@ -212,7 +212,7 @@ export async function PUT(
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Favorite not found" }, { status: 404 });
+    return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
   }
 
   const normalizedMealType: PrismaMealType =
@@ -232,10 +232,7 @@ export async function PUT(
   });
 
   if (existingFoodsCount !== uniqueFoodIds.length) {
-    return NextResponse.json(
-      { error: "One or more foods no longer exist" },
-      { status: 400 },
-    );
+    return apiBadRequest("One or more foods no longer exist", "FOOD_NOT_FOUND");
   }
 
   try {
@@ -273,13 +270,10 @@ export async function PUT(
     });
 
     if (!updated) {
-      return NextResponse.json(
-        { error: "Favorite not found" },
-        { status: 404 },
-      );
+      return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       id: updated.id,
       name: updated.name,
       mealType: updated.mealType,
@@ -293,17 +287,16 @@ export async function PUT(
       "code" in error &&
       (error as { code?: string }).code === "P2002"
     ) {
-      return NextResponse.json(
-        {
-          error: "A favorite with this name already exists for that meal type",
-        },
-        { status: 409 },
+      return apiConflict(
+        "A favorite with this name already exists for that meal type",
+        "FAVORITE_NAME_CONFLICT",
       );
     }
 
-    return NextResponse.json(
-      { error: "Failed to update favorite" },
-      { status: 500 },
+    return apiInternalError(
+      "meal-favorites/[id]/PUT",
+      error,
+      "Failed to update favorite",
     );
   }
 }
@@ -314,12 +307,12 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { id } = paramsValidation.data;
@@ -327,12 +320,9 @@ export async function DELETE(
     prisma as unknown as { mealFavorite?: MealFavoriteDelegate }
   ).mealFavorite;
   if (!mealFavorite) {
-    return NextResponse.json(
-      {
-        error:
-          "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
-      },
-      { status: 503 },
+    return apiServiceUnavailable(
+      "Meal favorites are not available yet. Run prisma generate and restart the dev server.",
+      "MEAL_FAVORITES_UNAVAILABLE",
     );
   }
 
@@ -344,12 +334,12 @@ export async function DELETE(
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Favorite not found" }, { status: 404 });
+    return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
   }
 
   await mealFavorite.delete({
     where: { id: existing.id },
   });
 
-  return NextResponse.json({ success: true });
+  return apiSuccess({ success: true });
 }

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { logError } from "@/lib/logger";
+import {
+  apiInternalError,
+  apiNotFound,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 // GET /api/account/export - Export all user data (GDPR Subject Access Request)
 export async function GET() {
@@ -9,7 +13,7 @@ export async function GET() {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiUnauthorized();
     }
 
     const userId = session.user.id;
@@ -39,7 +43,7 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiNotFound("User not found", "USER_NOT_FOUND");
     }
 
     const mealEntries = await prisma.mealEntry.findMany({
@@ -149,10 +153,10 @@ export async function GET() {
       },
     });
   } catch (error) {
-    logError("account/export/GET", error);
-    return NextResponse.json(
-      { error: "Failed to export data" },
-      { status: 500 },
+    return apiInternalError(
+      "account/export/GET",
+      error,
+      "Failed to export data",
     );
   }
 }

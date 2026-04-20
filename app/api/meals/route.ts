@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
@@ -8,6 +7,13 @@ import {
   mealsPostBodySchema,
   mealTypeSchema,
 } from "@/lib/apiSchemas";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiSuccess,
+  apiTooManyRequests,
+  apiUnauthorized,
+} from "@/lib/apiResponse";
 
 const MEAL_TYPES = mealTypeSchema.options;
 
@@ -31,7 +37,7 @@ const getDateRange = (dateString?: string | null) => {
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   const { searchParams } = new URL(request.url);
@@ -40,7 +46,7 @@ export async function GET(request: Request) {
   });
 
   if (!queryValidation.success) {
-    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
 
   const { date } = queryValidation.data;
@@ -48,7 +54,7 @@ export async function GET(request: Request) {
   try {
     ({ start, end } = getDateRange(date));
   } catch {
-    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
 
   const entries = (await prisma.mealEntry.findMany({
@@ -123,47 +129,38 @@ export async function GET(request: Request) {
       })),
   }));
 
-  return NextResponse.json({ meals });
+  return apiSuccess({ meals });
 }
 
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiUnauthorized();
   }
 
   try {
     await mealWriteLimiter.consume(session.user.id);
   } catch {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again shortly." },
-      { status: 429 },
-    );
+    return apiTooManyRequests();
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
+    return apiBadRequest("Invalid JSON payload", "INVALID_JSON");
   }
 
   const payloadValidation = mealsPostBodySchema.safeParse(body);
   if (!payloadValidation.success) {
     const firstIssue = payloadValidation.error.issues[0];
     if (firstIssue?.path[0] === "mealType") {
-      return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+      return apiBadRequest("Invalid meal type", "INVALID_MEAL_TYPE");
     }
     if (firstIssue?.path[0] === "date") {
-      return NextResponse.json(
-        { error: "Invalid date format" },
-        { status: 400 },
-      );
+      return apiBadRequest("Invalid date format", "INVALID_DATE");
     }
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    return apiBadRequest("Invalid payload", "VALIDATION_ERROR");
   }
 
   const { mealType, foodId, serving, date } = payloadValidation.data;
@@ -173,7 +170,7 @@ export async function POST(request: Request) {
   });
 
   if (!food) {
-    return NextResponse.json({ error: "Food not found" }, { status: 404 });
+    return apiNotFound("Food not found", "FOOD_NOT_FOUND");
   }
 
   const servingValue = serving ?? 1;
@@ -187,7 +184,7 @@ export async function POST(request: Request) {
       mealDate = new Date();
     }
   } catch {
-    return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
 
   const entry = await prisma.mealEntry.create({
@@ -208,31 +205,34 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({
-    item: {
-      id: entry.id,
-      name: food.name,
-      measurementAmount: food.measurementAmount,
-      measurementType: food.measurementType,
-      calories: entry.calories,
-      baseCalories: food.calories,
-      serving: entry.serving,
-      protein: entry.protein,
-      carbs: entry.carbs,
-      fat: entry.fat,
-      saturates: entry.saturates,
-      sugars: entry.sugars,
-      fibre: entry.fibre,
-      salt: entry.salt,
-      baseProtein: food.protein,
-      baseCarbs: food.carbs,
-      baseFat: food.fat,
-      baseSaturates: food.saturates,
-      baseSugars: food.sugars,
-      baseFibre: food.fibre,
-      baseSalt: food.salt,
-      defaultServingAmount: food.defaultServingAmount,
-      defaultServingDescription: food.defaultServingDescription,
+  return apiSuccess(
+    {
+      item: {
+        id: entry.id,
+        name: food.name,
+        measurementAmount: food.measurementAmount,
+        measurementType: food.measurementType,
+        calories: entry.calories,
+        baseCalories: food.calories,
+        serving: entry.serving,
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fat: entry.fat,
+        saturates: entry.saturates,
+        sugars: entry.sugars,
+        fibre: entry.fibre,
+        salt: entry.salt,
+        baseProtein: food.protein,
+        baseCarbs: food.carbs,
+        baseFat: food.fat,
+        baseSaturates: food.saturates,
+        baseSugars: food.sugars,
+        baseFibre: food.fibre,
+        baseSalt: food.salt,
+        defaultServingAmount: food.defaultServingAmount,
+        defaultServingDescription: food.defaultServingDescription,
+      },
     },
-  });
+    201,
+  );
 }

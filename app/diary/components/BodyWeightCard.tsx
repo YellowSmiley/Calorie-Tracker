@@ -7,6 +7,7 @@ import {
   convertBodyWeightFromInput,
   getBodyWeightForDisplay,
 } from "@/lib/unitConversions";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { AcceptedBodyWeightUnits } from "@/app/settings/types";
 
 interface BodyWeightCardProps {
@@ -83,8 +84,9 @@ export default function BodyWeightCard({
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        throw new Error(data.error || "Failed to save body weight");
+        throw new Error(
+          await getApiErrorMessage(response, "Failed to save body weight"),
+        );
       }
 
       setSavedBodyWeightKg(weight);
