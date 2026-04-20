@@ -138,7 +138,7 @@ export default function BodyWeightCard({
           isLoading={isSavingBodyWeight}
           loadingLabel="Saving weight..."
           spinnerClassName="h-4 w-4"
-          className="rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
           data-testid="diary-body-weight-save-button"
         >
           Save Weight

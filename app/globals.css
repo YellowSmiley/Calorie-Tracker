@@ -115,6 +115,16 @@ body {
   background: var(--button-primary-hover);
 }
 
+.ct-button-secondary {
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+}
+
+.ct-button-secondary:hover {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
 .ct-link-accent {
   color: var(--link-accent);
 }

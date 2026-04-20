@@ -383,9 +383,7 @@ export default function MealsSection({
             title="How to Use"
             ariaLabel="Help: How to add and manage foods"
           >
-            <p>
-              Step 1: Click Add Item at the bottom of a meal section.
-            </p>
+            <p>Step 1: Click Add Item at the bottom of a meal section.</p>
             <p>
               Step 2: Select a food, then enter serving size and quantity before
               confirming.
@@ -420,7 +418,7 @@ export default function MealsSection({
                         setSaveFavoriteName(`${meal.name} Favorite`);
                       }}
                       disabled={isSavingFavorite}
-                      className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors disabled:opacity-50"
+                      className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
                       data-testid={`save-favorite-${meal.name.toLowerCase()}`}
                     >
                       Save as Favorite
@@ -428,7 +426,7 @@ export default function MealsSection({
                     <button
                       type="button"
                       onClick={() => setFavoritePickerMealIndex(mealIndex)}
-                      className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                      className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                       data-testid={`apply-favorite-${meal.name.toLowerCase()}`}
                     >
                       Apply Favorite
@@ -436,7 +434,7 @@ export default function MealsSection({
                     <button
                       type="button"
                       onClick={() => setClearMealIndex(mealIndex)}
-                      className="rounded-lg border border-solid border-black/8 hover:border-black hover:bg-black/4 dark:border-white/[.145] dark:hover:border-white dark:hover:bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                      className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                       data-testid={`clear-meal-${meal.name.toLowerCase()}`}
                     >
                       Clear Meal
@@ -523,7 +521,7 @@ export default function MealsSection({
                           <td colSpan={3} className="px-4 py-3 text-center">
                             <button
                               type="button"
-                              className="ct-button-primary rounded-lg px-4 py-2 text-center text-sm font-medium transition-colors"
+                              className="ct-button-primary h-10 rounded-lg px-4 text-center text-sm font-medium transition-colors"
                               data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
                             >
                               Add Item
@@ -632,7 +630,7 @@ export default function MealsSection({
               <button
                 onClick={() => setClearMealIndex(null)}
                 disabled={isClearingMeal}
-                className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-50 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50"
+                className="ct-button-secondary h-10 flex-1 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -641,7 +639,7 @@ export default function MealsSection({
                 isLoading={isClearingMeal}
                 loadingLabel="Clearing meal..."
                 spinnerClassName="h-4 w-4"
-                className="flex-1 px-4 py-2 rounded-lg bg-black text-white font-medium hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300 transition-colors disabled:opacity-50"
+                className="ct-button-danger-solid h-10 flex-1 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
               >
                 Clear Meal
               </LoadingButton>

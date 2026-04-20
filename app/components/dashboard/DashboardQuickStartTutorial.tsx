@@ -47,7 +47,7 @@ export default function DashboardQuickStartTutorial() {
           onClick={() => setIsCollapsed((previous) => !previous)}
           aria-expanded={!isCollapsed}
           aria-controls="dashboard-quick-tutorial-content"
-          className="w-full rounded-lg border border-solid border-black/8 px-3 py-2 text-sm font-medium text-black transition-colors hover:border-black hover:bg-black/4 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:border-white/[.145] dark:text-zinc-50 dark:hover:border-white dark:hover:bg-[#1a1a1a] sm:w-auto"
+          className="ct-button-secondary h-10 w-full rounded-lg px-4 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500 sm:w-auto"
           data-testid="dashboard-tutorial-toggle"
         >
           {isCollapsed ? "Show tutorial" : "Hide tutorial"}
@@ -88,8 +88,7 @@ export default function DashboardQuickStartTutorial() {
             </li>
             <li>
               Example food entry: search for &quot;Greek yogurt&quot;, select
-              it, then enter a serving like 170g before saving it to your
-              meal.
+              it, then enter a serving like 170g before saving it to your meal.
             </li>
             <li>
               Use favorites to save meals with multiple ingredients. Example:

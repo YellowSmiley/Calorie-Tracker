@@ -62,7 +62,7 @@ export default function DataPrivacySection({
           isLoading={isExporting}
           loadingLabel="Exporting data..."
           spinnerClassName="h-4 w-4"
-          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50 disabled:opacity-50"
+          className="ct-button-primary h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors disabled:opacity-50"
         >
           Export My Data
         </LoadingButton>
@@ -90,7 +90,7 @@ export default function DataPrivacySection({
               type="button"
               data-testid="delete-account-button"
               onClick={onDeleteClick}
-              className="ct-button-danger-subtle w-full rounded-lg px-6 py-3 font-medium transition-colors"
+              className="ct-button-danger-subtle h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors"
             >
               Delete My Account
             </button>
@@ -118,7 +118,7 @@ export default function DataPrivacySection({
                 isLoading={isDeleting}
                 loadingLabel="Deleting account..."
                 spinnerClassName="h-4 w-4"
-                className="ct-button-danger-solid flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+                className="ct-button-danger-solid h-10 flex-1 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
               >
                 Yes, Delete Everything
               </LoadingButton>
@@ -126,7 +126,7 @@ export default function DataPrivacySection({
                 type="button"
                 data-testid="cancel-delete-button"
                 onClick={onDeleteCancel}
-                className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                className="ct-button-secondary h-10 flex-1 rounded-lg px-4 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>

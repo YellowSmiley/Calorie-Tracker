@@ -43,7 +43,7 @@ export default function ActionsSection({
         <button
           type="button"
           onClick={onMyFoodsClick}
-          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+          className="ct-button-secondary h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors"
           data-testid="my-foods-button"
         >
           My Foods
@@ -51,7 +51,7 @@ export default function ActionsSection({
         <button
           type="button"
           onClick={onFavoriteMealsClick}
-          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50"
+          className="ct-button-secondary h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors"
           data-testid="favorite-meals-button"
         >
           Favorite Meals
@@ -59,7 +59,7 @@ export default function ActionsSection({
         {isAdmin && (
           <PendingLink
             href="/admin"
-            className="block rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-center text-black dark:text-zinc-50"
+            className="ct-button-secondary block h-10 rounded-lg px-6 text-sm font-medium leading-10 transition-colors text-center"
             pendingLabel="Loading admin panel..."
             data-testid="admin-panel-link"
           >
@@ -76,7 +76,7 @@ export default function ActionsSection({
           isLoading={isSigningOut}
           loadingLabel="Signing out..."
           spinnerClassName="h-4 w-4"
-          className="w-full rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-6 py-3 font-medium transition-colors text-black dark:text-zinc-50 disabled:opacity-50"
+          className="ct-button-secondary h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors disabled:opacity-50"
           data-testid="sign-out-button"
         >
           Sign Out

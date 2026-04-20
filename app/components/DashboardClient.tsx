@@ -181,7 +181,6 @@ export default function DashboardClient({
                 options={CHART_RANGE_OPTIONS}
                 onChange={setChartDateRange}
                 isLoading={isLoading}
-                size="sm"
                 fullWidthOnMobile
               />
             }

@@ -266,7 +266,7 @@ export default function NutritionSummaryPanel({
             type="button"
             onClick={handlePreviousDate}
             disabled={isLoading}
-            className="rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
+            className="ct-button-secondary h-10 w-10 rounded-lg p-0 transition-colors"
           >
             <svg
               className="w-5 h-5 text-black dark:text-zinc-50"
@@ -288,14 +288,14 @@ export default function NutritionSummaryPanel({
             value={selectedDate}
             onChange={(event) => onDateChange(event.target.value)}
             disabled={isLoading}
-            className="min-w-40 cursor-pointer rounded-lg border border-zinc-200 bg-white px-4 py-2 text-center text-black scheme-light dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:scheme-dark"
+            className="h-10 min-w-40 cursor-pointer rounded-lg border border-zinc-200 bg-white px-4 text-center text-black scheme-light dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:scheme-dark"
           />
 
           <button
             type="button"
             onClick={handleNextDate}
             disabled={isLoading}
-            className="rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
+            className="ct-button-secondary h-10 w-10 rounded-lg p-0 transition-colors"
           >
             <svg
               className="w-5 h-5 text-black dark:text-zinc-50"

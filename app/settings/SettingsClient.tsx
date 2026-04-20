@@ -424,7 +424,7 @@ export default function SettingsClient({
             isLoading={isSaving}
             loadingLabel="Saving settings..."
             spinnerClassName="h-4 w-4"
-            className="ct-button-primary w-full rounded-lg px-6 py-3 font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="ct-button-primary h-10 w-full rounded-lg px-6 text-sm font-medium transition-colors disabled:opacity-50"
           >
             Save Settings
           </LoadingButton>

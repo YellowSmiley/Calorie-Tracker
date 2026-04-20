@@ -409,7 +409,7 @@ export default function GoalsCalculatorSection({
           <button
             type="button"
             onClick={calculateGoals}
-            className="ct-button-primary rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
             data-testid="goal-calculator-calculate"
           >
             Calculate and apply goals

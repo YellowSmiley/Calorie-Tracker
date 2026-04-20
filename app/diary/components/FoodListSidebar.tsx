@@ -321,7 +321,7 @@ export default function FoodListSidebar({
                   </p>
                   <button
                     onClick={onOpenCreateForm}
-                    className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                    className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                     data-testid="create-food-button"
                   >
                     Create Food
@@ -334,7 +334,7 @@ export default function FoodListSidebar({
                 <div className="px-4 py-4 text-center">
                   <button
                     onClick={onOpenCreateForm}
-                    className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                    className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                     data-testid="create-food-button"
                   >
                     Create Food
