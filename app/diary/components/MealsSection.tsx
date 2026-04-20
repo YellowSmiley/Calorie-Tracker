@@ -26,6 +26,7 @@ interface MealsSectionProps {
   setMeals: React.Dispatch<React.SetStateAction<Meal[]>>;
   currentDate: string;
   userSettings: UserSettings;
+  isAdmin: boolean;
   error: string | null;
   onError: (message: string | null) => void;
 }
@@ -35,6 +36,7 @@ export default function MealsSection({
   setMeals,
   currentDate,
   userSettings,
+  isAdmin,
   error,
   onError,
 }: MealsSectionProps) {
@@ -58,6 +60,7 @@ export default function MealsSection({
   const [isLoadingFood, setIsLoadingFood] = useState(false);
   const [isLoadingCustom, setIsLoadingCustom] = useState(false);
   const [isLoadingServing, setIsLoadingServing] = useState(false);
+  const [approvingFoodId, setApprovingFoodId] = useState<string | null>(null);
   const [favoritePickerMealIndex, setFavoritePickerMealIndex] = useState<
     number | null
   >(null);
@@ -249,6 +252,48 @@ export default function MealsSection({
       onError(err instanceof Error ? err.message : "Failed to update serving");
     } finally {
       setIsLoadingServing(false);
+    }
+  };
+
+  const handleApproveFood = async (foodId: string, currentlyApproved: boolean) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setApprovingFoodId(foodId);
+    onError(null);
+
+    try {
+      const response = await fetch(`/api/admin/foods/${foodId}/approve`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+        );
+      }
+
+      setMeals((prev) =>
+        prev.map((meal) => ({
+          ...meal,
+          items: meal.items.map((item) =>
+            item.id === foodId
+              ? { ...item, isApproved: !currentlyApproved }
+              : item,
+          ),
+        })),
+      );
+    } catch (err) {
+      onError(
+        err instanceof Error
+          ? err.message
+          : currentlyApproved
+            ? "Failed to unapprove food"
+            : "Failed to approve food",
+      );
+    } finally {
+      setApprovingFoodId(null);
     }
   };
 
@@ -552,6 +597,7 @@ export default function MealsSection({
         }}
         userSettings={userSettings}
         isLoading={isLoadingFood}
+        isAdmin={isAdmin}
       />
 
       <CreateFoodSidebar
@@ -577,6 +623,9 @@ export default function MealsSection({
         onSubmit={applyServingChange}
         userSettings={userSettings}
         isLoading={isLoadingServing}
+        isAdmin={isAdmin}
+        onApprove={handleApproveFood}
+        isApproving={Boolean(selectedFood && approvingFoodId === selectedFood.id)}
       />
 
       <DeleteFoodModal

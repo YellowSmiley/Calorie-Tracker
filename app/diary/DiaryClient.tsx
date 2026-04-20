@@ -16,6 +16,7 @@ export interface DiaryClientProps {
   activeDate: string;
   initialBodyWeightKg: number | null;
   userSettings: UserSettings;
+  isAdmin: boolean;
   userGoals: {
     calories: number;
     protein: number;
@@ -33,6 +34,7 @@ export default function DiaryClient({
   activeDate,
   initialBodyWeightKg,
   userSettings,
+  isAdmin,
   userGoals,
 }: DiaryClientProps) {
   const router = useRouter();
@@ -209,6 +211,7 @@ export default function DiaryClient({
             setMeals={setMeals}
             currentDate={currentDate}
             userSettings={userSettings}
+            isAdmin={isAdmin}
             error={error}
             onError={setError}
           />

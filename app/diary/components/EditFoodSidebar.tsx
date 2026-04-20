@@ -30,6 +30,9 @@ interface EditFoodSidebarProps {
   userSettings: UserSettings;
   isLoading?: boolean;
   isAdd?: boolean;
+  isAdmin?: boolean;
+  onApprove?: (foodId: string, currentlyApproved: boolean) => void;
+  isApproving?: boolean;
   onReport?: (foodId: string, reason?: string) => void;
   isReporting?: boolean;
   hasUserReported?: boolean;
@@ -44,6 +47,9 @@ export default function EditFoodSidebar({
   userSettings,
   isLoading = false,
   isAdd = false,
+  isAdmin = false,
+  onApprove,
+  isApproving = false,
   onReport,
   isReporting = false,
   hasUserReported = false,
@@ -684,6 +690,34 @@ export default function EditFoodSidebar({
                 <p className="mt-1 text-right text-xs text-zinc-500 dark:text-zinc-400">
                   {reportReason.length}/250
                 </p>
+              </div>
+            ) : null}
+
+            {isAdmin && food ? (
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Admin moderation action
+                  </p>
+                  <LoadingButton
+                    type="button"
+                    onClick={() => onApprove?.(food.id, Boolean(food.isApproved))}
+                    isLoading={isApproving}
+                    loadingLabel={
+                      food.isApproved ? "Unapproving..." : "Approving..."
+                    }
+                    spinnerClassName="h-4 w-4"
+                    className={[
+                      "h-10 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-60",
+                      food.isApproved ? "ct-button-secondary" : "ct-button-primary",
+                    ].join(" ")}
+                    data-testid={
+                      isAdd ? "add-food-approve-button" : "edit-serving-approve-button"
+                    }
+                  >
+                    {food.isApproved ? "Unapprove Food" : "Approve Food"}
+                  </LoadingButton>
+                </div>
               </div>
             ) : null}
           </div>

@@ -385,7 +385,30 @@ export default function FoodTable({
                   {` - ${food.createdByName || food.createdBy || "Unknown"}`}
                 </p>
               </div>
-              <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="shrink-0 flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isAdmin ? (
+                  <LoadingButton
+                    type="button"
+                    onClick={() => handleApproveFood(food.id, food.isApproved)}
+                    isLoading={approvingId === food.id}
+                    loadingLabel={
+                      food.isApproved ? "Unapproving..." : "Approving..."
+                    }
+                    spinnerClassName="h-4 w-4"
+                    className={[
+                      "rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50",
+                      food.isApproved
+                        ? "ct-button-secondary"
+                        : "ct-button-primary",
+                    ].join(" ")}
+                    data-testid={`food-row-approve-${food.id}`}
+                  >
+                    {food.isApproved ? "Unapprove" : "Approve"}
+                  </LoadingButton>
+                ) : null}
                 <button
                   onClick={() => {
                     setDeleteTarget(food);

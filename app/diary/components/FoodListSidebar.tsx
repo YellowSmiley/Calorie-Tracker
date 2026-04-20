@@ -24,6 +24,7 @@ interface FoodListSidebarProps {
   onOpenCreateForm: () => void;
   isLoading?: boolean;
   userSettings: UserSettings;
+  isAdmin?: boolean;
 }
 
 const PAGE_SIZE = 50;
@@ -66,6 +67,7 @@ export default function FoodListSidebar({
   onOpenCreateForm,
   isLoading = false,
   userSettings,
+  isAdmin = false,
 }: FoodListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -76,6 +78,7 @@ export default function FoodListSidebar({
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [reportingFoodId, setReportingFoodId] = useState<string | null>(null);
+  const [approvingFoodId, setApprovingFoodId] = useState<string | null>(null);
   const [reportError, setReportError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -216,6 +219,51 @@ export default function FoodListSidebar({
       setReportError("Failed to submit report");
     } finally {
       setReportingFoodId(null);
+    }
+  };
+
+  const handleApproveFood = async (
+    foodId: string,
+    currentlyApproved: boolean,
+  ) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setApprovingFoodId(foodId);
+    setReportError(null);
+
+    try {
+      const response = await fetch(`/api/admin/foods/${foodId}/approve`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        setReportError(
+          currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+        );
+        return;
+      }
+
+      setFoods((prev) =>
+        prev.map((food) =>
+          food.id === foodId
+            ? { ...food, isApproved: !currentlyApproved }
+            : food,
+        ),
+      );
+
+      setSelectedFood((prev) =>
+        prev && prev.id === foodId
+          ? { ...prev, isApproved: !currentlyApproved }
+          : prev,
+      );
+    } catch {
+      setReportError(
+        currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+      );
+    } finally {
+      setApprovingFoodId(null);
     }
   };
 
@@ -386,6 +434,30 @@ export default function FoodListSidebar({
                     );
                   })()}
                 </div>
+                {isAdmin ? (
+                  <div
+                    className="shrink-0"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleApproveFood(food.id, Boolean(food.isApproved))}
+                      disabled={approvingFoodId === food.id}
+                      className={`h-9 rounded-lg px-3 text-xs font-medium transition-colors disabled:opacity-60 ${
+                        food.isApproved ? "ct-button-secondary" : "ct-button-primary"
+                      }`}
+                      data-testid={`add-food-list-approve-${food.id}`}
+                    >
+                      {approvingFoodId === food.id
+                        ? food.isApproved
+                          ? "Unapproving..."
+                          : "Approving..."
+                        : food.isApproved
+                          ? "Unapprove"
+                          : "Approve"}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))}
           </DataTableShell>
@@ -406,6 +478,11 @@ export default function FoodListSidebar({
         canReport={selectedFood?.canUserReport !== false}
         userSettings={userSettings}
         isAdd
+        isAdmin={isAdmin}
+        onApprove={handleApproveFood}
+        isApproving={Boolean(
+          selectedFood && approvingFoodId === selectedFood.id,
+        )}
       />
     </div>
   );

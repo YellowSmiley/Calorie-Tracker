@@ -134,6 +134,7 @@ export default async function DiaryPage({
       initialBodyWeightKg={bodyWeightEntry?.weight ?? null}
       userSettings={userSettings}
       userGoals={userGoals}
+      isAdmin={Boolean(session.user.isAdmin)}
     />
   );
 }
