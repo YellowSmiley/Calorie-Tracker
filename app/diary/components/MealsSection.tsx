@@ -255,7 +255,10 @@ export default function MealsSection({
     }
   };
 
-  const handleApproveFood = async (foodId: string, currentlyApproved: boolean) => {
+  const handleApproveFood = async (
+    foodId: string,
+    currentlyApproved: boolean,
+  ) => {
     if (!isAdmin) {
       return;
     }
@@ -270,7 +273,9 @@ export default function MealsSection({
 
       if (!response.ok) {
         throw new Error(
-          currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+          currentlyApproved
+            ? "Failed to unapprove food"
+            : "Failed to approve food",
         );
       }
 
@@ -625,7 +630,9 @@ export default function MealsSection({
         isLoading={isLoadingServing}
         isAdmin={isAdmin}
         onApprove={handleApproveFood}
-        isApproving={Boolean(selectedFood && approvingFoodId === selectedFood.id)}
+        isApproving={Boolean(
+          selectedFood && approvingFoodId === selectedFood.id,
+        )}
       />
 
       <DeleteFoodModal

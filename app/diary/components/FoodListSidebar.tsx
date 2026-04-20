@@ -240,7 +240,9 @@ export default function FoodListSidebar({
 
       if (!response.ok) {
         setReportError(
-          currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+          currentlyApproved
+            ? "Failed to unapprove food"
+            : "Failed to approve food",
         );
         return;
       }
@@ -260,7 +262,9 @@ export default function FoodListSidebar({
       );
     } catch {
       setReportError(
-        currentlyApproved ? "Failed to unapprove food" : "Failed to approve food",
+        currentlyApproved
+          ? "Failed to unapprove food"
+          : "Failed to approve food",
       );
     } finally {
       setApprovingFoodId(null);
@@ -441,10 +445,14 @@ export default function FoodListSidebar({
                   >
                     <button
                       type="button"
-                      onClick={() => handleApproveFood(food.id, Boolean(food.isApproved))}
+                      onClick={() =>
+                        handleApproveFood(food.id, Boolean(food.isApproved))
+                      }
                       disabled={approvingFoodId === food.id}
                       className={`h-9 rounded-lg px-3 text-xs font-medium transition-colors disabled:opacity-60 ${
-                        food.isApproved ? "ct-button-secondary" : "ct-button-primary"
+                        food.isApproved
+                          ? "ct-button-secondary"
+                          : "ct-button-primary"
                       }`}
                       data-testid={`add-food-list-approve-${food.id}`}
                     >

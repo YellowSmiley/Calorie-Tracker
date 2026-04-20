@@ -701,7 +701,9 @@ export default function EditFoodSidebar({
                   </p>
                   <LoadingButton
                     type="button"
-                    onClick={() => onApprove?.(food.id, Boolean(food.isApproved))}
+                    onClick={() =>
+                      onApprove?.(food.id, Boolean(food.isApproved))
+                    }
                     isLoading={isApproving}
                     loadingLabel={
                       food.isApproved ? "Unapproving..." : "Approving..."
@@ -709,10 +711,14 @@ export default function EditFoodSidebar({
                     spinnerClassName="h-4 w-4"
                     className={[
                       "h-10 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-60",
-                      food.isApproved ? "ct-button-secondary" : "ct-button-primary",
+                      food.isApproved
+                        ? "ct-button-secondary"
+                        : "ct-button-primary",
                     ].join(" ")}
                     data-testid={
-                      isAdd ? "add-food-approve-button" : "edit-serving-approve-button"
+                      isAdd
+                        ? "add-food-approve-button"
+                        : "edit-serving-approve-button"
                     }
                   >
                     {food.isApproved ? "Unapprove Food" : "Approve Food"}
