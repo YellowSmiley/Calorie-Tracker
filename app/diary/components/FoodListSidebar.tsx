@@ -11,6 +11,7 @@ import HelpButton from "../../components/HelpButton";
 import SearchInput from "../../components/SearchInput";
 import DataTableShell from "../../components/DataTableShell";
 import EditFoodSidebar from "./EditFoodSidebar";
+import InfoAlert from "../../components/InfoAlert";
 import { UserSettings } from "../../settings/types";
 import { Food } from "@prisma/client";
 import { FoodWithCreator } from "../../api/admin/foods/route";
@@ -255,8 +256,11 @@ export default function FoodListSidebar({
             title="Select Food"
             ariaLabel="Help: How to select and add food"
           >
-            <p>Search for a food to add to your meal.</p>
-            <p>Use the search bar to find foods by name.</p>
+            <p>Step 1: Search and select a food to add to your meal.</p>
+            <p>
+              Step 2: In the next screen, enter serving size and quantity, then
+              confirm.
+            </p>
             <p>
               Approved foods are marked with an Approved badge and appear first
               in results.
@@ -276,6 +280,11 @@ export default function FoodListSidebar({
 
       <div className="p-4 overflow-hidden">
         <div className="mx-auto w-full max-w-3xl h-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
+          <InfoAlert className="mx-4 mt-4" dataTestId="select-food-flow-alert">
+            Select a food first. You will set serving size and quantity on the
+            next screen.
+          </InfoAlert>
+
           {reportError && (
             <div className="px-4 pt-4" data-testid="food-report-error">
               <div className="rounded-lg border border-zinc-300 bg-zinc-100 p-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">

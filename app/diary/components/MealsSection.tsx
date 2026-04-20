@@ -384,9 +384,13 @@ export default function MealsSection({
             ariaLabel="Help: How to add and manage foods"
           >
             <p>
-              Click Add Food at the bottom of each meal section to log foods.
+              Step 1: Click Add Item at the bottom of a meal section.
             </p>
-            <p>Click any food item to adjust serving size.</p>
+            <p>
+              Step 2: Select a food, then enter serving size and quantity before
+              confirming.
+            </p>
+            <p>Click any logged food item later to adjust serving size.</p>
             <p>
               Click Remove to delete a food from your diary. Daily totals update
               automatically.
@@ -519,10 +523,10 @@ export default function MealsSection({
                           <td colSpan={3} className="px-4 py-3 text-center">
                             <button
                               type="button"
-                              className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-center text-sm font-medium text-black dark:text-zinc-50 transition-colors"
+                              className="ct-button-primary rounded-lg px-4 py-2 text-center text-sm font-medium transition-colors"
                               data-testid={`diary-add-food-button-${meal.name.toLowerCase()}`}
                             >
-                              Add Food
+                              Add Item
                             </button>
                           </td>
                         </tr>

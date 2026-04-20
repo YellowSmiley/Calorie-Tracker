@@ -84,11 +84,12 @@ export default function DashboardQuickStartTutorial() {
                 Diary
               </Link>{" "}
               and choose your meal (Breakfast, Lunch, Dinner, or Snacks), then
-              select Add Food.
+              select Add Item.
             </li>
             <li>
-              Example food entry: search for &quot;Greek yogurt&quot;, pick a
-              serving like 170g, review nutrition, and save it to your meal.
+              Example food entry: search for &quot;Greek yogurt&quot;, select
+              it, then enter a serving like 170g before saving it to your
+              meal.
             </li>
             <li>
               Use favorites to save meals with multiple ingredients. Example:

@@ -49,7 +49,7 @@ describe("EditFoodSidebar Add Food logic", () => {
     );
     const quantityInput = getByLabelText(/Quantity/i);
     fireEvent.change(quantityInput, { target: { value: "5" } });
-    const submitBtn = getByRole("button", { name: /add food/i });
+    const submitBtn = getByRole("button", { name: /add item/i });
     fireEvent.click(submitBtn);
     // Should call onSubmit with the correct total amount (5 × 70 = 350)
     expect(onSubmit).toHaveBeenCalledWith(3.5);

@@ -20,6 +20,7 @@ import {
 import ValidatedNumberField from "./ValidatedNumberField";
 import LoadingButton from "@/app/components/LoadingButton";
 import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
+import InfoAlert from "@/app/components/InfoAlert";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -224,8 +225,10 @@ export default function EditFoodSidebar({
           >
             {isAdd ? (
               <>
-                <p>Fill in details to add a new food item.</p>
-                <p>Enter the name, serving size, and nutrition information.</p>
+                <p>Step 1: Select a food from the list.</p>
+                <p>
+                  Step 2: Enter serving size and quantity, then tap Add Item.
+                </p>
               </>
             ) : (
               <>
@@ -422,6 +425,12 @@ export default function EditFoodSidebar({
 
             {/* Serving Size + Quantity Inputs */}
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 space-y-4">
+              {isAdd ? (
+                <InfoAlert title="Add Flow" dataTestId="add-food-flow-alert">
+                  Confirm serving size and quantity before tapping Add Item.
+                </InfoAlert>
+              ) : null}
+
               <div className="grid grid-cols-2 gap-4">
                 <ValidatedNumberField
                   id="serving-size-input"
@@ -697,7 +706,7 @@ export default function EditFoodSidebar({
               className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid={isAdd ? "add-food-submit" : "edit-food-submit"}
             >
-              {isAdd ? "Add Food" : "Update Serving"}
+              {isAdd ? "Add Item" : "Update Serving"}
             </LoadingButton>
           </div>
         </div>
