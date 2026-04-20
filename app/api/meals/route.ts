@@ -6,6 +6,11 @@ import { MeasurementType } from "@/app/diary/types";
 const VALID_MEAL_TYPES = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"] as const;
 const MAX_SERVING = 1000;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+type ValidMealType = (typeof VALID_MEAL_TYPES)[number];
+
+const isValidMealType = (value: unknown): value is ValidMealType =>
+  typeof value === "string" &&
+  (VALID_MEAL_TYPES as readonly string[]).includes(value);
 
 const getDateRange = (dateString?: string | null) => {
   if (dateString && !DATE_REGEX.test(dateString)) {
@@ -118,15 +123,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { mealType, foodId, serving, date } = body ?? {};
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  const payload =
+    body && typeof body === "object"
+      ? (body as {
+          mealType?: unknown;
+          foodId?: unknown;
+          serving?: unknown;
+          date?: unknown;
+        })
+      : {};
+
+  const mealType = payload.mealType;
+  const foodId = payload.foodId;
+  const serving = payload.serving;
+  const date = payload.date;
 
   if (!mealType || !foodId) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  if (!VALID_MEAL_TYPES.includes(mealType)) {
+  if (!isValidMealType(mealType)) {
     return NextResponse.json({ error: "Invalid meal type" }, { status: 400 });
+  }
+
+  if (typeof foodId !== "string") {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
   const food = await prisma.food.findUnique({
@@ -145,6 +173,7 @@ export async function POST(request: Request) {
   let mealDate: Date;
   try {
     if (date) {
+      if (typeof date !== "string") throw new Error("Invalid date format");
       if (!DATE_REGEX.test(date)) throw new Error("Invalid date format");
       mealDate = new Date(`${date}T00:00:00`);
       if (isNaN(mealDate.getTime())) throw new Error("Invalid date");
@@ -171,19 +200,16 @@ export async function POST(request: Request) {
       fibre: Number((food.fibre * servingValue).toFixed(1)),
       salt: Number((food.salt * servingValue).toFixed(2)),
     },
-    include: {
-      food: true,
-    },
   });
 
   return NextResponse.json({
     item: {
       id: entry.id,
-      name: entry.food.name,
-      measurementAmount: entry.food.measurementAmount,
-      measurementType: entry.food.measurementType,
+      name: food.name,
+      measurementAmount: food.measurementAmount,
+      measurementType: food.measurementType,
       calories: entry.calories,
-      baseCalories: entry.food.calories,
+      baseCalories: food.calories,
       serving: entry.serving,
       protein: entry.protein,
       carbs: entry.carbs,
@@ -192,15 +218,15 @@ export async function POST(request: Request) {
       sugars: entry.sugars,
       fibre: entry.fibre,
       salt: entry.salt,
-      baseProtein: entry.food.protein,
-      baseCarbs: entry.food.carbs,
-      baseFat: entry.food.fat,
-      baseSaturates: entry.food.saturates,
-      baseSugars: entry.food.sugars,
-      baseFibre: entry.food.fibre,
-      baseSalt: entry.food.salt,
-      defaultServingAmount: entry.food.defaultServingAmount,
-      defaultServingDescription: entry.food.defaultServingDescription,
+      baseProtein: food.protein,
+      baseCarbs: food.carbs,
+      baseFat: food.fat,
+      baseSaturates: food.saturates,
+      baseSugars: food.sugars,
+      baseFibre: food.fibre,
+      baseSalt: food.salt,
+      defaultServingAmount: food.defaultServingAmount,
+      defaultServingDescription: food.defaultServingDescription,
     },
   });
 }

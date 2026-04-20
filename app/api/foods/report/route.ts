@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { containsBlockedLanguage } from "@/lib/foodModeration";
+import { RateLimiterMemory } from "rate-limiter-flexible";
+
+const reportLimiter = new RateLimiterMemory({
+  points: 10,
+  duration: 60,
+});
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -10,7 +16,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { foodId?: string; reason?: string };
+  try {
+    await reportLimiter.consume(session.user.id);
+  } catch {
+    return NextResponse.json(
+      { error: "Too many report attempts. Please try again shortly." },
+      { status: 429 },
+    );
+  }
+
+  let body: { foodId?: string; reason?: string };
+  try {
+    body = (await request.json()) as { foodId?: string; reason?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
+  }
+
   const foodId = (body.foodId || "").trim();
   const reason = (body.reason || "").trim();
 

@@ -12,8 +12,18 @@ export async function PATCH(
   }
 
   const { id } = (await params) as { id: string };
-  const body = await request.json();
-  const { serving } = body ?? {};
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  const payload =
+    body && typeof body === "object"
+      ? (body as { serving?: unknown })
+      : {};
+  const serving = payload.serving;
 
   if (typeof serving !== "number" || serving <= 0 || serving > 1000) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
