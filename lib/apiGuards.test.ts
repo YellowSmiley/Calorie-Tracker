@@ -7,7 +7,18 @@ jest.mock("@/auth", () => ({
   auth: jest.fn(),
 }));
 
-const mockedAuth = auth as jest.MockedFunction<typeof auth>;
+type MockSession = {
+  user?: {
+    id?: string;
+    isAdmin?: boolean;
+  };
+} | null;
+
+const mockedAuth = auth as jest.Mock;
+
+const mockAuthSession = (session: MockSession) => {
+  mockedAuth.mockResolvedValue(session);
+};
 
 describe("apiGuards", () => {
   afterEach(() => {
@@ -15,12 +26,12 @@ describe("apiGuards", () => {
   });
 
   test("requireUser returns user when session has id", async () => {
-    mockedAuth.mockResolvedValue({
+    mockAuthSession({
       user: {
         id: "user-1",
         isAdmin: false,
       },
-    } as Awaited<ReturnType<typeof auth>>);
+    });
 
     const result = await requireUser();
 
@@ -31,7 +42,7 @@ describe("apiGuards", () => {
   });
 
   test("requireUser returns unauthorized when session is missing", async () => {
-    mockedAuth.mockResolvedValue(null);
+    mockAuthSession(null);
 
     const result = await requireUser();
 
@@ -42,12 +53,12 @@ describe("apiGuards", () => {
   });
 
   test("requireAdmin returns unauthorized when user is not admin", async () => {
-    mockedAuth.mockResolvedValue({
+    mockAuthSession({
       user: {
         id: "user-1",
         isAdmin: false,
       },
-    } as Awaited<ReturnType<typeof auth>>);
+    });
 
     const result = await requireAdmin();
 
@@ -58,12 +69,12 @@ describe("apiGuards", () => {
   });
 
   test("requireAdmin returns user when admin", async () => {
-    mockedAuth.mockResolvedValue({
+    mockAuthSession({
       user: {
         id: "admin-1",
         isAdmin: true,
       },
-    } as Awaited<ReturnType<typeof auth>>);
+    });
 
     const result = await requireAdmin();
 

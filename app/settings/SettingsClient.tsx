@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import MyFoodsSidebar from "./components/MyFoodsSidebar";
 import FavoriteMealsSidebar from "./components/FavoriteMealsSidebar";
@@ -101,6 +101,17 @@ export default function SettingsClient({
   const [showFavoriteMeals, setShowFavoriteMeals] = useState(false);
   const [nutritionGoalErrors, setNutritionGoalErrors] =
     useState<NutritionGoalErrors>({});
+
+  useEffect(() => {
+    if (!showMyFoods && !showFavoriteMeals) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [showMyFoods, showFavoriteMeals]);
 
   const nutritionGoalFields: NutritionGoalField[] = [
     "calorieGoal",

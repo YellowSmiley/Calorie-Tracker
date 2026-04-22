@@ -278,8 +278,8 @@ export default function FoodTable({
   };
 
   return (
-    <div className="flex flex-col h-full p-4">
-      <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 p-4">
+      <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
         <SearchInput
           value={searchQuery}
           onChange={setSearchQuery}
@@ -311,6 +311,7 @@ export default function FoodTable({
         <DataTableShell
           scrollRef={scrollRef}
           onScroll={handleScroll}
+          containerClassName="flex-1 overflow-y-auto overscroll-contain"
           isLoading={isLoading}
           loadingLabel="Loading foods"
           emptyNode={

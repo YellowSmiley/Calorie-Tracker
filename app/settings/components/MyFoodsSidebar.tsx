@@ -18,7 +18,7 @@ export default function MyFoodsSidebar({
 }: MyFoodsSidebarProps) {
   return (
     <div
-      className={`fixed top-0 right-0 h-full w-full bg-zinc-50 dark:bg-zinc-950 shadow-lg z-50 flex flex-col transition-transform duration-300 ${
+      className={`fixed top-0 right-0 h-full w-full bg-zinc-50 dark:bg-zinc-950 shadow-lg z-50 flex flex-col overscroll-contain transition-transform duration-300 ${
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -36,7 +36,7 @@ export default function MyFoodsSidebar({
         <div className="w-12" />
       </div>
 
-      <div className="overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <FoodTable userSettings={userSettings} isAdmin={isAdmin} />
       </div>
     </div>
