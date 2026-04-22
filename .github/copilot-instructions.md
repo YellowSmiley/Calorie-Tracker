@@ -78,8 +78,8 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Treat these user-directed architecture decisions as project standards going forward unless the user explicitly overrides them later.
 - Apply established patterns consistently across relevant routes/components/utilities, not only in the one file being edited.
 - Current standing examples of persistent architecture rules:
-	- Use transaction boundaries for multi-step write operations to avoid partial state.
-	- Move repetitive authentication/authorization checks into reusable guard utilities.
+  - Use transaction boundaries for multi-step write operations to avoid partial state.
+  - Move repetitive authentication/authorization checks into reusable guard utilities.
 
 ## Documentation Upkeep
 
