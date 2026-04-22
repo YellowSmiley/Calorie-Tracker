@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 import { requireUser } from "@/lib/apiGuards";
 import { checkFoodWriteRateLimit } from "@/lib/rateLimit";
 import {
-  containsBlockedLanguage,
-  validateFoodNumbersForModeration,
-} from "@/lib/foodModeration";
+  buildDuplicateCheckInput,
+  findDuplicateFood,
+  getFoodModerationError,
+  mergeWithExistingFood,
+} from "@/lib/foodModerationService";
 import {
   apiBadRequest,
   apiConflict,
@@ -54,23 +55,6 @@ export async function PUT(
 
     const body = parsedBody.data;
 
-    if (containsBlockedLanguage(body.name)) {
-      return apiBadRequest(
-        "Food name contains blocked language.",
-        "FOOD_NAME_BLOCKED",
-      );
-    }
-
-    if (
-      typeof body.defaultServingDescription === "string" &&
-      containsBlockedLanguage(body.defaultServingDescription)
-    ) {
-      return apiBadRequest(
-        "Serving description contains blocked language.",
-        "SERVING_DESCRIPTION_BLOCKED",
-      );
-    }
-
     // Ownership check
     const existingFood = await prisma.food.findUnique({
       where: { id: foodId },
@@ -82,34 +66,15 @@ export async function PUT(
       return apiForbidden();
     }
 
-    const mergedFoodForDuplicateCheck = {
-      id: foodId,
-      name: body.name ?? existingFood.name,
-      measurementType: body.measurementType ?? existingFood.measurementType,
-      measurementAmount:
-        typeof body.measurementAmount === "number"
-          ? body.measurementAmount
-          : existingFood.measurementAmount,
-      calories:
-        typeof body.calories === "number"
-          ? body.calories
-          : existingFood.calories,
-      protein:
-        typeof body.protein === "number" ? body.protein : existingFood.protein,
-      carbs: typeof body.carbs === "number" ? body.carbs : existingFood.carbs,
-      fat: typeof body.fat === "number" ? body.fat : existingFood.fat,
-      saturates:
-        typeof body.saturates === "number"
-          ? body.saturates
-          : existingFood.saturates,
-      sugars:
-        typeof body.sugars === "number" ? body.sugars : existingFood.sugars,
-      fibre: typeof body.fibre === "number" ? body.fibre : existingFood.fibre,
-      salt: typeof body.salt === "number" ? body.salt : existingFood.salt,
-    };
+    const normalized = mergeWithExistingFood(existingFood, body);
 
-    const duplicate = await findLikelyDuplicateFood(
-      mergedFoodForDuplicateCheck,
+    const moderationError = getFoodModerationError(normalized);
+    if (moderationError) {
+      return apiBadRequest(moderationError.message, moderationError.code);
+    }
+
+    const duplicate = await findDuplicateFood(
+      buildDuplicateCheckInput(normalized, foodId),
     );
     if (duplicate) {
       return apiConflict(
@@ -118,45 +83,22 @@ export async function PUT(
       );
     }
 
-    const moderationNumberError = validateFoodNumbersForModeration({
-      calories: mergedFoodForDuplicateCheck.calories,
-      protein: mergedFoodForDuplicateCheck.protein,
-      carbs: mergedFoodForDuplicateCheck.carbs,
-      fat: mergedFoodForDuplicateCheck.fat,
-      saturates: mergedFoodForDuplicateCheck.saturates,
-      sugars: mergedFoodForDuplicateCheck.sugars,
-      fibre: mergedFoodForDuplicateCheck.fibre,
-      salt: mergedFoodForDuplicateCheck.salt,
-    });
-
-    if (moderationNumberError) {
-      return apiBadRequest(moderationNumberError, "FOOD_NUMBERS_INVALID");
-    }
-
     const updated = await prisma.food.update({
       where: { id: foodId },
       data: {
-        name: body.name,
-        measurementAmount: body.measurementAmount,
-        measurementType: body.measurementType,
-        calories: body.calories,
-        protein: body.protein,
-        carbs: body.carbs,
-        fat: body.fat,
-        saturates: typeof body.saturates === "number" ? body.saturates : 0,
-        sugars: typeof body.sugars === "number" ? body.sugars : 0,
-        fibre: typeof body.fibre === "number" ? body.fibre : 0,
-        salt: typeof body.salt === "number" ? body.salt : 0,
-        defaultServingAmount:
-          typeof body.defaultServingAmount === "number" &&
-          body.defaultServingAmount > 0
-            ? body.defaultServingAmount
-            : null,
-        defaultServingDescription:
-          typeof body.defaultServingDescription === "string" &&
-          body.defaultServingDescription.trim()
-            ? body.defaultServingDescription.trim().slice(0, 50)
-            : null,
+        name: normalized.name,
+        measurementAmount: normalized.measurementAmount,
+        measurementType: normalized.measurementType,
+        calories: normalized.calories,
+        protein: normalized.protein,
+        carbs: normalized.carbs,
+        fat: normalized.fat,
+        saturates: normalized.saturates,
+        sugars: normalized.sugars,
+        fibre: normalized.fibre,
+        salt: normalized.salt,
+        defaultServingAmount: normalized.defaultServingAmount,
+        defaultServingDescription: normalized.defaultServingDescription,
         isApproved: false,
         approvedBy: null,
         approvedAt: null,

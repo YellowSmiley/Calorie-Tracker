@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/apiGuards";
 import { checkAccountDeleteRateLimit } from "@/lib/rateLimit";
+import { deleteAccountWithLastAdminProtection } from "@/lib/accountService";
 import {
   apiBadRequest,
   apiInternalError,
@@ -25,37 +25,7 @@ export async function DELETE() {
       return apiTooManyRequests();
     }
 
-    const result = await prisma.$transaction(
-      async (tx) => {
-        // Check if this user is the last admin in the same transaction as delete.
-        const existingUser = await tx.user.findUnique({
-          where: { id: userId },
-          select: { isAdmin: true },
-        });
-
-        if (existingUser?.isAdmin) {
-          const adminCount = await tx.user.count({
-            where: { isAdmin: true },
-          });
-
-          if (adminCount <= 1) {
-            return { blocked: true as const };
-          }
-        }
-
-        // Delete the user — Prisma cascade will handle:
-        // - Account (onDelete: Cascade)
-        // - Session (onDelete: Cascade)
-        // - MealEntry (onDelete: Cascade)
-        // - Food.createdBy (onDelete: SetNull)
-        await tx.user.delete({
-          where: { id: userId },
-        });
-
-        return { blocked: false as const };
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+    const result = await deleteAccountWithLastAdminProtection(prisma, userId);
 
     if (result.blocked) {
       return apiBadRequest(

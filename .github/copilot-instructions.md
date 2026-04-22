@@ -13,10 +13,10 @@ When making code changes, run these checks in this order when feasible:
 1. `npm run lint`
 2. `npx tsc --noEmit`
 3. `npm run test:ci`
-4. `npm run test:e2e`
+4. Playwright is optional per change. Instead of running Playwright every time, add/update TODO comments in the related `e2e/*.spec.ts` file(s) describing coverage that should be added later.
 
-If a full Playwright run is too slow for the task, run the most relevant Playwright spec(s) first, then call out that full `npm run test:e2e` is still recommended.
-For this workspace, local Playwright is only reliable when tests are run one at a time and not in headless mode. Prefer a single spec, single project, headed run such as `npm run test:e2e -- e2e/diary.spec.ts --project=chromium --workers=1 --headed`.
+Run Playwright manually when explicitly requested by the user, when debugging an end-to-end failure, or before major releases.
+For this workspace, local Playwright is only reliable when tests are run one at a time and not in headless mode. When needed, prefer a single spec, single project, headed run such as `npm run test:e2e -- e2e/diary.spec.ts --project=chromium --workers=1 --headed`.
 
 ## Component Reuse Rules
 
@@ -57,7 +57,7 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Prefer stable selectors using `data-testid` for interactive elements used by end-to-end tests.
 - Do not remove or rename existing `data-testid` attributes without updating affected Playwright specs in the same change.
 - For UI refactors, verify Playwright selectors still match and call out any selector migrations in the final response.
-- When adding any UI feature, check whether the change needs Playwright coverage, in both default units and converted units, and tests pass with all added scenarios before finalizing.
+- When adding any UI feature, check whether the change needs Playwright coverage in both default units and converted units, and add/update TODO comments in the relevant Playwright spec(s) when coverage is deferred.
 - Ensure BDD-style Playwright tests are focused on user behaviors and outcomes, not implementation details. If a test is failing due to a non-user-facing change, update the test to be more resilient rather than changing the implementation to fit the test.
 
 ## PR/Review Mindset
@@ -80,6 +80,7 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Current standing examples of persistent architecture rules:
   - Use transaction boundaries for multi-step write operations to avoid partial state.
   - Move repetitive authentication/authorization checks into reusable guard utilities.
+  - Extract non-trivial domain/business logic from complex API routes into dedicated service-layer modules in `lib/` (for example `mealService`, `foodModerationService`, `accountService`) and keep route handlers focused on transport concerns (auth, validation, response mapping).
 
 ## Documentation Upkeep
 

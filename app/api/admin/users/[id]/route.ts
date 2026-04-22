@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/apiGuards";
 import { checkAdminWriteRateLimit } from "@/lib/rateLimit";
+import { deleteUserByAdminWithLastAdminProtection } from "@/lib/accountService";
+import { applyAdminUserAction } from "@/lib/adminUserService";
 import {
   apiBadRequest,
   apiInternalError,
@@ -81,127 +82,17 @@ export async function PATCH(
         );
       }
 
-      const updatedUser = await prisma.$transaction(async (tx) => {
-        if (body.action === "addMark") {
-          const marked = await tx.user.update({
-            where: { id: userId },
-            data: { blackMarks: { increment: 1 } },
-            select: { blackMarks: true, email: true, lastKnownIp: true },
-          });
-
-          if (marked.blackMarks >= 3) {
-            await tx.user.update({
-              where: { id: userId },
-              data: { isActive: false, bannedAt: new Date() },
-            });
-
-            if (marked.email) {
-              await tx.blacklistEntry.upsert({
-                where: {
-                  entryType_value: {
-                    entryType: "email",
-                    value: marked.email.toLowerCase().trim(),
-                  },
-                },
-                update: { reason: "Auto-blacklisted after 3 moderation marks" },
-                create: {
-                  entryType: "email",
-                  value: marked.email.toLowerCase().trim(),
-                  reason: "Auto-blacklisted after 3 moderation marks",
-                },
-              });
-            }
-
-            if (marked.lastKnownIp) {
-              await tx.blacklistEntry.upsert({
-                where: {
-                  entryType_value: {
-                    entryType: "ip",
-                    value: marked.lastKnownIp,
-                  },
-                },
-                update: { reason: "Auto-blacklisted after 3 moderation marks" },
-                create: {
-                  entryType: "ip",
-                  value: marked.lastKnownIp,
-                  reason: "Auto-blacklisted after 3 moderation marks",
-                },
-              });
-            }
-          }
-        }
-
-        if (body.action === "removeMark") {
-          const nextMarks = Math.max(0, targetUser.blackMarks - 1);
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              blackMarks: nextMarks,
-              bannedAt: nextMarks < 3 ? null : targetUser.bannedAt,
-            },
-          });
-        }
-
-        if (body.action === "activate") {
-          await tx.user.update({
-            where: { id: userId },
-            data: { isActive: true },
-          });
-        }
-
-        if (body.action === "deactivate") {
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              isActive: false,
-              bannedAt: targetUser.bannedAt ?? new Date(),
-            },
-          });
-        }
-
-        if (body.action === "clearPunishments") {
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              blackMarks: 0,
-              bannedAt: null,
-              isActive: true,
-            },
-          });
-
-          if (targetUser.email) {
-            await tx.blacklistEntry.deleteMany({
-              where: {
-                entryType: "email",
-                value: targetUser.email.toLowerCase().trim(),
-              },
-            });
-          }
-
-          if (targetUser.lastKnownIp) {
-            await tx.blacklistEntry.deleteMany({
-              where: {
-                entryType: "ip",
-                value: targetUser.lastKnownIp,
-              },
-            });
-          }
-        }
-
-        return tx.user.findUnique({
-          where: { id: userId },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            isAdmin: true,
-            provider: true,
-            isActive: true,
-            blackMarks: true,
-            bannedAt: true,
-          },
-        });
-      });
+      const updatedUser = await applyAdminUserAction(
+        prisma,
+        userId,
+        body.action,
+        {
+          blackMarks: targetUser.blackMarks,
+          bannedAt: targetUser.bannedAt,
+          email: targetUser.email,
+          lastKnownIp: targetUser.lastKnownIp,
+        },
+      );
 
       if (!updatedUser) {
         return apiNotFound("User not found", "USER_NOT_FOUND");
@@ -280,33 +171,9 @@ export async function DELETE(
       );
     }
 
-    const result = await prisma.$transaction(
-      async (tx) => {
-        // Prevent deleting the last admin within same transaction as delete.
-        const targetUser = await tx.user.findUnique({
-          where: { id: userId },
-          select: { isAdmin: true },
-        });
-
-        if (!targetUser) {
-          return { missing: true as const, blocked: false as const };
-        }
-
-        if (targetUser.isAdmin) {
-          const adminCount = await tx.user.count({ where: { isAdmin: true } });
-          if (adminCount <= 1) {
-            return { missing: false as const, blocked: true as const };
-          }
-        }
-
-        // Delete user and all their data (cascade handles it)
-        await tx.user.delete({
-          where: { id: userId },
-        });
-
-        return { missing: false as const, blocked: false as const };
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    const result = await deleteUserByAdminWithLastAdminProtection(
+      prisma,
+      userId,
     );
 
     if (result.missing) {

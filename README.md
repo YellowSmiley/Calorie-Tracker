@@ -48,6 +48,7 @@ The project has recently been hardened and refactored to improve security postur
 
 - Introduced a shared schema validation layer in `lib/apiSchemas.ts` using Zod.
 - Refactored high-churn routes to consume centralized schemas for params, query, and body validation, reducing duplicated manual guards and improving type inference.
+- Added service-layer domain modules (for example `lib/mealService.ts`, `lib/foodModerationService.ts`, `lib/accountService.ts`) to centralize business logic and keep API route handlers thinner and more consistent.
 - Added focused schema unit tests in `lib/apiSchemas.test.ts` to validate contracts for meals, body weight, reporting, settings, and meal favorites.
 
 ### Why this matters

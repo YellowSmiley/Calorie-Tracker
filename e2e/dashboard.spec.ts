@@ -3,6 +3,9 @@ import { addFoodToMeal, createTestFood, resetFoodItems } from "./helpers";
 import { login } from "./auth";
 import { resetSettings } from "./helpers";
 
+// TODO(playwright): add auth security flow coverage for refactored auth services
+// (verification link lifecycle, reset-token lifecycle, and weak-password error UX).
+
 const goals = {
   calories: 3000,
   protein: 150,

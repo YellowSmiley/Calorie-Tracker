@@ -18,11 +18,12 @@ import {
   findCloseFoodSuggestions,
   sortByRelevanceAndUsage,
 } from "../../../../lib/foodSearchSuggestions";
-import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 import {
-  containsBlockedLanguage,
-  validateFoodNumbersForModeration,
-} from "@/lib/foodModeration";
+  buildDuplicateCheckInput,
+  findDuplicateFood,
+  getFoodModerationError,
+  normalizeFoodWriteInput,
+} from "@/lib/foodModerationService";
 
 export type FoodWithCreator = Food & {
   createdByName?: string;
@@ -153,68 +154,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const {
-      name,
-      measurementType,
-      measurementAmount,
-      calories,
-      protein,
-      carbs,
-      fat,
-      saturates,
-      sugars,
-      fibre,
-      salt,
-      defaultServingAmount,
-      defaultServingDescription,
-    } = parsedBody.data;
+    const normalized = normalizeFoodWriteInput(parsedBody.data);
 
-    if (containsBlockedLanguage(name)) {
-      return apiBadRequest(
-        "Food name contains blocked language.",
-        "FOOD_NAME_BLOCKED",
-      );
+    const moderationError = getFoodModerationError(normalized);
+    if (moderationError) {
+      return apiBadRequest(moderationError.message, moderationError.code);
     }
 
-    if (
-      typeof defaultServingDescription === "string" &&
-      containsBlockedLanguage(defaultServingDescription)
-    ) {
-      return apiBadRequest(
-        "Serving description contains blocked language.",
-        "SERVING_DESCRIPTION_BLOCKED",
-      );
-    }
-
-    const moderationNumberError = validateFoodNumbersForModeration({
-      calories,
-      protein,
-      carbs,
-      fat,
-      saturates: typeof saturates === "number" ? saturates : 0,
-      sugars: typeof sugars === "number" ? sugars : 0,
-      fibre: typeof fibre === "number" ? fibre : 0,
-      salt: typeof salt === "number" ? salt : 0,
-    });
-
-    if (moderationNumberError) {
-      return apiBadRequest(moderationNumberError, "FOOD_NUMBERS_INVALID");
-    }
-
-    const duplicate = await findLikelyDuplicateFood({
-      name,
-      measurementType,
-      measurementAmount:
-        measurementAmount && measurementAmount > 0 ? measurementAmount : 100,
-      calories,
-      protein,
-      carbs,
-      fat,
-      saturates: typeof saturates === "number" ? saturates : 0,
-      sugars: typeof sugars === "number" ? sugars : 0,
-      fibre: typeof fibre === "number" ? fibre : 0,
-      salt: typeof salt === "number" ? salt : 0,
-    });
+    const duplicate = await findDuplicateFood(
+      buildDuplicateCheckInput(normalized),
+    );
 
     if (duplicate) {
       return apiConflict(
@@ -225,28 +174,20 @@ export async function POST(request: NextRequest) {
 
     const newFood = await prisma.food.create({
       data: {
-        name,
-        measurementType,
-        measurementAmount:
-          measurementAmount && measurementAmount > 0 ? measurementAmount : 100,
-        calories,
-        protein,
-        carbs,
-        fat,
-        saturates: typeof saturates === "number" ? saturates : 0,
-        sugars: typeof sugars === "number" ? sugars : 0,
-        fibre: typeof fibre === "number" ? fibre : 0,
-        salt: typeof salt === "number" ? salt : 0,
+        name: normalized.name,
+        measurementType: normalized.measurementType,
+        measurementAmount: normalized.measurementAmount,
+        calories: normalized.calories,
+        protein: normalized.protein,
+        carbs: normalized.carbs,
+        fat: normalized.fat,
+        saturates: normalized.saturates,
+        sugars: normalized.sugars,
+        fibre: normalized.fibre,
+        salt: normalized.salt,
         createdBy: user.id,
-        defaultServingAmount:
-          typeof defaultServingAmount === "number" && defaultServingAmount > 0
-            ? defaultServingAmount
-            : null,
-        defaultServingDescription:
-          typeof defaultServingDescription === "string" &&
-          defaultServingDescription.trim()
-            ? defaultServingDescription.trim().slice(0, 50)
-            : null,
+        defaultServingAmount: normalized.defaultServingAmount,
+        defaultServingDescription: normalized.defaultServingDescription,
         isApproved: false,
         approvedBy: null,
         approvedAt: null,

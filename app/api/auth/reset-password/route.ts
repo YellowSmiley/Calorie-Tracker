@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { checkAuthRateLimit } from "@/lib/rateLimit";
-import { createHash } from "crypto";
 import bcrypt from "bcryptjs";
 import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { authResetPasswordBodySchema } from "@/lib/apiSchemas";
+import {
+  buildResetTokenIdentifier,
+  getWeakPasswordMessage,
+  hashToken,
+  normalizeEmail,
+} from "@/lib/authSecurityService";
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -23,39 +28,22 @@ export async function POST(request: Request) {
 
     const { email, token, password } = parsedBody.data;
 
-    // Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-    const passwordRequirements = [
-      {
-        regex: /.{8,}/,
-        message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
-      },
-      {
-        regex: /[A-Z]/,
-        message: "Password must contain at least one uppercase letter",
-      },
-      {
-        regex: /[a-z]/,
-        message: "Password must contain at least one lowercase letter",
-      },
-      { regex: /[0-9]/, message: "Password must contain at least one number" },
-      {
-        regex: /[^A-Za-z0-9]/,
-        message: "Password must contain at least one special character",
-      },
-    ];
-    for (const req of passwordRequirements) {
-      if (!req.regex.test(password)) {
-        return apiBadRequest(req.message, "WEAK_PASSWORD");
-      }
+    const weakPasswordMessage = getWeakPasswordMessage(
+      password,
+      MIN_PASSWORD_LENGTH,
+    );
+    if (weakPasswordMessage) {
+      return apiBadRequest(weakPasswordMessage, "WEAK_PASSWORD");
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const normalizedEmail = normalizeEmail(email);
+    const resetIdentifier = buildResetTokenIdentifier(normalizedEmail);
+    const tokenHash = hashToken(token);
 
     const record = await prisma.verificationToken.findUnique({
       where: {
         identifier_token: {
-          identifier: `reset:${normalizedEmail}`,
+          identifier: resetIdentifier,
           token: tokenHash,
         },
       },
@@ -72,7 +60,7 @@ export async function POST(request: Request) {
       await prisma.verificationToken.delete({
         where: {
           identifier_token: {
-            identifier: `reset:${normalizedEmail}`,
+            identifier: resetIdentifier,
             token: tokenHash,
           },
         },
@@ -93,7 +81,7 @@ export async function POST(request: Request) {
       prisma.verificationToken.delete({
         where: {
           identifier_token: {
-            identifier: `reset:${normalizedEmail}`,
+            identifier: resetIdentifier,
             token: tokenHash,
           },
         },

@@ -1,9 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { checkAuthRateLimit } from "@/lib/rateLimit";
-import crypto, { createHash } from "crypto";
 import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { authEmailBodySchema } from "@/lib/apiSchemas";
+import {
+  buildResetTokenIdentifier,
+  buildTokenExpiry,
+  createSecureToken,
+  hashToken,
+  normalizeEmail,
+} from "@/lib/authSecurityService";
 
 const TOKEN_EXPIRY_HOURS = 1;
 
@@ -22,7 +28,8 @@ export async function POST(request: Request) {
 
     const { email } = parsedBody.data;
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeEmail(email);
+    const resetIdentifier = buildResetTokenIdentifier(normalizedEmail);
 
     // Always return success to prevent enumeration
     const successResponse = () =>
@@ -43,17 +50,17 @@ export async function POST(request: Request) {
     }
 
     // Generate a new reset token
-    const token = crypto.randomBytes(32).toString("hex");
-    const tokenHash = createHash("sha256").update(token).digest("hex");
-    const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+    const token = createSecureToken();
+    const tokenHash = hashToken(token);
+    const expires = buildTokenExpiry(TOKEN_EXPIRY_HOURS);
 
     await prisma.$transaction([
       prisma.verificationToken.deleteMany({
-        where: { identifier: `reset:${normalizedEmail}` },
+        where: { identifier: resetIdentifier },
       }),
       prisma.verificationToken.create({
         data: {
-          identifier: `reset:${normalizedEmail}`,
+          identifier: resetIdentifier,
           token: tokenHash,
           expires,
         },

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
 import { checkMealWriteRateLimit } from "@/lib/rateLimit";
+import { buildMealNutritionData } from "@/lib/mealService";
 import {
   mealEntryParamsSchema,
   mealEntryPatchBodySchema,
@@ -57,18 +58,13 @@ export async function PATCH(
     return apiNotFound("Entry not found", "MEAL_ENTRY_NOT_FOUND");
   }
 
+  const nutrition = buildMealNutritionData(existing.food, serving);
+
   const updated = await prisma.mealEntry.update({
     where: { id: existing.id },
     data: {
       serving,
-      calories: Number((existing.food.calories * serving).toFixed(1)),
-      protein: Number((existing.food.protein * serving).toFixed(1)),
-      carbs: Number((existing.food.carbs * serving).toFixed(1)),
-      fat: Number((existing.food.fat * serving).toFixed(1)),
-      saturates: Number((existing.food.saturates * serving).toFixed(1)),
-      sugars: Number((existing.food.sugars * serving).toFixed(1)),
-      fibre: Number((existing.food.fibre * serving).toFixed(1)),
-      salt: Number((existing.food.salt * serving).toFixed(2)),
+      ...nutrition,
     },
     include: { food: true },
   });

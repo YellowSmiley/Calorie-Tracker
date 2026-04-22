@@ -13,6 +13,9 @@ import { login } from "./auth";
 import { resetSettings } from "./helpers";
 import { FoodItem } from "@/app/diary/types";
 
+// TODO(playwright): add/expand diary API edge-case coverage for meal service refactors
+// (date parsing boundaries, serving recalculation precision, and API error-state UX).
+
 function randomFoodName() {
   return "TestFood-" + Math.random().toString(36).substring(2, 10);
 }

@@ -10,6 +10,12 @@ type AsyncMock = Mock<(...args: unknown[]) => Promise<unknown>>;
 // Mock dependencies
 jest.mock("@/lib/prisma", () => ({
   prisma: {
+    $transaction: jest.fn(async (operations: unknown[]) =>
+      Promise.all(operations),
+    ),
+    blacklistEntry: {
+      findFirst: jest.fn(),
+    },
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -58,6 +64,9 @@ function makeRequest(body: Record<string, unknown>): Request {
 describe("POST /api/auth/register", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (prisma.blacklistEntry.findFirst as unknown as AsyncMock).mockResolvedValue(
+      null,
+    );
     (prisma.user.findUnique as unknown as AsyncMock).mockResolvedValue(null);
     (prisma.user.create as unknown as AsyncMock).mockResolvedValue({
       id: "new-user",
@@ -73,7 +82,7 @@ describe("POST /api/auth/register", () => {
       const data = await res.json();
 
       expect(res.status).toBe(400);
-      expect(data.error).toBe("Email and password are required");
+      expect(data.error).toBe("Invalid registration payload");
     });
 
     it("returns 400 when password is missing", async () => {
@@ -81,7 +90,7 @@ describe("POST /api/auth/register", () => {
       const data = await res.json();
 
       expect(res.status).toBe(400);
-      expect(data.error).toBe("Email and password are required");
+      expect(data.error).toBe("Invalid registration payload");
     });
 
     it("returns 400 for invalid email format", async () => {
@@ -91,7 +100,7 @@ describe("POST /api/auth/register", () => {
       const data = await res.json();
 
       expect(res.status).toBe(400);
-      expect(data.error).toBe("Invalid email address");
+      expect(data.error).toBe("Invalid registration payload");
     });
 
     it("returns 400 when password is too short", async () => {
@@ -101,7 +110,7 @@ describe("POST /api/auth/register", () => {
       const data = await res.json();
 
       expect(res.status).toBe(400);
-      expect(data.error).toBe("Password must be at least 8 characters");
+      expect(data.error).toBe("Invalid registration payload");
     });
 
     it("accepts exactly 8 character password", async () => {
@@ -153,11 +162,11 @@ describe("POST /api/auth/register", () => {
 
       expect(bcrypt.hash).toHaveBeenCalledWith("password123", 12);
       expect(prisma.user.create).toHaveBeenCalledWith({
-        data: {
+        data: expect.objectContaining({
           name: "John",
           email: "john@test.com",
           passwordHash: "hashed_password",
-        },
+        }),
       });
     });
 

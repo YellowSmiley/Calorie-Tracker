@@ -3,9 +3,14 @@ import { MeasurementType } from "@/app/diary/types";
 import { requireUser } from "@/lib/apiGuards";
 import { checkMealWriteRateLimit } from "@/lib/rateLimit";
 import {
+  buildMealNutritionData,
+  buildMealsResponse,
+  getDateRangeForDay,
+  getMealDateForCreate,
+} from "@/lib/mealService";
+import {
   mealsGetQuerySchema,
   mealsPostBodySchema,
-  mealTypeSchema,
 } from "@/lib/apiSchemas";
 import {
   apiBadRequest,
@@ -13,20 +18,6 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
-
-const MEAL_TYPES = mealTypeSchema.options;
-
-const getDateRange = (dateString?: string | null) => {
-  const baseDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
-  if (isNaN(baseDate.getTime())) {
-    throw new Error("Invalid date");
-  }
-  const start = new Date(baseDate);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(baseDate);
-  end.setHours(23, 59, 59, 999);
-  return { start, end };
-};
 
 export async function GET(request: Request) {
   const guard = await requireUser();
@@ -47,7 +38,7 @@ export async function GET(request: Request) {
   const { date } = queryValidation.data;
   let start: Date, end: Date;
   try {
-    ({ start, end } = getDateRange(date));
+    ({ start, end } = getDateRangeForDay(date));
   } catch {
     return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
@@ -93,36 +84,7 @@ export async function GET(request: Request) {
     };
   }>;
 
-  const meals = MEAL_TYPES.map((type) => ({
-    name: type[0] + type.slice(1).toLowerCase(),
-    items: entries
-      .filter((entry) => entry.mealType === type)
-      .map((entry) => ({
-        id: entry.id,
-        name: entry.food.name,
-        measurementAmount: entry.food.measurementAmount,
-        measurementType: entry.food.measurementType,
-        calories: entry.calories,
-        baseCalories: entry.food.calories,
-        serving: entry.serving,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fat: entry.fat,
-        saturates: entry.saturates,
-        sugars: entry.sugars,
-        fibre: entry.fibre,
-        salt: entry.salt,
-        baseProtein: entry.food.protein,
-        baseCarbs: entry.food.carbs,
-        baseFat: entry.food.fat,
-        baseSaturates: entry.food.saturates,
-        baseSugars: entry.food.sugars,
-        baseFibre: entry.food.fibre,
-        baseSalt: entry.food.salt,
-        defaultServingAmount: entry.food.defaultServingAmount,
-        defaultServingDescription: entry.food.defaultServingDescription,
-      })),
-  }));
+  const meals = buildMealsResponse(entries);
 
   return apiSuccess({ meals });
 }
@@ -172,15 +134,12 @@ export async function POST(request: Request) {
 
   let mealDate: Date;
   try {
-    if (date) {
-      mealDate = new Date(`${date}T00:00:00`);
-      if (isNaN(mealDate.getTime())) throw new Error("Invalid date");
-    } else {
-      mealDate = new Date();
-    }
+    mealDate = getMealDateForCreate(date);
   } catch {
     return apiBadRequest("Invalid date format", "INVALID_DATE");
   }
+
+  const nutrition = buildMealNutritionData(food, servingValue);
 
   const entry = await prisma.mealEntry.create({
     data: {
@@ -189,14 +148,7 @@ export async function POST(request: Request) {
       mealType,
       date: mealDate,
       serving: servingValue,
-      calories: Number((food.calories * servingValue).toFixed(1)),
-      protein: Number((food.protein * servingValue).toFixed(1)),
-      carbs: Number((food.carbs * servingValue).toFixed(1)),
-      fat: Number((food.fat * servingValue).toFixed(1)),
-      saturates: Number((food.saturates * servingValue).toFixed(1)),
-      sugars: Number((food.sugars * servingValue).toFixed(1)),
-      fibre: Number((food.fibre * servingValue).toFixed(1)),
-      salt: Number((food.salt * servingValue).toFixed(2)),
+      ...nutrition,
     },
   });
 

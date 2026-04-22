@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { createHash } from "crypto";
 import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { authVerifyQuerySchema } from "@/lib/apiSchemas";
+import { hashToken, normalizeEmail } from "@/lib/authSecurityService";
 
 export async function GET(request: Request) {
   try {
@@ -18,8 +18,8 @@ export async function GET(request: Request) {
 
     const { token, email } = parsedQuery.data;
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const normalizedEmail = normalizeEmail(email);
+    const tokenHash = hashToken(token);
 
     // Look up the verification token by hash
     const record = await prisma.verificationToken.findUnique({
