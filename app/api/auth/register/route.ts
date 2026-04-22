@@ -73,27 +73,28 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await prisma.user.create({
-      data: {
-        name: name?.trim() || null,
-        email: normalizedEmail,
-        passwordHash,
-        lastKnownIp: ip,
-      },
-    });
-
     // Generate verification token
     const token = crypto.randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
     const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
-    await prisma.verificationToken.create({
-      data: {
-        identifier: normalizedEmail,
-        token: tokenHash,
-        expires,
-      },
-    });
+    await prisma.$transaction([
+      prisma.user.create({
+        data: {
+          name: name?.trim() || null,
+          email: normalizedEmail,
+          passwordHash,
+          lastKnownIp: ip,
+        },
+      }),
+      prisma.verificationToken.create({
+        data: {
+          identifier: normalizedEmail,
+          token: tokenHash,
+          expires,
+        },
+      }),
+    ]);
 
     // Send verification email
     await sendVerificationEmail(normalizedEmail, token);

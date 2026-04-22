@@ -72,6 +72,15 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Keep changes minimal and aligned with existing project style.
 - Avoid touching unrelated files.
 
+## Architecture Consistency Rules
+
+- When the user requests an architectural change intended as an ongoing pattern, update this file in the same change so the rule persists for future work.
+- Treat these user-directed architecture decisions as project standards going forward unless the user explicitly overrides them later.
+- Apply established patterns consistently across relevant routes/components/utilities, not only in the one file being edited.
+- Current standing examples of persistent architecture rules:
+	- Use transaction boundaries for multi-step write operations to avoid partial state.
+	- Move repetitive authentication/authorization checks into reusable guard utilities.
+
 ## Documentation Upkeep
 
 - After implementing a feature, security hardening, or architecture change, explicitly check whether `README.md` should be updated in the same change.

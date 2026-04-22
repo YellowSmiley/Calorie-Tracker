@@ -42,23 +42,23 @@ export async function POST(request: Request) {
       return successResponse();
     }
 
-    // Delete any existing reset tokens for this user
-    await prisma.verificationToken.deleteMany({
-      where: { identifier: `reset:${normalizedEmail}` },
-    });
-
     // Generate a new reset token
     const token = crypto.randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
     const expires = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
-    await prisma.verificationToken.create({
-      data: {
-        identifier: `reset:${normalizedEmail}`,
-        token: tokenHash,
-        expires,
-      },
-    });
+    await prisma.$transaction([
+      prisma.verificationToken.deleteMany({
+        where: { identifier: `reset:${normalizedEmail}` },
+      }),
+      prisma.verificationToken.create({
+        data: {
+          identifier: `reset:${normalizedEmail}`,
+          token: tokenHash,
+          expires,
+        },
+      }),
+    ]);
 
     await sendPasswordResetEmail(normalizedEmail, token);
 

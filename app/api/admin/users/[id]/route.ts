@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/apiGuards";
 import { checkAdminWriteRateLimit } from "@/lib/rateLimit";
 import {
@@ -279,25 +280,45 @@ export async function DELETE(
       );
     }
 
-    // Prevent deleting the last admin
-    const targetUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { isAdmin: true },
-    });
-    if (targetUser?.isAdmin) {
-      const adminCount = await prisma.user.count({ where: { isAdmin: true } });
-      if (adminCount <= 1) {
-        return apiBadRequest(
-          "Cannot delete the last admin",
-          "LAST_ADMIN_DELETE_BLOCKED",
-        );
-      }
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Prevent deleting the last admin within same transaction as delete.
+        const targetUser = await tx.user.findUnique({
+          where: { id: userId },
+          select: { isAdmin: true },
+        });
+
+        if (!targetUser) {
+          return { missing: true as const, blocked: false as const };
+        }
+
+        if (targetUser.isAdmin) {
+          const adminCount = await tx.user.count({ where: { isAdmin: true } });
+          if (adminCount <= 1) {
+            return { missing: false as const, blocked: true as const };
+          }
+        }
+
+        // Delete user and all their data (cascade handles it)
+        await tx.user.delete({
+          where: { id: userId },
+        });
+
+        return { missing: false as const, blocked: false as const };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+
+    if (result.missing) {
+      return apiNotFound("User not found", "USER_NOT_FOUND");
     }
 
-    // Delete user and all their data (cascade handles it)
-    await prisma.user.delete({
-      where: { id: userId },
-    });
+    if (result.blocked) {
+      return apiBadRequest(
+        "Cannot delete the last admin",
+        "LAST_ADMIN_DELETE_BLOCKED",
+      );
+    }
 
     return apiSuccess({ success: true });
   } catch (error) {
