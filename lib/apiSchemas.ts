@@ -189,6 +189,12 @@ export const adminUserActionSchema = z.enum([
   "clearPunishments",
 ]);
 
+export const adminAuditReasonBodySchema = z
+  .object({
+    reason: z.string().trim().max(500).optional(),
+  })
+  .passthrough();
+
 export const adminUserPatchBodySchema = z
   .object({
     name: z.string().trim().min(1).max(100).optional(),
@@ -198,6 +204,7 @@ export const adminUserPatchBodySchema = z
       .min(8, "Password must be at least 8 characters")
       .optional(),
     action: adminUserActionSchema.optional(),
+    reason: z.string().trim().max(500).optional(),
   })
   .passthrough();
 

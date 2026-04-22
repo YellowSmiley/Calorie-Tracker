@@ -15,6 +15,7 @@ import {
   adminUserPatchBodySchema,
   resourceIdParamsSchema,
 } from "@/lib/apiSchemas";
+import { logAdminAction, getRequestId, userActionToAuditAction } from "@/lib/auditService";
 
 async function selectUserForAdmin(userId: string) {
   return prisma.user.findUnique({
@@ -98,6 +99,19 @@ export async function PATCH(
         return apiNotFound("User not found", "USER_NOT_FOUND");
       }
 
+      await logAdminAction(prisma, {
+        actorId: user.id,
+        targetType: "user",
+        targetId: userId,
+        action: userActionToAuditAction(body.action),
+        reason: body.reason,
+        requestId: getRequestId(request),
+        metadata: {
+          blackMarks: updatedUser.blackMarks,
+          isActive: updatedUser.isActive,
+        },
+      });
+
       return apiSuccess({ success: true, user: updatedUser });
     }
 
@@ -130,6 +144,16 @@ export async function PATCH(
       },
     });
 
+    await logAdminAction(prisma, {
+      actorId: user.id,
+      targetType: "user",
+      targetId: userId,
+      action: "USER_PROFILE_UPDATED",
+      reason: body.reason,
+      requestId: getRequestId(request),
+      metadata: { updatedFields: Object.keys(updateData) },
+    });
+
     return apiSuccess({ success: true, user: updatedUser });
   } catch (error) {
     return apiInternalError(
@@ -141,7 +165,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<unknown> },
 ) {
   const guard = await requireAdmin();
@@ -186,6 +210,14 @@ export async function DELETE(
         "LAST_ADMIN_DELETE_BLOCKED",
       );
     }
+
+    await logAdminAction(prisma, {
+      actorId: user.id,
+      targetType: "user",
+      targetId: userId,
+      action: "USER_DELETED_BY_ADMIN",
+      requestId: getRequestId(request),
+    });
 
     return apiSuccess({ success: true });
   } catch (error) {

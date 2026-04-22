@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiGuards";
 import { checkAdminWriteRateLimit } from "@/lib/rateLimit";
 import { apiNotFound, apiSuccess, apiTooManyRequests } from "@/lib/apiResponse";
-import { resourceIdParamsSchema } from "@/lib/apiSchemas";
+import { adminAuditReasonBodySchema, resourceIdParamsSchema } from "@/lib/apiSchemas";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
   const guard = await requireAdmin();
@@ -27,6 +28,16 @@ export async function POST(
 
   const { id: foodId } = parsedParams.data;
 
+  let reason: string | undefined;
+  try {
+    const rawBody = await request.json();
+    const parsed = adminAuditReasonBodySchema.safeParse(rawBody);
+    if (parsed.success) reason = parsed.data.reason;
+  } catch {
+    // body is optional
+  }
+  const requestId = getRequestId(request);
+
   const food = await prisma.food.findUnique({ where: { id: foodId } });
   if (!food) {
     return apiNotFound("Food not found", "FOOD_NOT_FOUND");
@@ -43,6 +54,16 @@ export async function POST(
       resolvedBy: user.id,
       resolvedAt,
     },
+  });
+
+  await logAdminAction(prisma, {
+    actorId: user.id,
+    targetType: "food",
+    targetId: foodId,
+    action: "FOOD_REPORTS_RESOLVED",
+    reason,
+    requestId,
+    metadata: { resolvedCount: result.count },
   });
 
   return apiSuccess({ success: true, resolvedCount: result.count });

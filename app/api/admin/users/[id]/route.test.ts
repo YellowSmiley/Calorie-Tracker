@@ -28,6 +28,12 @@ jest.mock("@/lib/accountService", () => ({
   deleteUserByAdminWithLastAdminProtection: jest.fn(),
 }));
 
+jest.mock("@/lib/auditService", () => ({
+  logAdminAction: jest.fn(),
+  getRequestId: jest.fn().mockReturnValue(undefined),
+  userActionToAuditAction: jest.fn().mockReturnValue("USER_MARK_ADDED"),
+}));
+
 jest.mock("bcryptjs", () => ({
   hash: jest.fn(() => Promise.resolve("hashed_password")),
 }));

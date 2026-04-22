@@ -220,3 +220,21 @@ model WeightEntry {
   @@unique([userId, date])
   @@index([userId, date])
 }
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  occurredAt DateTime @default(now())
+  actorId    String   @db.VarChar(128)
+  actorRole  String   @db.VarChar(32)
+  targetType String   @db.VarChar(64)
+  targetId   String   @db.VarChar(128)
+  action     String   @db.VarChar(64)
+  reason     String?  @db.VarChar(500)
+  metadata   Json?
+  requestId  String?  @db.VarChar(256)
+
+  @@index([occurredAt])
+  @@index([actorId, occurredAt])
+  @@index([targetType, targetId, occurredAt])
+  @@index([action, occurredAt])
+}
