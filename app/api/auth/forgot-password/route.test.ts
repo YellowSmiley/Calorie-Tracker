@@ -37,8 +37,9 @@ import { checkAuthRateLimit } from "@/lib/rateLimit";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 
-const mockCheckAuthRateLimit =
-  checkAuthRateLimit as jest.MockedFunction<typeof checkAuthRateLimit>;
+const mockCheckAuthRateLimit = checkAuthRateLimit as jest.MockedFunction<
+  typeof checkAuthRateLimit
+>;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 const mockSendPasswordResetEmail =
   sendPasswordResetEmail as jest.MockedFunction<typeof sendPasswordResetEmail>;

@@ -70,9 +70,7 @@ describe("DELETE /api/account", () => {
     expect(response.status).toBe(400);
     const data = await response.json();
     expect(data.code).toBe("LAST_ADMIN_DELETE_BLOCKED");
-    expect(data.message).toContain(
-      "Cannot delete the last admin account",
-    );
+    expect(data.message).toContain("Cannot delete the last admin account");
   });
 
   test("successfully deletes user account", async () => {

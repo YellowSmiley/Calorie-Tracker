@@ -34,11 +34,12 @@ import { buildMealNutritionData } from "@/lib/mealService";
 
 const mockRequireUser = requireUser as jest.MockedFunction<typeof requireUser>;
 const mockCheckMealWriteRateLimit =
-  checkMealWriteRateLimit as jest.MockedFunction<typeof checkMealWriteRateLimit>;
+  checkMealWriteRateLimit as jest.MockedFunction<
+    typeof checkMealWriteRateLimit
+  >;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
-const mockBuildMealNutritionData = buildMealNutritionData as jest.MockedFunction<
-  typeof buildMealNutritionData
->;
+const mockBuildMealNutritionData =
+  buildMealNutritionData as jest.MockedFunction<typeof buildMealNutritionData>;
 
 describe("DELETE /api/meals/[id]", () => {
   beforeEach(() => {
@@ -50,10 +51,9 @@ describe("DELETE /api/meals/[id]", () => {
       response: new Response("Unauthorized", { status: 401 }) as never,
     });
 
-    const response = await DELETE(
-      {} as NextRequest,
-      { params: Promise.resolve({ id: "meal-123" }) },
-    );
+    const response = await DELETE({} as NextRequest, {
+      params: Promise.resolve({ id: "meal-123" }),
+    });
 
     expect(response.status).toBe(401);
     expect(mockRequireUser).toHaveBeenCalled();
@@ -65,10 +65,9 @@ describe("DELETE /api/meals/[id]", () => {
     });
     mockCheckMealWriteRateLimit.mockResolvedValue(false);
 
-    const response = await DELETE(
-      {} as NextRequest,
-      { params: Promise.resolve({ id: "meal-123" }) },
-    );
+    const response = await DELETE({} as NextRequest, {
+      params: Promise.resolve({ id: "meal-123" }),
+    });
 
     expect(response.status).toBe(429);
   });
@@ -96,10 +95,9 @@ describe("DELETE /api/meals/[id]", () => {
     mockCheckMealWriteRateLimit.mockResolvedValue(true);
     mockPrisma.mealEntry.findFirst.mockResolvedValue(null);
 
-    const response = await DELETE(
-      {} as NextRequest,
-      { params: Promise.resolve({ id: "meal-456" }) },
-    );
+    const response = await DELETE({} as NextRequest, {
+      params: Promise.resolve({ id: "meal-456" }),
+    });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -123,10 +121,9 @@ describe("DELETE /api/meals/[id]", () => {
       userId,
     } as never);
 
-    const response = await DELETE(
-      {} as NextRequest,
-      { params: Promise.resolve({ id: mealId }) },
-    );
+    const response = await DELETE({} as NextRequest, {
+      params: Promise.resolve({ id: mealId }),
+    });
 
     expect(response.status).toBe(200);
     expect(mockPrisma.mealEntry.delete).toHaveBeenCalledWith({

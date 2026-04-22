@@ -29,9 +29,7 @@ jest.mock("@/lib/accountService", () => ({
 }));
 
 jest.mock("bcryptjs", () => ({
-  hash: jest.fn(() =>
-    Promise.resolve("hashed_password"),
-  ),
+  hash: jest.fn(() => Promise.resolve("hashed_password")),
 }));
 
 import { PATCH, DELETE } from "./route";
@@ -42,12 +40,17 @@ import { applyAdminUserAction } from "@/lib/adminUserService";
 import { deleteUserByAdminWithLastAdminProtection } from "@/lib/accountService";
 import bcrypt from "bcryptjs";
 
-const mockRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
+const mockRequireAdmin = requireAdmin as jest.MockedFunction<
+  typeof requireAdmin
+>;
 const mockCheckAdminWriteRateLimit =
-  checkAdminWriteRateLimit as jest.MockedFunction<typeof checkAdminWriteRateLimit>;
+  checkAdminWriteRateLimit as jest.MockedFunction<
+    typeof checkAdminWriteRateLimit
+  >;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
-const mockApplyAdminUserAction =
-  applyAdminUserAction as jest.MockedFunction<typeof applyAdminUserAction>;
+const mockApplyAdminUserAction = applyAdminUserAction as jest.MockedFunction<
+  typeof applyAdminUserAction
+>;
 const mockDeleteUserByAdminWithLastAdminProtection =
   deleteUserByAdminWithLastAdminProtection as jest.MockedFunction<
     typeof deleteUserByAdminWithLastAdminProtection
@@ -340,9 +343,9 @@ describe("DELETE /api/admin/users/[id]", () => {
       user: mockAdminUser,
     });
     mockCheckAdminWriteRateLimit.mockResolvedValue(true);
-        mockDeleteUserByAdminWithLastAdminProtection.mockResolvedValue({
+    mockDeleteUserByAdminWithLastAdminProtection.mockResolvedValue({
       blocked: true,
-          missing: false,
+      missing: false,
     });
 
     const response = await DELETE({} as Request, {
