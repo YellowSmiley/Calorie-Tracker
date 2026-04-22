@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import { requireUser } from "@/lib/apiGuards";
+import { checkMealWriteRateLimit } from "@/lib/rateLimit";
 import {
   mealEntryParamsSchema,
   mealEntryPatchBodySchema,
@@ -13,11 +13,6 @@ import {
   apiTooManyRequests,
 } from "@/lib/apiResponse";
 
-const mealWriteLimiter = new RateLimiterMemory({
-  points: 120,
-  duration: 60,
-});
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<unknown> },
@@ -28,9 +23,8 @@ export async function PATCH(
   }
   const { user } = guard;
 
-  try {
-    await mealWriteLimiter.consume(user.id);
-  } catch {
+  const allowed = await checkMealWriteRateLimit(user.id);
+  if (!allowed) {
     return apiTooManyRequests();
   }
 
@@ -118,9 +112,8 @@ export async function DELETE(
   }
   const { user } = guard;
 
-  try {
-    await mealWriteLimiter.consume(user.id);
-  } catch {
+  const allowed = await checkMealWriteRateLimit(user.id);
+  if (!allowed) {
     return apiTooManyRequests();
   }
 

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { containsBlockedLanguage } from "@/lib/foodModeration";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import { requireUser } from "@/lib/apiGuards";
+import { checkFoodReportRateLimit } from "@/lib/rateLimit";
 import { foodReportBodySchema } from "@/lib/apiSchemas";
 import {
   apiBadRequest,
@@ -11,11 +11,6 @@ import {
   apiTooManyRequests,
 } from "@/lib/apiResponse";
 
-const reportLimiter = new RateLimiterMemory({
-  points: 10,
-  duration: 60,
-});
-
 export async function POST(request: NextRequest) {
   const guard = await requireUser();
   if ("response" in guard) {
@@ -23,9 +18,8 @@ export async function POST(request: NextRequest) {
   }
   const { user } = guard;
 
-  try {
-    await reportLimiter.consume(user.id);
-  } catch {
+  const allowed = await checkFoodReportRateLimit(user.id);
+  if (!allowed) {
     return apiTooManyRequests(
       "Too many report attempts. Please try again shortly.",
     );

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findLikelyDuplicateFood } from "@/lib/foodDuplicateDetection";
 import { requireUser } from "@/lib/apiGuards";
+import { checkFoodWriteRateLimit } from "@/lib/rateLimit";
 import {
   containsBlockedLanguage,
   validateFoodNumbersForModeration,
@@ -13,6 +14,7 @@ import {
   apiInternalError,
   apiNotFound,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
 import {
   adminFoodUpsertBodySchema,
@@ -28,6 +30,11 @@ export async function PUT(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkFoodWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -181,6 +188,11 @@ export async function DELETE(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkFoodWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);

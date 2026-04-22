@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireAdmin } from "@/lib/apiGuards";
+import { checkAdminWriteRateLimit } from "@/lib/rateLimit";
 import {
   apiBadRequest,
   apiInternalError,
   apiNotFound,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
 import {
   adminUserPatchBodySchema,
@@ -38,6 +40,11 @@ export async function PATCH(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkAdminWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);
@@ -250,6 +257,11 @@ export async function DELETE(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkAdminWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   try {
     const parsedParams = resourceIdParamsSchema.safeParse(await params);

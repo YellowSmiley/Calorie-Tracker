@@ -2,11 +2,13 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Food } from "@prisma/client";
 import { requireUser } from "@/lib/apiGuards";
+import { checkFoodWriteRateLimit } from "@/lib/rateLimit";
 import {
   apiBadRequest,
   apiConflict,
   apiInternalError,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
 import {
   adminFoodUpsertBodySchema,
@@ -135,6 +137,11 @@ export async function POST(request: NextRequest) {
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkFoodWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   try {
     const parsedBody = adminFoodUpsertBodySchema.safeParse(

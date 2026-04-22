@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import { requireUser } from "@/lib/apiGuards";
+import { checkMealWriteRateLimit } from "@/lib/rateLimit";
 import {
   mealsGetQuerySchema,
   mealsPostBodySchema,
@@ -15,11 +15,6 @@ import {
 } from "@/lib/apiResponse";
 
 const MEAL_TYPES = mealTypeSchema.options;
-
-const mealWriteLimiter = new RateLimiterMemory({
-  points: 120,
-  duration: 60,
-});
 
 const getDateRange = (dateString?: string | null) => {
   const baseDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
@@ -139,9 +134,8 @@ export async function POST(request: Request) {
   }
   const { user } = guard;
 
-  try {
-    await mealWriteLimiter.consume(user.id);
-  } catch {
+  const allowed = await checkMealWriteRateLimit(user.id);
+  if (!allowed) {
     return apiTooManyRequests();
   }
 

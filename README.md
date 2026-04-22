@@ -39,7 +39,7 @@ The project has recently been hardened and refactored to improve security postur
 
 ### Security hardening
 
-- Added API abuse protections on key write endpoints with per-user rate limiting for meal create/update/delete and food reporting routes.
+- Added API abuse protections with per-user rate limiting on sensitive authentication and data-modification flows.
 - Added stricter JSON payload handling for mutation routes to return clean `400` responses on malformed bodies instead of bubbling parsing exceptions.
 - Added global baseline response headers through the proxy layer: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` with restricted camera/microphone/geolocation.
 - Added no-cache controls for sensitive account data export responses.
@@ -117,7 +117,10 @@ See also: the codebase instructions in `.github/copilot-instructions.md` for tes
    SMTP_USER="your-smtp-user"
    SMTP_PASSWORD="your-smtp-password"
    SMTP_FROM="noreply@example.com"
+   REDIS_URL="redis://localhost:6379"
    ```
+
+   `REDIS_URL` is optional in local development. If set, rate limiting uses shared Redis storage for multi-instance deployments. If omitted, the app falls back to in-memory limiting.
 
    Generate `AUTH_SECRET`:
 
@@ -390,6 +393,7 @@ Set **at minimum**:
 | `AUTH_URL`                              | Public URL (e.g. `https://calorietracker.yourdomain.com`) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials                                  |
 | `SMTP_*`                                | SMTP server for email verification & password reset       |
+| `REDIS_URL`                             | Optional Redis endpoint for distributed rate limiting      |
 
 #### 2. Build and start
 
@@ -505,7 +509,7 @@ New-NetFirewallRule -DisplayName "Next.js Dev" -Direction Inbound -Port 3000 -Pr
 - **Password reset** — time-limited tokens, hashed, atomic token consumption
 - **Account lockout** — failed logins, block (per email)
 - **No user enumeration** — login, forgot-password, and registration endpoints all return generic responses regardless of whether the account exists
-- **Rate Limiting** - stopping multiple attempts
+- **Rate limiting** — Request throttling is applied to sensitive auth and mutation flows to reduce abuse risk and protect service stability.
 - **Input Validation** - throwing errors on bad data
 - **HTTP Security Headers** - ensuring security headers are set
 

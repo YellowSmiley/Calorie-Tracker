@@ -1,7 +1,13 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiGuards";
-import { apiBadRequest, apiNotFound, apiSuccess } from "@/lib/apiResponse";
+import { checkAdminWriteRateLimit } from "@/lib/rateLimit";
+import {
+  apiBadRequest,
+  apiNotFound,
+  apiSuccess,
+  apiTooManyRequests,
+} from "@/lib/apiResponse";
 import { resourceIdParamsSchema } from "@/lib/apiSchemas";
 
 export async function POST(
@@ -11,6 +17,11 @@ export async function POST(
   const guard = await requireAdmin();
   if ("response" in guard) {
     return guard.response;
+  }
+
+  const allowed = await checkAdminWriteRateLimit(guard.user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
   }
 
   const parsedParams = resourceIdParamsSchema.safeParse(await params);

@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
-import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
+import { checkAccountDeleteRateLimit } from "@/lib/rateLimit";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiTooManyRequests,
+} from "@/lib/apiResponse";
 
 // DELETE /api/account - Delete user account and all associated data
 export async function DELETE() {
@@ -12,6 +18,11 @@ export async function DELETE() {
     const { user: authUser } = guard;
 
     const userId = authUser.id;
+
+    const allowed = await checkAccountDeleteRateLimit(userId);
+    if (!allowed) {
+      return apiTooManyRequests();
+    }
 
     // Check if this user is the last admin
     const existingUser = await prisma.user.findUnique({

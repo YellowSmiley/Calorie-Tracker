@@ -2,11 +2,13 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { settingsPutBodySchema } from "@/lib/apiSchemas";
 import { requireUser } from "@/lib/apiGuards";
+import { checkProfileWriteRateLimit } from "@/lib/rateLimit";
 import {
   apiBadRequest,
   apiInternalError,
   apiNotFound,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
 
 // GET /api/settings - Get user settings
@@ -54,6 +56,11 @@ export async function PUT(request: NextRequest) {
       return guard.response;
     }
     const { user } = guard;
+
+    const allowed = await checkProfileWriteRateLimit(user.id);
+    if (!allowed) {
+      return apiTooManyRequests();
+    }
 
     let body: unknown;
     try {

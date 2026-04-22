@@ -14,7 +14,9 @@ import {
   apiInternalError,
   apiServiceUnavailable,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { checkMealFavoritesWriteRateLimit } from "@/lib/rateLimit";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
   mealTypeSchema.options.includes(
@@ -166,6 +168,11 @@ export async function POST(request: NextRequest) {
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkMealFavoritesWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   let body: unknown;
   try {

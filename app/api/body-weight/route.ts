@@ -5,7 +5,13 @@ import {
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
 } from "@/lib/apiSchemas";
-import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
+import {
+  apiBadRequest,
+  apiInternalError,
+  apiSuccess,
+  apiTooManyRequests,
+} from "@/lib/apiResponse";
+import { checkProfileWriteRateLimit } from "@/lib/rateLimit";
 
 const getEntryDate = (dateString?: string | null) => {
   const safeDate = dateString || new Date().toISOString().split("T")[0];
@@ -69,6 +75,11 @@ export async function PUT(request: NextRequest) {
       return guard.response;
     }
     const { user } = guard;
+
+    const allowed = await checkProfileWriteRateLimit(user.id);
+    if (!allowed) {
+      return apiTooManyRequests();
+    }
 
     let body: unknown;
     try {

@@ -8,8 +8,10 @@ import {
   apiNotFound,
   apiServiceUnavailable,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
 import { mealFavoriteApplyBodySchema } from "@/lib/apiSchemas";
+import { checkMealFavoritesWriteRateLimit } from "@/lib/rateLimit";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -51,6 +53,11 @@ export async function POST(request: NextRequest) {
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkMealFavoritesWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   const body = await request.json();
   const parsedBody = mealFavoriteApplyBodySchema.safeParse(body);

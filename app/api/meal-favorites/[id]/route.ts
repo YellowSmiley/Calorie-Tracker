@@ -16,7 +16,9 @@ import {
   apiNotFound,
   apiServiceUnavailable,
   apiSuccess,
+  apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { checkMealFavoritesWriteRateLimit } from "@/lib/rateLimit";
 
 const isValidMealType = (mealType: string): mealType is PrismaMealType =>
   mealTypeSchema.options.includes(
@@ -154,6 +156,11 @@ export async function PUT(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkMealFavoritesWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
@@ -311,6 +318,11 @@ export async function DELETE(
     return guard.response;
   }
   const { user } = guard;
+
+  const allowed = await checkMealFavoritesWriteRateLimit(user.id);
+  if (!allowed) {
+    return apiTooManyRequests();
+  }
 
   const paramsValidation = mealFavoriteParamsSchema.safeParse(await params);
   if (!paramsValidation.success) {
