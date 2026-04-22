@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
-import {
-  apiBadRequest,
-  apiInternalError,
-  apiSuccess,
-} from "@/lib/apiResponse";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { dashboardGetQuerySchema } from "@/lib/apiSchemas";
 
 type NutritionTotals = {

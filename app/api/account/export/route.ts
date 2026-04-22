@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
-import {
-  apiInternalError,
-  apiNotFound,
-} from "@/lib/apiResponse";
+import { apiInternalError, apiNotFound } from "@/lib/apiResponse";
 
 // GET /api/account/export - Export all user data (GDPR Subject Access Request)
 export async function GET() {

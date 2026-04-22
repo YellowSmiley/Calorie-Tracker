@@ -5,11 +5,7 @@ import {
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
 } from "@/lib/apiSchemas";
-import {
-  apiBadRequest,
-  apiInternalError,
-  apiSuccess,
-} from "@/lib/apiResponse";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 
 const getEntryDate = (dateString?: string | null) => {
   const safeDate = dateString || new Date().toISOString().split("T")[0];

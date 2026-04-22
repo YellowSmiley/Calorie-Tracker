@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiGuards";
-import {
-  apiBadRequest,
-  apiInternalError,
-  apiSuccess,
-} from "@/lib/apiResponse";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { findCloseFoodSuggestions } from "../../../../lib/foodSearchSuggestions";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
 

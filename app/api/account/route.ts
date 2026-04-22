@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
-import {
-  apiBadRequest,
-  apiInternalError,
-  apiSuccess,
-} from "@/lib/apiResponse";
+import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 
 // DELETE /api/account - Delete user account and all associated data
 export async function DELETE() {

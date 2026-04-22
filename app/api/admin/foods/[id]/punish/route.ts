@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiGuards";
-import {
-  apiBadRequest,
-  apiNotFound,
-  apiSuccess,
-} from "@/lib/apiResponse";
+import { apiBadRequest, apiNotFound, apiSuccess } from "@/lib/apiResponse";
 import { resourceIdParamsSchema } from "@/lib/apiSchemas";
 
 export async function POST(
