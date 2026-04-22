@@ -8,10 +8,7 @@ import {
   getDateRangeForDay,
   getMealDateForCreate,
 } from "@/lib/mealService";
-import {
-  mealsGetQuerySchema,
-  mealsPostBodySchema,
-} from "@/lib/apiSchemas";
+import { mealsGetQuerySchema, mealsPostBodySchema } from "@/lib/apiSchemas";
 import {
   apiBadRequest,
   apiNotFound,

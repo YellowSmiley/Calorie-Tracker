@@ -31,17 +31,22 @@ describe("adminUserService", () => {
     };
 
     const prisma = {
-      $transaction: jest.fn(async (fn: (inner: typeof tx) => Promise<unknown>) =>
-        fn(tx),
+      $transaction: jest.fn(
+        async (fn: (inner: typeof tx) => Promise<unknown>) => fn(tx),
       ),
     };
 
-    const result = await applyAdminUserAction(prisma as never, "u1", "addMark", {
-      blackMarks: 2,
-      bannedAt: null,
-      email: "test@example.com",
-      lastKnownIp: "127.0.0.1",
-    });
+    const result = await applyAdminUserAction(
+      prisma as never,
+      "u1",
+      "addMark",
+      {
+        blackMarks: 2,
+        bannedAt: null,
+        email: "test@example.com",
+        lastKnownIp: "127.0.0.1",
+      },
+    );
 
     expect(result?.blackMarks).toBe(3);
     expect(tx.blacklistEntry.upsert).toHaveBeenCalledTimes(2);
@@ -69,8 +74,8 @@ describe("adminUserService", () => {
     };
 
     const prisma = {
-      $transaction: jest.fn(async (fn: (inner: typeof tx) => Promise<unknown>) =>
-        fn(tx),
+      $transaction: jest.fn(
+        async (fn: (inner: typeof tx) => Promise<unknown>) => fn(tx),
       ),
     };
 

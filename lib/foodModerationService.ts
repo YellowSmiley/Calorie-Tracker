@@ -10,7 +10,10 @@ import {
 
 export type FoodModerationError = {
   message: string;
-  code: "FOOD_NAME_BLOCKED" | "SERVING_DESCRIPTION_BLOCKED" | "FOOD_NUMBERS_INVALID";
+  code:
+    | "FOOD_NAME_BLOCKED"
+    | "SERVING_DESCRIPTION_BLOCKED"
+    | "FOOD_NUMBERS_INVALID";
 };
 
 export type FoodWriteInput = {
@@ -29,7 +32,10 @@ export type FoodWriteInput = {
   defaultServingDescription?: string | null;
 };
 
-export type NormalizedFoodWriteInput = Omit<FoodWriteInput, "defaultServingAmount" | "defaultServingDescription"> & {
+export type NormalizedFoodWriteInput = Omit<
+  FoodWriteInput,
+  "defaultServingAmount" | "defaultServingDescription"
+> & {
   defaultServingAmount: number | null;
   defaultServingDescription: string | null;
 };
@@ -167,6 +173,7 @@ export function mergeWithExistingFood(
     defaultServingAmount:
       incoming.defaultServingAmount ?? existingFood.defaultServingAmount,
     defaultServingDescription:
-      incoming.defaultServingDescription ?? existingFood.defaultServingDescription,
+      incoming.defaultServingDescription ??
+      existingFood.defaultServingDescription,
   });
 }

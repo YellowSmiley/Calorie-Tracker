@@ -14,8 +14,8 @@ describe("accountService", () => {
     };
 
     const prisma = {
-      $transaction: jest.fn(async (fn: (inner: typeof tx) => Promise<unknown>) =>
-        fn(tx),
+      $transaction: jest.fn(
+        async (fn: (inner: typeof tx) => Promise<unknown>) => fn(tx),
       ),
     };
 
@@ -38,8 +38,8 @@ describe("accountService", () => {
     };
 
     const prisma = {
-      $transaction: jest.fn(async (fn: (inner: typeof tx) => Promise<unknown>) =>
-        fn(tx),
+      $transaction: jest.fn(
+        async (fn: (inner: typeof tx) => Promise<unknown>) => fn(tx),
       ),
     };
 
