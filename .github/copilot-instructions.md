@@ -49,6 +49,7 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 
 - Use Jest for unit and business-logic tests only (pure functions, calculations, validation, transforms, and API/helper logic).
 - Do not add Jest tests that primarily verify page rendering flows, component interaction journeys, routing, or end-to-end behavior; cover those with Playwright instead.
+- If an existing Jest test in `app/**/page.test.tsx` grows into journey-style interaction coverage, extract the non-trivial logic to `lib/` and migrate the journey scenarios to Playwright TODOs in related `e2e/*.spec.ts` files.
 - When UI features include non-trivial logic, extract that logic to `lib/` and test it with Jest, then keep the user-flow validation in Playwright.
 - Prefer focused Jest runs for changed units (for example `npm run test:ci -- lib/someUtility.test.ts`) before broader suites.
 

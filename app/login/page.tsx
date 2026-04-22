@@ -5,6 +5,13 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import PendingLink from "@/app/components/PendingLink";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import {
+  buildForgotPasswordRequestInit,
+  GENERIC_SIGN_IN_FAILED_MESSAGE,
+  getCredentialsSignInError,
+  getForgotPasswordSendingMessage,
+  getForgotPasswordValidationError,
+} from "@/lib/loginService";
 
 export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -23,7 +30,7 @@ export default function LoginPage() {
     try {
       await signIn("google", { callbackUrl: "/" });
     } catch {
-      setError("Failed to sign in. Please try again.");
+      setError(GENERIC_SIGN_IN_FAILED_MESSAGE);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -40,15 +47,14 @@ export default function LoginPage() {
         password: password,
         redirect: false,
       });
-      if (result?.error || !result?.ok) {
-        setError(
-          "Failed to login. Please check your credentials and try again.",
-        );
+      const signInError = getCredentialsSignInError(result);
+      if (signInError) {
+        setError(signInError);
       } else {
         window.location.href = "/";
       }
     } catch {
-      setError("Failed to sign in. Please try again.");
+      setError(GENERIC_SIGN_IN_FAILED_MESSAGE);
     } finally {
       setIsFormLoading(false);
     }
@@ -59,18 +65,19 @@ export default function LoginPage() {
     setError("");
     setResetSent(false);
 
-    if (!email) {
-      setError("Please enter your email address first.");
+    const validationError = getForgotPasswordValidationError(email);
+    if (validationError) {
+      setError(validationError);
+      setResetSending(false);
       return;
     }
 
     setIsResetLoading(true);
     try {
-      await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      await fetch(
+        "/api/auth/forgot-password",
+        buildForgotPasswordRequestInit(email),
+      );
       setResetSent(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -161,7 +168,7 @@ export default function LoginPage() {
             {resetSending && (
               <div className="rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3">
                 <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                  Sending password reset link to {email}...
+                  {getForgotPasswordSendingMessage(email)}
                 </p>
               </div>
             )}

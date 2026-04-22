@@ -3,6 +3,10 @@ import { expect, Page } from "@playwright/test";
 const testerEmail = process.env.E2E_TEST_EMAIL ?? "";
 const testerPassword = process.env.E2E_TEST_PASSWORD ?? "";
 
+// TODO(playwright): add dedicated auth UX flow specs for login journeys
+// (invalid credentials error state, forgot-password interaction, Google sign-in,
+// and post-login redirect/callbackUrl behavior).
+
 export const login = async (page: Page) => {
   await page.goto("/login");
   await page.getByTestId("email").fill(testerEmail);
