@@ -393,7 +393,7 @@ Set **at minimum**:
 | `AUTH_URL`                              | Public URL (e.g. `https://calorietracker.yourdomain.com`) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials                                  |
 | `SMTP_*`                                | SMTP server for email verification & password reset       |
-| `REDIS_URL`                             | Optional Redis endpoint for distributed rate limiting      |
+| `REDIS_URL`                             | Optional Redis endpoint for distributed rate limiting     |
 
 #### 2. Build and start
 

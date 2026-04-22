@@ -2,7 +2,11 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
 import { checkMealFavoritesWriteRateLimit } from "@/lib/rateLimit";
-import { apiBadRequest, apiSuccess, apiTooManyRequests } from "@/lib/apiResponse";
+import {
+  apiBadRequest,
+  apiSuccess,
+  apiTooManyRequests,
+} from "@/lib/apiResponse";
 import { mealFavoriteClearMealBodySchema } from "@/lib/apiSchemas";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;

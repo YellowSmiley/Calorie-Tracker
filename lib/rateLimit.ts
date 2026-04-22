@@ -173,7 +173,9 @@ export async function checkLoginRateLimit(email: string): Promise<boolean> {
 /**
  * Check meal write rate limit by user id. Returns true if allowed, false if blocked.
  */
-export async function checkMealWriteRateLimit(userId: string): Promise<boolean> {
+export async function checkMealWriteRateLimit(
+  userId: string,
+): Promise<boolean> {
   try {
     await mealWriteLimiter.consume(userId);
     return true;
@@ -213,7 +215,9 @@ export async function checkMealFavoritesWriteRateLimit(
 /**
  * Check food write rate limit by user id. Returns true if allowed, false if blocked.
  */
-export async function checkFoodWriteRateLimit(userId: string): Promise<boolean> {
+export async function checkFoodWriteRateLimit(
+  userId: string,
+): Promise<boolean> {
   try {
     await foodWriteLimiter.consume(userId);
     return true;
@@ -253,7 +257,9 @@ export async function checkAccountDeleteRateLimit(
 /**
  * Check admin write rate limit by user id. Returns true if allowed, false if blocked.
  */
-export async function checkAdminWriteRateLimit(userId: string): Promise<boolean> {
+export async function checkAdminWriteRateLimit(
+  userId: string,
+): Promise<boolean> {
   try {
     await adminWriteLimiter.consume(userId);
     return true;
