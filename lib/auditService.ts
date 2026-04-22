@@ -87,7 +87,9 @@ export async function logAdminAction(
  * Returns undefined outside of Vercel deployments.
  */
 export function getRequestId(request: Request): string | undefined {
-  return (request.headers as Headers | undefined)?.get("x-vercel-id") ?? undefined;
+  return (
+    (request.headers as Headers | undefined)?.get("x-vercel-id") ?? undefined
+  );
 }
 
 const USER_ACTION_TO_AUDIT: Record<string, AuditAction> = {

@@ -15,7 +15,11 @@ import {
   adminUserPatchBodySchema,
   resourceIdParamsSchema,
 } from "@/lib/apiSchemas";
-import { logAdminAction, getRequestId, userActionToAuditAction } from "@/lib/auditService";
+import {
+  logAdminAction,
+  getRequestId,
+  userActionToAuditAction,
+} from "@/lib/auditService";
 
 async function selectUserForAdmin(userId: string) {
   return prisma.user.findUnique({
