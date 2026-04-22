@@ -20,9 +20,7 @@ export function getCredentialsSignInError(
   return null;
 }
 
-export function getForgotPasswordValidationError(
-  email: string,
-): string | null {
+export function getForgotPasswordValidationError(email: string): string | null {
   if (!email.trim()) {
     return FORGOT_PASSWORD_EMAIL_REQUIRED_MESSAGE;
   }
