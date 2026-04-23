@@ -54,6 +54,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="google-adsense-account" content="ca-pub-3994001555579385" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3994001555579385"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}

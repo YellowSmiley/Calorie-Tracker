@@ -208,6 +208,7 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    SMTP_PASSWORD="your-smtp-password"
    SMTP_FROM="noreply@example.com"
    REDIS_URL="redis://localhost:6379"
+   NEXT_PUBLIC_ADSENSE_HEADER_SLOT_ID="1234567890"
    STRIPE_SECRET_KEY="sk_test_..."
    STRIPE_PREMIUM_PRICE_ID="price_..."
    STRIPE_WEBHOOK_SECRET="whsec_..."
@@ -232,6 +233,10 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    - `POST /api/billing/webhook`
    - Listen for: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, and `customer.subscription.deleted`.
    - Premium access is derived from the active Stripe subscription state and updates automatically via webhook events.
+
+   AdSense note:
+   - `NEXT_PUBLIC_ADSENSE_HEADER_SLOT_ID` must be set to a real AdSense ad unit slot ID for production ads to render.
+   - If it is missing, the app intentionally does not render the header ad slot in production.
 
 ## Billing Testing Guide (Stripe Sandbox)
 

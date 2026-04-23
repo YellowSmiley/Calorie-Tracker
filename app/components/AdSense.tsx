@@ -12,6 +12,9 @@ declare global {
 
 const ADSENSE_HIDDEN_UNTIL_KEY = "ct_adsense_hidden_until";
 const ADSENSE_REAPPEAR_MS = 30 * 1000;
+const ADSENSE_CLIENT_ID = "ca-pub-3994001555579385";
+const ADSENSE_HEADER_SLOT_ID =
+  process.env.NEXT_PUBLIC_ADSENSE_HEADER_SLOT_ID?.trim() ?? "";
 
 interface AdSenseProps {
   className?: string;
@@ -35,6 +38,7 @@ export default function AdSense({ className }: AdSenseProps) {
   });
   const adRef = useRef<HTMLElement | null>(null);
   const reopenTimerRef = useRef<number | null>(null);
+  const isAdSlotConfigured = ADSENSE_HEADER_SLOT_ID.length > 0;
 
   const scheduleReopen = (delayMs: number) => {
     if (reopenTimerRef.current !== null) {
@@ -65,27 +69,6 @@ export default function AdSense({ className }: AdSenseProps) {
       scheduleReopen(hiddenUntil - Date.now());
     } else {
       window.localStorage.removeItem(ADSENSE_HIDDEN_UNTIL_KEY);
-    }
-
-    if (process.env.NODE_ENV === "production") {
-      const script = document.createElement("script");
-      script.async = true;
-      script.src =
-        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3994001555579385";
-      script.crossOrigin = "anonymous";
-      script.id = "ct-adsense-script";
-
-      if (!document.getElementById(script.id)) {
-        document.body.appendChild(script);
-      }
-
-      // Add meta tag for Google AdSense account
-      if (!document.querySelector('meta[name="google-adsense-account"]')) {
-        const meta = document.createElement("meta");
-        meta.name = "google-adsense-account";
-        meta.content = "ca-pub-3994001555579385";
-        document.head.appendChild(meta);
-      }
     }
 
     return () => {
@@ -130,6 +113,10 @@ export default function AdSense({ className }: AdSenseProps) {
     return null;
   }
 
+  if (process.env.NODE_ENV === "production" && !isAdSlotConfigured) {
+    return null;
+  }
+
   return (
     <section
       className={[
@@ -162,8 +149,8 @@ export default function AdSense({ className }: AdSenseProps) {
           }}
           className="adsbygoogle"
           style={{ display: "block" }}
-          data-ad-client="ca-pub-3994001555579385"
-          data-ad-slot="1234567890"
+          data-ad-client={ADSENSE_CLIENT_ID}
+          data-ad-slot={ADSENSE_HEADER_SLOT_ID}
           data-ad-format="auto"
           data-full-width-responsive="true"
           data-testid="header-adsense-slot"
