@@ -11,7 +11,11 @@ import {
   SettingsData,
   UserSettings,
 } from "./types";
-import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
+import {
+  CACHE_TAGS,
+  CACHE_DURATIONS,
+  getUnstableCacheRevalidate,
+} from "@/lib/cacheKeys";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -42,7 +46,7 @@ export default async function SettingsPage() {
       }),
     [CACHE_TAGS.userSettings(session.user.id)],
     {
-      revalidate: CACHE_DURATIONS.userSettings,
+      revalidate: getUnstableCacheRevalidate(CACHE_DURATIONS.userSettings),
       tags: [CACHE_TAGS.userSettings(session.user.id)],
     },
   )();

@@ -5,7 +5,11 @@ import { prisma } from "@/lib/prisma";
 import UserFoodsClient from "./UserFoodsClient";
 import { Metadata } from "next";
 import { AcceptedWeightedUnits, UserSettings } from "../settings/types";
-import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
+import {
+  CACHE_TAGS,
+  CACHE_DURATIONS,
+  getUnstableCacheRevalidate,
+} from "@/lib/cacheKeys";
 
 export const metadata: Metadata = {
   title: "My Foods - Calorie Tracker",
@@ -32,7 +36,7 @@ export default async function UserFoodsPage() {
       }),
     [CACHE_TAGS.userSettings(session.user.id)],
     {
-      revalidate: CACHE_DURATIONS.userSettings,
+      revalidate: getUnstableCacheRevalidate(CACHE_DURATIONS.userSettings),
       tags: [CACHE_TAGS.userSettings(session.user.id)],
     },
   )()) as UserSettings;

@@ -78,9 +78,7 @@ export type RuntimeEnv = z.infer<typeof runtimeEnvSchema>;
 
 let cachedRuntimeEnv: RuntimeEnv | null = null;
 
-export function parseRuntimeEnv(
-  env: NodeJS.ProcessEnv,
-): RuntimeEnv {
+export function parseRuntimeEnv(env: NodeJS.ProcessEnv): RuntimeEnv {
   return runtimeEnvSchema.parse(env);
 }
 

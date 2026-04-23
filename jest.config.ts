@@ -1,28 +1,28 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-    preset: 'ts-jest',
-    testEnvironment: 'jsdom',
-    roots: ['<rootDir>'],
-    setupFiles: ['<rootDir>/jest.env.ts'],
-    testMatch: [
-        '**/__tests__/**/*.[jt]s?(x)',
-        '**/?(*.)+(spec|test).[jt]s?(x)',
+  preset: "ts-jest",
+  testEnvironment: "jsdom",
+  roots: ["<rootDir>"],
+  setupFiles: ["<rootDir>/jest.env.ts"],
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          jsx: "react-jsx",
+          esModuleInterop: true,
+        },
+      },
     ],
-    moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/$1',
-    },
-    setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-    transform: {
-        '^.+\\.tsx?$': ['ts-jest', {
-            tsconfig: {
-                jsx: 'react-jsx',
-                esModuleInterop: true,
-            },
-        }],
-    },
-    testPathIgnorePatterns: ["e2e/", ".next/"],
-    modulePathIgnorePatterns: ["<rootDir>/.next/"],
+  },
+  testPathIgnorePatterns: ["e2e/", ".next/"],
+  modulePathIgnorePatterns: ["<rootDir>/.next/"],
 };
 
 export default config;

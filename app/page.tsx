@@ -4,7 +4,11 @@ import { prisma } from "@/lib/prisma";
 import DashboardClient from "./components/DashboardClient";
 import { SettingsData, UserSettings } from "./settings/types";
 import { redirect } from "next/navigation";
-import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
+import {
+  CACHE_TAGS,
+  CACHE_DURATIONS,
+  getUnstableCacheRevalidate,
+} from "@/lib/cacheKeys";
 
 type DashboardUserData = SettingsData & {
   isActive: boolean;
@@ -41,7 +45,7 @@ export default async function Home() {
       }),
     [CACHE_TAGS.userSettings(session.user.id)],
     {
-      revalidate: CACHE_DURATIONS.userSettings,
+      revalidate: getUnstableCacheRevalidate(CACHE_DURATIONS.userSettings),
       tags: [CACHE_TAGS.userSettings(session.user.id)],
     },
   )()) as DashboardUserData;

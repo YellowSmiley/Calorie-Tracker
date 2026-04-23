@@ -41,6 +41,16 @@ export const CACHE_DURATIONS = {
   adminUsers: IS_PRODUCTION_CACHE ? 1800 : 0, // 30 min in prod, disabled in dev
 };
 
+export function getUnstableCacheRevalidate(
+  maxAgeSeconds: number,
+): number | false {
+  if (!IS_PRODUCTION_CACHE || maxAgeSeconds <= 0) {
+    return false;
+  }
+
+  return maxAgeSeconds;
+}
+
 export function getCacheControlHeader(maxAgeSeconds: number): string {
   if (!IS_PRODUCTION_CACHE || maxAgeSeconds <= 0) {
     return "no-store, no-cache, must-revalidate, max-age=0";

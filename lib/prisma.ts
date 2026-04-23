@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { getRuntimeEnv } from "@/lib/runtimeEnv";
 
 const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient | undefined;
+  prisma: PrismaClient | undefined;
 };
 
 const runtimeEnv = getRuntimeEnv();
@@ -13,12 +13,12 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
 export const prisma =
-    globalForPrisma.prisma ??
-    new PrismaClient({
-        adapter,
-        log: ["warn", "error"],
-    });
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    adapter,
+    log: ["warn", "error"],
+  });
 
 if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prisma;
 }

@@ -54,4 +54,52 @@ describe("EditFoodSidebar Add Food logic", () => {
     // Should call onSubmit with the correct total amount (5 × 70 = 350)
     expect(onSubmit).toHaveBeenCalledWith(3.5);
   });
+
+  it("shows the default serving size when one exists", () => {
+    const { getByText } = render(
+      <EditFoodSidebar
+        isOpen={true}
+        food={baseFood}
+        onClose={() => {}}
+        onSubmit={() => {}}
+        userSettings={userSettings}
+        isAdd={true}
+      />,
+    );
+
+    expect(getByText("Default serving: 70g (1 medium egg)")).toBeTruthy();
+  });
+
+  it("prefills edit mode with default serving size and derived quantity", () => {
+    const onSubmit = jest.fn();
+    const editFood = {
+      ...baseFood,
+      defaultServingAmount: 50,
+      defaultServingDescription: "1 thing",
+      serving: 3,
+    } satisfies FoodItem;
+
+    const { getByRole, getByTestId } = render(
+      <EditFoodSidebar
+        isOpen={true}
+        food={editFood}
+        onClose={() => {}}
+        onSubmit={onSubmit}
+        userSettings={userSettings}
+        isAdd={false}
+      />,
+    );
+
+    const servingSizeInput = getByTestId(
+      "edit-food-serving-size",
+    ) as HTMLInputElement;
+    const quantityInput = getByTestId("edit-food-quantity") as HTMLInputElement;
+
+    expect(servingSizeInput.value).toBe("50.00");
+    expect(quantityInput.value).toBe("6");
+
+    fireEvent.click(getByRole("button", { name: /update serving/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(3);
+  });
 });

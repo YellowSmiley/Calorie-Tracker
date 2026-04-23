@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FoodItem } from "../types";
 import {
   convertWeightForDisplay,
@@ -82,6 +82,43 @@ export default function EditFoodSidebar({
   const [reportReason, setReportReason] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
+  // Re-initialise whenever the sidebar opens or the food item changes.
+  useEffect(() => {
+    if (!isOpen || !food) return;
+
+    setReportReason("");
+    setFieldErrors({});
+
+    if (isAdd) {
+      setServingSize(String(defaultServing.toFixed(2)));
+      setQuantity("1");
+    } else {
+      const totalAmountInBaseUnits = food.serving * foodMeasurementAmount;
+
+      if (food.defaultServingAmount) {
+        const derivedQuantity = Number(
+          (totalAmountInBaseUnits / food.defaultServingAmount).toFixed(2),
+        );
+        setServingSize(String(defaultServing.toFixed(2)));
+        setQuantity(String(derivedQuantity));
+      } else {
+        const totalAmountInDisplayUnits =
+          food.measurementType === "weight"
+            ? convertWeightForDisplay(
+                totalAmountInBaseUnits,
+                userSettings.weightUnit as AcceptedWeightedUnits,
+              )
+            : convertVolumeForDisplay(
+                totalAmountInBaseUnits,
+                userSettings.volumeUnit as AcceptedVolumeUnits,
+              );
+        setServingSize(String(totalAmountInDisplayUnits.toFixed(2)));
+        setQuantity("1");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, food?.id, food?.serving, isAdd]);
+
   const validateServingSize = (value: string) => {
     if (!value.trim()) return "Serving size is required.";
     const parsed = Number(value);
@@ -100,37 +137,16 @@ export default function EditFoodSidebar({
     return undefined;
   };
 
-  // Initialise when food / sidebar opens (adjust state during render)
-  const [prevKey, setPrevKey] = useState("");
-  const currentKey = `${food?.id}-${food?.serving}-${isOpen}-${isAdd}`;
-
-  if (currentKey !== prevKey && food && isOpen) {
-    setPrevKey(currentKey);
-    setReportReason("");
-    if (isAdd) {
-      setServingSize(String(defaultServing.toFixed(2)));
-      setQuantity("1");
-    } else {
-      const totalAmountInBaseUnits = food.serving * foodMeasurementAmount;
-      const totalAmountInDisplayUnits =
-        food.measurementType === "weight"
-          ? convertWeightForDisplay(
-              totalAmountInBaseUnits,
-              userSettings.weightUnit as AcceptedWeightedUnits,
-            )
-          : convertVolumeForDisplay(
-              totalAmountInBaseUnits,
-              userSettings.volumeUnit as AcceptedVolumeUnits,
-            );
-
-      setServingSize(String(totalAmountInDisplayUnits.toFixed(2)));
-      setQuantity("1");
-    }
-  }
-
   const servingSizeNum = parseFloat(servingSize) || 0;
   const quantityNum = parseFloat(quantity) || 0;
   const totalAmount = servingSizeNum * quantityNum;
+  const servingUnit =
+    food?.measurementType === "weight"
+      ? userSettings.weightUnit
+      : userSettings.volumeUnit;
+  const defaultServingLabel = food?.defaultServingAmount
+    ? `Default serving: ${Number(defaultServing.toFixed(2))}${servingUnit}${food.defaultServingDescription ? ` (${food.defaultServingDescription})` : ""}`
+    : null;
 
   const calculatedNutrition: {
     calories: number;
@@ -487,9 +503,14 @@ export default function EditFoodSidebar({
               </div>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center">
                 {totalAmount > 0
-                  ? `Total: ${Number(totalAmount.toFixed(2))}${food?.measurementType === "weight" ? userSettings.weightUnit : userSettings.volumeUnit}`
+                  ? `Total: ${Number(totalAmount.toFixed(2))}${servingUnit}`
                   : "Enter serving size and quantity"}
               </p>
+              {defaultServingLabel ? (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                  {defaultServingLabel}
+                </p>
+              ) : null}
             </div>
 
             {/* Calculated Nutrition */}

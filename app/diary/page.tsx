@@ -4,7 +4,11 @@ import { prisma } from "@/lib/prisma";
 import DiaryClient from "./DiaryClient";
 import type { FoodItem, Meal } from "./types";
 import { SettingsData, UserSettings } from "../settings/types";
-import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
+import {
+  CACHE_TAGS,
+  CACHE_DURATIONS,
+  getUnstableCacheRevalidate,
+} from "@/lib/cacheKeys";
 
 const initialMeals: Meal[] = [
   { name: "Breakfast", items: [] },
@@ -60,7 +64,7 @@ export default async function DiaryPage({
       }),
     [CACHE_TAGS.userSettings(session.user.id)],
     {
-      revalidate: CACHE_DURATIONS.userSettings,
+      revalidate: getUnstableCacheRevalidate(CACHE_DURATIONS.userSettings),
       tags: [CACHE_TAGS.userSettings(session.user.id)],
     },
   )()) as SettingsData;
