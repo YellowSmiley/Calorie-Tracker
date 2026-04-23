@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getRuntimeEnv } from "@/lib/runtimeEnv";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const runtimeEnv = getRuntimeEnv();
 
 function withSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -26,15 +28,10 @@ function checkCsrf(request: NextRequest): NextResponse | null {
     return null;
   }
 
-  const allowedUrl = process.env.AUTH_URL || "http://localhost:3000";
-
-  try {
-    const allowedOrigin = new URL(allowedUrl).origin;
-    if (origin === allowedOrigin) {
-      return null;
-    }
-  } catch {
-    // malformed AUTH_URL — fall through
+  const allowedUrl = runtimeEnv.AUTH_URL;
+  const allowedOrigin = new URL(allowedUrl).origin;
+  if (origin === allowedOrigin) {
+    return null;
   }
 
   // Also allow localhost during development

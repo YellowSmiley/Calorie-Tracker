@@ -1,12 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { getRuntimeEnv } from "@/lib/runtimeEnv";
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 
-const connectionString = process.env.DATABASE_URL;
+const runtimeEnv = getRuntimeEnv();
+const connectionString = runtimeEnv.DATABASE_URL;
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 

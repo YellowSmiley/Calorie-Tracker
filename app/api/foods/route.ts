@@ -92,6 +92,9 @@ export async function GET(request: NextRequest) {
   }
 
   const response = apiSuccess({ foods, total, take, skip, suggestions });
-  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.foods));
+  response.headers.set(
+    "Cache-Control",
+    getCacheControlHeader(CACHE_DURATIONS.foods),
+  );
   return response;
 }

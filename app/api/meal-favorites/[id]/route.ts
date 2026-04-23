@@ -146,7 +146,10 @@ export async function GET(
     updatedAt: favorite.updatedAt,
     items: favorite.items.map(mapFavoriteItemForClient),
   });
-  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMealFavorites));
+  response.headers.set(
+    "Cache-Control",
+    getCacheControlHeader(CACHE_DURATIONS.userMealFavorites),
+  );
   return response;
 }
 

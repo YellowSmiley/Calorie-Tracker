@@ -209,6 +209,8 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    REDIS_URL="redis://localhost:6379"
    ```
 
+   The server validates these required runtime variables once during startup and fails fast if any are missing or malformed.
+
    `REDIS_URL` is optional in local development. If set, rate limiting uses shared Redis storage for multi-instance deployments. If omitted, the app falls back to in-memory limiting.
 
    Generate `AUTH_SECRET`:
@@ -216,6 +218,11 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    ```bash
    openssl rand -base64 32
    ```
+
+   Validation rules:
+   - `AUTH_SECRET` must be at least 32 characters long
+   - `AUTH_URL` must be a valid `http(s)` URL and should be `https` in production
+   - `SMTP_PORT` must be a numeric port and `SMTP_FROM` must be a valid email address
 
 4. **Set up Google OAuth**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)

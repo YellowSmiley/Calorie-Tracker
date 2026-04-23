@@ -1,19 +1,22 @@
 import nodemailer from "nodemailer";
+import { getRuntimeEnv } from "@/lib/runtimeEnv";
+
+const runtimeEnv = getRuntimeEnv();
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === "true",
+    host: runtimeEnv.SMTP_HOST,
+    port: Number(runtimeEnv.SMTP_PORT),
+    secure: runtimeEnv.SMTP_SECURE === "true",
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user: runtimeEnv.SMTP_USER,
+        pass: runtimeEnv.SMTP_PASSWORD,
     },
 });
 
-const FROM_ADDRESS = process.env.SMTP_FROM || "noreply@example.com";
+const FROM_ADDRESS = runtimeEnv.SMTP_FROM;
 
 export async function sendVerificationEmail(email: string, token: string) {
-    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+    const baseUrl = runtimeEnv.AUTH_URL;
     const verifyUrl = `${baseUrl}/verify?token=${token}&email=${encodeURIComponent(email)}`;
 
     await transporter.sendMail({
@@ -37,7 +40,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+    const baseUrl = runtimeEnv.AUTH_URL;
     const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
     await transporter.sendMail({

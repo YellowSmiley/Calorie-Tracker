@@ -57,7 +57,10 @@ export async function GET(request: NextRequest) {
     });
 
     const response = apiSuccess({ weight: entry?.weight ?? null });
-    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userBodyWeight));
+    response.headers.set(
+      "Cache-Control",
+      getCacheControlHeader(CACHE_DURATIONS.userBodyWeight),
+    );
     return response;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {

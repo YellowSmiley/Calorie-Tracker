@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { checkLoginRateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
+import { getRuntimeEnv } from "@/lib/runtimeEnv";
 import {
   DEFAULT_CALORIE_GOAL,
   DEFAULT_PROTEIN_GOAL,
@@ -20,6 +21,8 @@ import {
 } from "./lib/consts";
 import { getClientIp } from "@/lib/blacklist";
 
+const runtimeEnv = getRuntimeEnv();
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   trustHost: true,
@@ -32,8 +35,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID ?? "",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
+      clientId: runtimeEnv.AUTH_GOOGLE_ID,
+      clientSecret: runtimeEnv.AUTH_GOOGLE_SECRET,
     }),
     Credentials({
       name: "Credentials",

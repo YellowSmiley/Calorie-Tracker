@@ -4,6 +4,7 @@ const config: Config = {
     preset: 'ts-jest',
     testEnvironment: 'jsdom',
     roots: ['<rootDir>'],
+    setupFiles: ['<rootDir>/jest.env.ts'],
     testMatch: [
         '**/__tests__/**/*.[jt]s?(x)',
         '**/?(*.)+(spec|test).[jt]s?(x)',

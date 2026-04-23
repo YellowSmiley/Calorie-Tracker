@@ -161,7 +161,10 @@ export async function GET(request: NextRequest) {
     take,
     skip,
   });
-  favoritesResponse.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMealFavorites));
+  favoritesResponse.headers.set(
+    "Cache-Control",
+    getCacheControlHeader(CACHE_DURATIONS.userMealFavorites),
+  );
   return favoritesResponse;
 }
 

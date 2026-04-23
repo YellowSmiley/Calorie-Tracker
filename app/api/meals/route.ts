@@ -86,7 +86,10 @@ export async function GET(request: Request) {
   const meals = buildMealsResponse(entries);
 
   const response = apiSuccess({ meals });
-  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMeals));
+  response.headers.set(
+    "Cache-Control",
+    getCacheControlHeader(CACHE_DURATIONS.userMeals),
+  );
   return response;
 }
 

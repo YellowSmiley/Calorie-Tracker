@@ -278,7 +278,10 @@ export async function GET(request: NextRequest) {
       totals,
       trend: Array.from(trendMap.values()),
     });
-    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.dashboard));
+    response.headers.set(
+      "Cache-Control",
+      getCacheControlHeader(CACHE_DURATIONS.dashboard),
+    );
     return response;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
