@@ -1,5 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
-import { hasPremiumAccess, parseStripePeriodEndDate } from "./subscriptionService";
+import {
+  hasPremiumAccess,
+  parseStripePeriodEndDate,
+} from "./subscriptionService";
 
 describe("subscriptionService", () => {
   describe("parseStripePeriodEndDate", () => {
@@ -34,7 +37,9 @@ describe("subscriptionService", () => {
     });
 
     it("allows active/trialing status when period end is missing", () => {
-      expect(hasPremiumAccess("active", undefined, 1_700_000_000_000)).toBe(true);
+      expect(hasPremiumAccess("active", undefined, 1_700_000_000_000)).toBe(
+        true,
+      );
       expect(hasPremiumAccess("trialing", undefined, 1_700_000_000_000)).toBe(
         true,
       );

@@ -23,10 +23,14 @@ const SUBSCRIPTION_EVENTS = new Set([
   "customer.subscription.deleted",
 ]);
 
-function getCurrentPeriodEndUnix(subscription: Stripe.Subscription): number | null {
-  const value = (subscription as Stripe.Subscription & {
-    current_period_end?: number;
-  }).current_period_end;
+function getCurrentPeriodEndUnix(
+  subscription: Stripe.Subscription,
+): number | null {
+  const value = (
+    subscription as Stripe.Subscription & {
+      current_period_end?: number;
+    }
+  ).current_period_end;
 
   return typeof value === "number" ? value : null;
 }
@@ -39,10 +43,7 @@ async function updateFromSubscription(subscription: Stripe.Subscription) {
 
   const currentPeriodEnd = getCurrentPeriodEndUnix(subscription);
   const periodEnd = parseStripePeriodEndDate(currentPeriodEnd);
-  const isPremium = hasPremiumAccess(
-    subscription.status,
-    currentPeriodEnd,
-  );
+  const isPremium = hasPremiumAccess(subscription.status, currentPeriodEnd);
 
   const subscriptionPriceId = subscription.items.data[0]?.price?.id ?? null;
   const premiumPriceId = getStripePremiumPriceId();
@@ -152,7 +153,8 @@ export async function POST(request: Request) {
       }
 
       if (subscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const subscription =
+          await stripe.subscriptions.retrieve(subscriptionId);
         await updateFromSubscription(subscription);
       }
 

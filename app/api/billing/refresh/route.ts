@@ -15,10 +15,14 @@ import {
 } from "@/lib/subscriptionService";
 import { getRequestId, logAdminAction } from "@/lib/auditService";
 
-function getCurrentPeriodEndUnix(subscription: Stripe.Subscription): number | null {
-  const value = (subscription as Stripe.Subscription & {
-    current_period_end?: number;
-  }).current_period_end;
+function getCurrentPeriodEndUnix(
+  subscription: Stripe.Subscription,
+): number | null {
+  const value = (
+    subscription as Stripe.Subscription & {
+      current_period_end?: number;
+    }
+  ).current_period_end;
 
   return typeof value === "number" ? value : null;
 }
