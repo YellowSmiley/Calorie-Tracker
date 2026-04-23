@@ -9,6 +9,7 @@ import GoalsCalculatorSection from "./components/GoalsCalculatorSection";
 import MeasurementUnitsSection from "./components/MeasurementUnitsSection";
 import DataPrivacySection from "./components/DataPrivacySection";
 import ActionsSection from "./components/ActionsSection";
+import SubscriptionSection from "./components/SubscriptionSection";
 import { SettingsData, UserSettings } from "./types";
 import { signOut } from "next-auth/react";
 import {
@@ -25,6 +26,11 @@ import AppHeader from "../components/AppHeader";
 interface SettingsClientProps {
   userSettings: UserSettings;
   initialSettings: SettingsData;
+  billingData: {
+    isPremium: boolean;
+    subscriptionStatus: string | null;
+    premiumExpiresAt: string | null;
+  };
 }
 
 type NutritionGoalField =
@@ -47,6 +53,7 @@ type SectionMessage = {
 export default function SettingsClient({
   userSettings,
   initialSettings,
+  billingData,
 }: SettingsClientProps) {
   const { data: session } = useSession();
   const [settings, setSettings] = useState<SettingsData>(() => ({
@@ -368,6 +375,12 @@ export default function SettingsClient({
             <MeasurementUnitsSection
               settings={settings}
               onChange={handleChange}
+            />
+
+            <SubscriptionSection
+              isPremium={billingData.isPremium}
+              subscriptionStatus={billingData.subscriptionStatus}
+              premiumExpiresAt={billingData.premiumExpiresAt}
             />
 
             <DataPrivacySection

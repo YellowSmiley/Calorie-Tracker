@@ -1,8 +1,13 @@
 "use client";
 
 import { type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import HelpButton from "@/app/components/HelpButton";
+
+const AdSense = dynamic(() => import("@/app/components/AdSense"), {
+  ssr: false,
+});
 
 interface AppHeaderProps {
   title: string;
@@ -60,6 +65,8 @@ export default function AppHeader({
             ) : null}
           </div>
         </div>
+
+        <AdSense className="mt-4" />
       </div>
     </header>
   );

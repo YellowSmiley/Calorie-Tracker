@@ -5,6 +5,8 @@ import { resetSettings } from "./helpers";
 
 // TODO(playwright): add auth security flow coverage for refactored auth services
 // (verification link lifecycle, reset-token lifecycle, and weak-password error UX).
+// TODO(playwright): cover closeable AppHeader ad behavior (close action, cooldown,
+// and reappearance) for Dashboard/Diary/Settings in both default and converted units.
 
 const goals = {
   calories: 3000,

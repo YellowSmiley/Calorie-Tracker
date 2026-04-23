@@ -22,6 +22,7 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
 - 📈 **Dashboard** - View daily, weekly, and monthly nutrition summaries with progress bars
 - 📅 **Daily Summary** - Collapsible accordion showing nutrition totals vs goals
 - ⚙️ **Customizable Settings** - Set personal nutrition goals and preferred measurement units
+- 💳 **Premium Subscription** - Upgrade to ad-free for £2.50/month with automated status sync
 - 🔄 **Unit Conversions** - Support for kcal/cal/Cal, g/mg/oz, g/kg/lbs, ml/cup/tbsp/tsp/L
 - 🍔 **Food Management** - Create, edit, and delete custom foods with full CRUD support
 - � **Progressive Web App** - Install on any device, works offline, full-screen experience
@@ -207,6 +208,9 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    SMTP_PASSWORD="your-smtp-password"
    SMTP_FROM="noreply@example.com"
    REDIS_URL="redis://localhost:6379"
+   STRIPE_SECRET_KEY="sk_test_..."
+   STRIPE_PREMIUM_PRICE_ID="price_..."
+   STRIPE_WEBHOOK_SECRET="whsec_..."
    ```
 
    The server validates these required runtime variables once during startup and fails fast if any are missing or malformed.
@@ -224,7 +228,77 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    - `AUTH_URL` must be a valid `http(s)` URL and should be `https` in production
    - `SMTP_PORT` must be a numeric port and `SMTP_FROM` must be a valid email address
 
-4. **Set up Google OAuth**
+   Stripe variables are optional unless you enable premium billing. When configured, set your Stripe webhook endpoint to:
+   - `POST /api/billing/webhook`
+   - Listen for: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, and `customer.subscription.deleted`.
+   - Premium access is derived from the active Stripe subscription state and updates automatically via webhook events.
+
+## Billing Testing Guide (Stripe Sandbox)
+
+Use this guide for local and staging validation of premium subscriptions.
+
+### Prerequisites
+
+- Stripe account in test mode
+- App environment variables configured:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_PREMIUM_PRICE_ID`
+  - `STRIPE_WEBHOOK_SECRET`
+- Webhook endpoint created for:
+  - `POST /api/billing/webhook`
+- Subscribed webhook events:
+  - `checkout.session.completed`
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+
+### Test Card Details
+
+Never use real card data in sandbox.
+
+#### Successful payment
+
+- Card number: `4242 4242 4242 4242`
+- Expiry: any future date (example `12/34`)
+- CVC: any 3 digits (example `123`)
+- Name/address/postcode: any valid-looking values
+
+#### Failure scenarios
+
+- Generic decline: `4000 0000 0000 0002`
+- 3D Secure required: `4000 0025 0000 3155`
+- Insufficient funds: `4000 0000 0000 9995`
+
+### Recommended QA Flow
+
+1. Log in as a non-premium user.
+2. Go to Settings and click "Upgrade for £2.50/month".
+3. Complete checkout with the success test card.
+4. Confirm Stripe shows webhook delivery as `2xx`.
+5. Confirm database user fields update:
+   - `isPremium = true`
+   - `subscriptionStatus` set (`active` / `trialing` / `past_due`)
+   - `premiumExpiresAt` populated when present from Stripe
+6. Confirm ads are no longer rendered for that user.
+7. Open "Manage Subscription" and cancel from Stripe portal.
+8. Confirm follow-up webhook updates user premium status accordingly.
+
+## Local Webhook Forwarding (Optional)
+
+If you are testing locally and cannot expose localhost publicly, use Stripe CLI forwarding and copy the generated webhook signing secret into `STRIPE_WEBHOOK_SECRET`.
+
+## Troubleshooting
+
+- `BILLING_NOT_CONFIGURED`:
+  - Check `STRIPE_SECRET_KEY` and `STRIPE_PREMIUM_PRICE_ID`.
+- `INVALID_SIGNATURE` on webhook:
+  - Check `STRIPE_WEBHOOK_SECRET` and ensure raw body is forwarded unchanged.
+- Premium not updating:
+  - Verify the event type is subscribed.
+  - Verify webhook delivery status in Stripe dashboard.
+  - Confirm the same Stripe test workspace is used for checkout and webhook.
+
+1. **Set up Google OAuth**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select existing
    - Enable Google+ API
@@ -232,19 +306,19 @@ The app uses a three-tier caching strategy to balance performance, freshness, an
    - Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
    - Copy Client ID and Client Secret to `.env`
 
-5. **Run database migrations**
+2. **Run database migrations**
 
    ```bash
    npx prisma migrate dev --name init
    ```
 
-6. **Start the development server**
+3. **Start the development server**
 
    ```bash
    npm run dev
    ```
 
-7. **Open the app**
+4. **Open the app**
 
    Navigate to [http://localhost:3000](http://localhost:3000)
 

@@ -224,9 +224,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { isAdmin: true },
+          select: { isAdmin: true, isPremium: true },
         });
         token.isAdmin = dbUser?.isAdmin ?? false;
+        token.isPremium = dbUser?.isPremium ?? false;
       }
       return token;
     },
@@ -234,6 +235,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.isAdmin = (token.isAdmin as boolean) ?? false;
+        session.user.isPremium = (token.isPremium as boolean) ?? false;
       }
       return session;
     },

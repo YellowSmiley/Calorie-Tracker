@@ -6,7 +6,6 @@ import Navigation from "./components/Navigation";
 import CookieBanner from "./components/CookieBanner";
 import Providers from "./providers";
 import { Analytics } from "@vercel/analytics/next";
-import AdSense from "./components/AdSense";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import RouteLoadingIndicator from "./components/RouteLoadingIndicator";
 
@@ -63,7 +62,6 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <RouteLoadingIndicator />
           </Suspense>
-          <AdSense />
           {children}
           <Navigation />
           <CookieBanner />

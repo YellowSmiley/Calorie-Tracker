@@ -34,6 +34,12 @@ model User {
   blackMarks    Int        @default(0)
   bannedAt      DateTime?
   lastKnownIp   String?    @db.VarChar(64)
+  isPremium     Boolean    @default(false)
+  premiumExpiresAt DateTime?
+  stripeCustomerId String? @unique @db.VarChar(255)
+  stripeSubscriptionId String? @unique @db.VarChar(255)
+  stripePriceId String?   @db.VarChar(255)
+  subscriptionStatus String? @db.VarChar(64)
   
   // User role
   isAdmin       Boolean    @default(false)
