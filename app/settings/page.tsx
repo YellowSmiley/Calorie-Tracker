@@ -44,7 +44,7 @@ export default async function SettingsPage() {
     {
       revalidate: CACHE_DURATIONS.userSettings,
       tags: [CACHE_TAGS.userSettings(session.user.id)],
-    }
+    },
   )();
 
   const initialSettings: SettingsData = {

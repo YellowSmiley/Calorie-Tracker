@@ -45,7 +45,10 @@ export async function GET() {
     }
 
     const response = apiSuccess(settingsUser);
-    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userSettings));
+    response.headers.set(
+      "Cache-Control",
+      getCacheControlHeader(CACHE_DURATIONS.userSettings),
+    );
     return response;
   } catch (error) {
     return apiInternalError("settings/GET", error, "Failed to fetch settings");

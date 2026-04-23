@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Food } from "@prisma/client";
 import { requireUser } from "@/lib/apiGuards";
 import { checkFoodWriteRateLimit } from "@/lib/rateLimit";
+import { getCacheControlHeader } from "@/lib/cacheKeys";
 import {
   apiBadRequest,
   apiConflict,
@@ -120,13 +121,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return apiSuccess({
+    const response = apiSuccess({
       foods: foodsWithCreator,
       total,
       take,
       skip,
       suggestions,
     });
+    response.headers.set("Cache-Control", getCacheControlHeader(0));
+    return response;
   } catch (error) {
     return apiInternalError("admin/foods/GET", error, "Failed to fetch foods");
   }

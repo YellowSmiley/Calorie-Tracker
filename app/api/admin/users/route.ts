@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/apiGuards";
 import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
 import { findCloseFoodSuggestions } from "../../../../lib/foodSearchSuggestions";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
+import { getCacheControlHeader } from "@/lib/cacheKeys";
 
 export async function GET(request: NextRequest) {
   const guard = await requireAdmin();
@@ -76,7 +77,9 @@ export async function GET(request: NextRequest) {
       suggestions = findCloseFoodSuggestions(search, candidateValues);
     }
 
-    return apiSuccess({ users, total, take, skip, suggestions });
+    const response = apiSuccess({ users, total, take, skip, suggestions });
+    response.headers.set("Cache-Control", getCacheControlHeader(0));
+    return response;
   } catch (error) {
     return apiInternalError("admin/users/GET", error, "Failed to fetch users");
   }

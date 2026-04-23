@@ -43,7 +43,7 @@ export default async function Home() {
     {
       revalidate: CACHE_DURATIONS.userSettings,
       tags: [CACHE_TAGS.userSettings(session.user.id)],
-    }
+    },
   )()) as DashboardUserData;
 
   if (user && user.isActive === false) {

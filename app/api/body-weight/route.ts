@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import {
   bodyWeightDateQuerySchema,
   bodyWeightPutBodySchema,
@@ -55,7 +56,9 @@ export async function GET(request: NextRequest) {
       select: { weight: true },
     });
 
-    return apiSuccess({ weight: entry?.weight ?? null });
+    const response = apiSuccess({ weight: entry?.weight ?? null });
+    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userBodyWeight));
+    return response;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
       return apiBadRequest(error.message, "INVALID_DATE");

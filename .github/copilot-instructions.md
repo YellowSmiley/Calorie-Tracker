@@ -97,11 +97,13 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 ## Caching and Data-Fetch Strategy
 
 **Development Mode (Lax by Default):**
+
 - In development (`NODE_ENV !== "production"`), keep caching relaxed to reduce stale-data confusion while debugging.
 - Prefer `no-store` response headers or `revalidate: 0` for server-component caches in dev.
 - Apply full TTL caching rules below only in production.
 
 **Sensitive Routes (No Cache):**
+
 - Always use `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` for:
   - Authentication endpoints (login, register, verify, password reset)
   - Account operations (profile export, account deletion)
@@ -110,6 +112,7 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Example: [app/api/account/export/route.ts](app/api/account/export/route.ts#L147)
 
 **Read-Heavy Routes (Controlled Caching with Revalidation):**
+
 - Use environment-aware TTL caching for user-specific data:
   - **User Settings** (1–5 min): Cached per user, revalidate on settings update
   - **Meal Entries by Date** (1–5 min): Cached, revalidate on meal CRUD
@@ -120,7 +123,9 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Pattern:
   ```typescript
   // GET /api/settings
-  const response = apiSuccess({ /* data */ });
+  const response = apiSuccess({
+    /* data */
+  });
   response.headers.set("Cache-Control", "private, max-age=300"); // 5 min
   return response;
   ```
@@ -131,29 +136,33 @@ For this workspace, local Playwright is only reliable when tests are run one at 
   return apiSuccess({ /* updated data */ });
   ```
 
-**Server Components (Redundancy Prevention):
+\*\*Server Components (Redundancy Prevention):
+
 - Wrap user-specific fetches in `unstable_cache()` with revalidation tags:
   ```typescript
   // app/page.tsx (dashboard server component)
   const settings = await unstable_cache(
     async () => fetch(`/api/settings?userId=${userId}`),
     [`settings:${userId}`],
-    { revalidate: 300, tags: [`settings:${userId}`] } // 5 min
+    { revalidate: 300, tags: [`settings:${userId}`] }, // 5 min
   )();
   ```
 - This prevents redundant fetches across multiple pages loading the same user settings.
 
 **Environment-Aware Cache Config:**
+
 - Centralize cache behavior in `lib/cacheKeys.ts`.
 - Use a production guard (for example `IS_PRODUCTION_CACHE`) so development defaults remain lax.
 
 **Tag-Based Invalidation Convention:**
+
 - Use format: `{resource}:{userId}` for user-scoped data
 - Use format: `{resource}` for global/admin data
 - Examples: `settings:user-123`, `meals:user-123:2026-04-23`, `foods`, `users`
 - Define tags in a shared location (e.g., `lib/cacheKeys.ts`) to prevent drift
 
 **When NOT to Cache:**
+
 - User-initiated mutations (always fresh response)
 - Real-time admin operations (need immediate visibility)
 - Data with compliance/privacy concerns (default to no-store)

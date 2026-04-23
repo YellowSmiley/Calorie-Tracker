@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/apiGuards";
 import { apiBadRequest, apiInternalError, apiSuccess } from "@/lib/apiResponse";
@@ -273,10 +274,12 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return apiSuccess({
+    const response = apiSuccess({
       totals,
       trend: Array.from(trendMap.values()),
     });
+    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.dashboard));
+    return response;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Invalid date")) {
       return apiBadRequest(error.message, "INVALID_DATE");

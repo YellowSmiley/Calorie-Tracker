@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { Prisma } from "@prisma/client";
@@ -138,13 +139,15 @@ export async function GET(
     return apiNotFound("Favorite not found", "FAVORITE_NOT_FOUND");
   }
 
-  return apiSuccess({
+  const response = apiSuccess({
     id: favorite.id,
     name: favorite.name,
     mealType: favorite.mealType,
     updatedAt: favorite.updatedAt,
     items: favorite.items.map(mapFavoriteItemForClient),
   });
+  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMealFavorites));
+  return response;
 }
 
 export async function PUT(

@@ -34,7 +34,7 @@ export default async function UserFoodsPage() {
     {
       revalidate: CACHE_DURATIONS.userSettings,
       tags: [CACHE_TAGS.userSettings(session.user.id)],
-    }
+    },
   )()) as UserSettings;
 
   const userSettings: UserSettings = {

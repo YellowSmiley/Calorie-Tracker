@@ -33,6 +33,9 @@ export const CACHE_DURATIONS = {
   userBodyWeight: IS_PRODUCTION_CACHE ? 600 : 0, // 10 min in prod, disabled in dev
   userMealFavorites: IS_PRODUCTION_CACHE ? 600 : 0, // 10 min in prod, disabled in dev
 
+  // Aggregated / user-derived (2–5 min)
+  dashboard: IS_PRODUCTION_CACHE ? 300 : 0, // 5 min in prod, disabled in dev
+
   // Global (10–30 min)
   foods: IS_PRODUCTION_CACHE ? 1200 : 0, // 20 min in prod, disabled in dev
   adminUsers: IS_PRODUCTION_CACHE ? 1800 : 0, // 30 min in prod, disabled in dev

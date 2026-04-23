@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiBadRequest, apiSuccess } from "@/lib/apiResponse";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
 import { requireUser } from "@/lib/apiGuards";
 import {
@@ -90,5 +91,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return apiSuccess({ foods, total, take, skip, suggestions });
+  const response = apiSuccess({ foods, total, take, skip, suggestions });
+  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.foods));
+  return response;
 }

@@ -62,7 +62,7 @@ export default async function DiaryPage({
     {
       revalidate: CACHE_DURATIONS.userSettings,
       tags: [CACHE_TAGS.userSettings(session.user.id)],
-    }
+    },
   )()) as SettingsData;
 
   const userSettings: UserSettings = {

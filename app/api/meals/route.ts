@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { MeasurementType } from "@/app/diary/types";
 import { requireUser } from "@/lib/apiGuards";
 import { checkMealWriteRateLimit } from "@/lib/rateLimit";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import {
   buildMealNutritionData,
   buildMealsResponse,
@@ -84,7 +85,9 @@ export async function GET(request: Request) {
 
   const meals = buildMealsResponse(entries);
 
-  return apiSuccess({ meals });
+  const response = apiSuccess({ meals });
+  response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMeals));
+  return response;
 }
 
 export async function POST(request: Request) {

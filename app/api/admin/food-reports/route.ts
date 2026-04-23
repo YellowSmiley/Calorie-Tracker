@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/apiGuards";
 import { apiBadRequest, apiSuccess } from "@/lib/apiResponse";
 import { searchPaginationQuerySchema } from "@/lib/apiSchemas";
+import { getCacheControlHeader } from "@/lib/cacheKeys";
 
 export async function GET(request: NextRequest) {
   const guard = await requireAdmin();
@@ -115,10 +116,12 @@ export async function GET(request: NextRequest) {
     })
     .filter(Boolean);
 
-  return apiSuccess({
+  const response = apiSuccess({
     items: responseItems,
     total,
     take,
     skip,
   });
+  response.headers.set("Cache-Control", getCacheControlHeader(0));
+  return response;
 }

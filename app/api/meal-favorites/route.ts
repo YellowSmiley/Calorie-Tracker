@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { MealType as PrismaMealType } from "@prisma/client";
 import { requireUser } from "@/lib/apiGuards";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 import {
   mealFavoriteCreateBodySchema,
   mealFavoritesGetQuerySchema,
@@ -137,7 +138,7 @@ export async function GET(request: NextRequest) {
     mealFavorite.count({ where }),
   ]);
 
-  return apiSuccess({
+  const favoritesResponse = apiSuccess({
     favorites: favorites.map((favorite: (typeof favorites)[number]) => ({
       id: favorite.id,
       name: favorite.name,
@@ -160,6 +161,8 @@ export async function GET(request: NextRequest) {
     take,
     skip,
   });
+  favoritesResponse.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userMealFavorites));
+  return favoritesResponse;
 }
 
 export async function POST(request: NextRequest) {
