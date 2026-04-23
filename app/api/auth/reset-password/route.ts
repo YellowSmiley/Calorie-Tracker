@@ -9,6 +9,7 @@ import {
   hashToken,
   normalizeEmail,
 } from "@/lib/authSecurityService";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -73,10 +74,11 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await prisma.$transaction([
+    const [updatedUser] = await prisma.$transaction([
       prisma.user.update({
         where: { email: normalizedEmail },
         data: { passwordHash },
+        select: { id: true },
       }),
       prisma.verificationToken.delete({
         where: {
@@ -87,6 +89,17 @@ export async function POST(request: Request) {
         },
       }),
     ]);
+
+    // Log password reset completion
+    const requestId = getRequestId(request);
+    await logAdminAction(prisma, {
+      actorId: updatedUser.id,
+      actorRole: "user",
+      targetType: "user",
+      targetId: updatedUser.id,
+      action: "PASSWORD_RESET_COMPLETED",
+      requestId,
+    });
 
     return apiSuccess({ success: true });
   } catch (error) {

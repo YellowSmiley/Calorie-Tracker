@@ -10,6 +10,7 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 // GET /api/settings - Get user settings
 export async function GET() {
@@ -122,6 +123,33 @@ export async function PUT(request: NextRequest) {
         bodyWeightUnit: true,
         volumeUnit: true,
       },
+    });
+
+    // Log settings update
+    const requestId = getRequestId(request);
+    await logAdminAction(prisma, {
+      actorId: user.id,
+      actorRole: "user",
+      targetType: "user",
+      targetId: user.id,
+      action: "SETTINGS_UPDATED",
+      metadata: {
+        updatedFields: [
+          calorieGoal !== undefined && "calorieGoal",
+          proteinGoal !== undefined && "proteinGoal",
+          carbGoal !== undefined && "carbGoal",
+          fatGoal !== undefined && "fatGoal",
+          saturatesGoal !== undefined && "saturatesGoal",
+          sugarsGoal !== undefined && "sugarsGoal",
+          fibreGoal !== undefined && "fibreGoal",
+          saltGoal !== undefined && "saltGoal",
+          calorieUnit !== undefined && "calorieUnit",
+          weightUnit !== undefined && "weightUnit",
+          bodyWeightUnit !== undefined && "bodyWeightUnit",
+          volumeUnit !== undefined && "volumeUnit",
+        ].filter(Boolean),
+      },
+      requestId,
     });
 
     return apiSuccess(updatedUser);

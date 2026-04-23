@@ -10,9 +10,11 @@ type AsyncMock = Mock<(...args: unknown[]) => Promise<unknown>>;
 // Mock dependencies
 jest.mock("@/lib/prisma", () => ({
   prisma: {
-    $transaction: jest.fn(async (operations: unknown[]) =>
-      Promise.all(operations),
-    ),
+    $transaction: jest.fn(async (operations: unknown[]) => {
+      // operations is an array of Prisma promises
+      // Execute them and return results as array
+      return Promise.all(operations as Promise<unknown>[]);
+    }),
     blacklistEntry: {
       findFirst: jest.fn(),
     },
@@ -47,6 +49,11 @@ jest.mock("crypto", () => ({
 
 jest.mock("@/lib/rateLimit", () => ({
   checkRegisterRateLimit: jest.fn(async () => null),
+}));
+
+jest.mock("@/lib/auditService", () => ({
+  logAdminAction: jest.fn(async () => undefined),
+  getRequestId: jest.fn(() => undefined),
 }));
 
 import { prisma } from "@/lib/prisma";

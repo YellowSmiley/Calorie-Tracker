@@ -11,6 +11,7 @@ import {
   hashToken,
   normalizeEmail,
 } from "@/lib/authSecurityService";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 const SALT_ROUNDS = 12;
 const TOKEN_EXPIRY_HOURS = 24;
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
     const tokenHash = hashToken(token);
     const expires = buildTokenExpiry(TOKEN_EXPIRY_HOURS);
 
-    await prisma.$transaction([
+    const [newUser] = await prisma.$transaction([
       prisma.user.create({
         data: {
           name: name?.trim() || null,
@@ -103,6 +104,17 @@ export async function POST(request: Request) {
 
     // Send verification email
     await sendVerificationEmail(normalizedEmail, token);
+
+    // Log user registration
+    const requestId = getRequestId(request);
+    await logAdminAction(prisma, {
+      actorId: newUser.id,
+      actorRole: "user",
+      targetType: "user",
+      targetId: newUser.id,
+      action: "USER_REGISTERED",
+      requestId,
+    });
 
     return successResponse();
   } catch {

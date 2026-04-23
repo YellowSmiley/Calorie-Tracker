@@ -3,10 +3,12 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 type AuditDb = { auditLog: PrismaClient["auditLog"] };
 
 export const AUDIT_ACTIONS = [
+  // Admin food moderation
   "FOOD_APPROVED",
   "FOOD_UNAPPROVED",
   "FOOD_CREATOR_PUNISHED",
   "FOOD_REPORTS_RESOLVED",
+  // Admin user actions
   "USER_MARK_ADDED",
   "USER_MARK_REMOVED",
   "USER_ACTIVATED",
@@ -14,6 +16,26 @@ export const AUDIT_ACTIONS = [
   "USER_PUNISHMENTS_CLEARED",
   "USER_DELETED_BY_ADMIN",
   "USER_PROFILE_UPDATED",
+  // User self-service
+  "MEAL_CREATED",
+  "MEAL_UPDATED",
+  "MEAL_DELETED",
+  "MEAL_FAVORITE_CREATED",
+  "MEAL_FAVORITE_UPDATED",
+  "MEAL_FAVORITE_DELETED",
+  "MEAL_FAVORITE_APPLIED",
+  "MEAL_FAVORITE_CLEARED",
+  "FOOD_CREATED",
+  "FOOD_REPORTED",
+  "SETTINGS_UPDATED",
+  "BODY_WEIGHT_RECORDED",
+  "BODY_WEIGHT_DELETED",
+  "ACCOUNT_DELETION_INITIATED",
+  // Auth
+  "USER_REGISTERED",
+  "USER_EMAIL_VERIFIED",
+  "PASSWORD_RESET_REQUESTED",
+  "PASSWORD_RESET_COMPLETED",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

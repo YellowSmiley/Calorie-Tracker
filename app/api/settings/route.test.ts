@@ -20,11 +20,17 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
+jest.mock("@/lib/auditService", () => ({
+  logAdminAction: jest.fn(),
+  getRequestId: jest.fn(),
+}));
+
 import { GET, PUT } from "./route";
 import { NextRequest } from "next/server";
 import { requireUser } from "@/lib/apiGuards";
 import { checkProfileWriteRateLimit } from "@/lib/rateLimit";
 import { prisma } from "@/lib/prisma";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 const mockRequireUser = requireUser as jest.MockedFunction<typeof requireUser>;
 const mockCheckProfileWriteRateLimit =
@@ -32,6 +38,12 @@ const mockCheckProfileWriteRateLimit =
     typeof checkProfileWriteRateLimit
   >;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockLogAdminAction = logAdminAction as jest.MockedFunction<
+  typeof logAdminAction
+>;
+const mockGetRequestId = getRequestId as jest.MockedFunction<
+  typeof getRequestId
+>;
 
 const mockSettingsUser = {
   calorieGoal: 2000,
@@ -95,6 +107,8 @@ describe("GET /api/settings", () => {
 describe("PUT /api/settings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetRequestId.mockReturnValue(undefined);
+    mockLogAdminAction.mockResolvedValue(undefined);
   });
 
   test("returns 401 when requireUser guard fails", async () => {

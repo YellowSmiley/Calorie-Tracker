@@ -25,12 +25,18 @@ jest.mock("@/lib/mealService", () => ({
   buildMealNutritionData: jest.fn(),
 }));
 
+jest.mock("@/lib/auditService", () => ({
+  logAdminAction: jest.fn(),
+  getRequestId: jest.fn(),
+}));
+
 import { PATCH, DELETE } from "./route";
 import { NextRequest } from "next/server";
 import { requireUser } from "@/lib/apiGuards";
 import { checkMealWriteRateLimit } from "@/lib/rateLimit";
 import { prisma } from "@/lib/prisma";
 import { buildMealNutritionData } from "@/lib/mealService";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 const mockRequireUser = requireUser as jest.MockedFunction<typeof requireUser>;
 const mockCheckMealWriteRateLimit =
@@ -38,12 +44,20 @@ const mockCheckMealWriteRateLimit =
     typeof checkMealWriteRateLimit
   >;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockLogAdminAction = logAdminAction as jest.MockedFunction<
+  typeof logAdminAction
+>;
+const mockGetRequestId = getRequestId as jest.MockedFunction<
+  typeof getRequestId
+>;
 const mockBuildMealNutritionData =
   buildMealNutritionData as jest.MockedFunction<typeof buildMealNutritionData>;
 
 describe("DELETE /api/meals/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetRequestId.mockReturnValue(undefined);
+    mockLogAdminAction.mockResolvedValue(undefined);
   });
 
   test("returns 401 when requireUser guard fails", async () => {
@@ -137,6 +151,8 @@ describe("DELETE /api/meals/[id]", () => {
 describe("PATCH /api/meals/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetRequestId.mockReturnValue(undefined);
+    mockLogAdminAction.mockResolvedValue(undefined);
   });
 
   test("returns 401 when requireUser guard fails", async () => {

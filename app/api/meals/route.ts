@@ -15,6 +15,7 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 export async function GET(request: Request) {
   const guard = await requireUser();
@@ -147,6 +148,18 @@ export async function POST(request: Request) {
       serving: servingValue,
       ...nutrition,
     },
+  });
+
+  // Log meal creation
+  const requestId = getRequestId(request);
+  await logAdminAction(prisma, {
+    actorId: user.id,
+    actorRole: "user",
+    targetType: "user",
+    targetId: user.id,
+    action: "MEAL_CREATED",
+    metadata: { mealEntryId: entry.id, foodId, mealType },
+    requestId,
   });
 
   return apiSuccess(

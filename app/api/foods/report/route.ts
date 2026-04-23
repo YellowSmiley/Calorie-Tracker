@@ -10,6 +10,7 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 export async function POST(request: NextRequest) {
   const guard = await requireUser();
@@ -76,12 +77,25 @@ export async function POST(request: NextRequest) {
     return apiSuccess({ success: true, alreadyReported: true });
   }
 
-  await prisma.foodReport.create({
+  const report = await prisma.foodReport.create({
     data: {
       foodId,
       reportedBy: user.id,
       reason: normalizedReason || null,
     },
+  });
+
+  // Log food report
+  const requestId = getRequestId(request);
+  await logAdminAction(prisma, {
+    actorId: user.id,
+    actorRole: "user",
+    targetType: "food",
+    targetId: foodId,
+    action: "FOOD_REPORTED",
+    reason: normalizedReason || undefined,
+    metadata: { reportId: report.id, reportedBy: user.id },
+    requestId,
   });
 
   return apiSuccess({ success: true, alreadyReported: false });

@@ -8,9 +8,10 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 // DELETE /api/account - Delete user account and all associated data
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
     const guard = await requireUser();
     if ("response" in guard) {
@@ -33,6 +34,17 @@ export async function DELETE() {
         "LAST_ADMIN_DELETE_BLOCKED",
       );
     }
+
+    // Log user self-service account deletion
+    const requestId = getRequestId(request);
+    await logAdminAction(prisma, {
+      actorId: userId,
+      actorRole: "user",
+      targetType: "user",
+      targetId: userId,
+      action: "ACCOUNT_DELETION_INITIATED",
+      requestId,
+    });
 
     return apiSuccess({ success: true });
   } catch (error) {

@@ -83,6 +83,17 @@ For this workspace, local Playwright is only reliable when tests are run one at 
   - Move repetitive authentication/authorization checks into reusable guard utilities.
   - Extract non-trivial domain/business logic from complex API routes into dedicated service-layer modules in `lib/` (for example `mealService`, `foodModerationService`, `accountService`) and keep route handlers focused on transport concerns (auth, validation, response mapping).
 
+## API Route Audit Logging Rules
+
+- Log all admin-initiated actions via `logAdminAction(prisma, {...})` after successful state changes (from `lib/auditService.ts`).
+- Log all user-triggered mutations (meals, foods, settings, body weight, account changes) to create an audit trail for compliance and debugging.
+- Include in every log entry: `actorId`, `targetType`, `targetId`, `action`, and `requestId` (via `getRequestId(request)`).
+- Include relevant `metadata` that captures the outcome: updated field names, punishment counts, etc. Avoid logging sensitive data (passwords, full IP addresses).
+- Optionally include a `reason` field when the action is admin-initiated or requires justification.
+- When defining new mutations, add the corresponding action to `AUDIT_ACTIONS` array in `lib/auditService.ts` and ensure the route logs it.
+- For production deployments, implement periodic log cleanup/archival via a scheduled task or admin-only endpoint to manage database growth (e.g., delete logs older than 90 days per compliance requirements).
+- Document your organization's log retention policy in `README.md` under the "Log retention and cleanup" subsection.
+
 ## Documentation Upkeep
 
 - After implementing a feature, security hardening, or architecture change, explicitly check whether `README.md` should be updated in the same change.

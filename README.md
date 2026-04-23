@@ -59,6 +59,62 @@ The project has recently been hardened and refactored to improve security postur
 
 See also: the codebase instructions in `.github/copilot-instructions.md` for testing and implementation expectations.
 
+## Audit Logging
+
+All sensitive operations (admin actions, data modifications, authentication events) are logged to the `auditLog` table for compliance, debugging, and security monitoring:
+
+**What gets logged:**
+
+- Admin actions on users (marks added/removed, activation, deactivation, profile updates, deletion)
+- Food moderation actions (approve/unapprove, creator punishments, report resolutions)
+- User account changes (registration, email verification, password resets, account deletion)
+- Data mutations (meals, foods, favorites, body weight, settings)
+
+**Log entry structure** (stored in DB and streamed as JSON to stdout):
+
+- `actorId`: User performing the action
+- `actorRole`: `admin` or `user`
+- `targetType`: `user` or `food`
+- `targetId`: ID of the affected resource
+- `action`: Enum (e.g., `USER_MARK_ADDED`, `FOOD_APPROVED`)
+- `reason`: Optional explanation (e.g., for admin actions)
+- `metadata`: Contextual data (e.g., which fields changed, punishment counts)
+- `requestId`: Vercel request correlation ID for tracing across logs
+- `occurredAt`: ISO timestamp
+
+**Usage in routes:**
+Use `logAdminAction()` from `lib/auditService.ts` after state-changing operations:
+
+```typescript
+await logAdminAction(prisma, {
+  actorId: user.id,
+  targetType: "user",
+  targetId: userId,
+  action: "USER_MARK_ADDED",
+  reason: body.reason,
+  requestId: getRequestId(request),
+  metadata: { blackMarks: updatedUser.blackMarks },
+});
+```
+
+**Log retention and cleanup:**
+
+- Audit logs are retained indefinitely by default for compliance and forensic purposes.
+- For production deployments with high activity, implement a periodic cleanup job to archive or delete logs older than your retention window (e.g., 90 days, 1 year).
+- Cleanup should preserve logs for ongoing investigations (e.g., punishment histories, ban patterns) and only remove logs after the organization's compliance requirements are met.
+- Consider storing archived logs in cold storage (e.g., S3, GCS) rather than deleting them entirely.
+- Create a scheduled task or cron job (using a service like AWS Lambda, Cloud Tasks, or a dedicated cleanup service) that runs `deleteOldAuditLogs()` from a dedicated cleanup route with admin authentication.
+- Example cleanup endpoint:
+
+  ```typescript
+  // app/api/admin/audit/cleanup.ts
+  // Delete logs older than 90 days, runs via scheduled task
+  const thirtyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  await prisma.auditLog.deleteMany({
+    where: { occurredAt: { lt: thirtyDaysAgo } },
+  });
+  ```
+
 ## Tech Stack
 
 - **Framework:** Next.js 16.1.6 (App Router)

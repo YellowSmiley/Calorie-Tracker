@@ -12,6 +12,7 @@ import {
   apiTooManyRequests,
 } from "@/lib/apiResponse";
 import { checkProfileWriteRateLimit } from "@/lib/rateLimit";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 const getEntryDate = (dateString?: string | null) => {
   const safeDate = dateString || new Date().toISOString().split("T")[0];
@@ -102,6 +103,7 @@ export async function PUT(request: NextRequest) {
 
     const { date: rawDate, weight } = payloadValidation.data;
     const date = getEntryDate(rawDate);
+    const requestId = getRequestId(request);
 
     if (weight === null || weight === undefined) {
       await prisma.weightEntry.deleteMany({
@@ -109,6 +111,17 @@ export async function PUT(request: NextRequest) {
           userId: user.id,
           date,
         },
+      });
+
+      // Log body weight deletion
+      await logAdminAction(prisma, {
+        actorId: user.id,
+        actorRole: "user",
+        targetType: "user",
+        targetId: user.id,
+        action: "BODY_WEIGHT_DELETED",
+        metadata: { date: date.toISOString() },
+        requestId,
       });
 
       return apiSuccess({ weight: null });
@@ -132,6 +145,17 @@ export async function PUT(request: NextRequest) {
       select: {
         weight: true,
       },
+    });
+
+    // Log body weight recording
+    await logAdminAction(prisma, {
+      actorId: user.id,
+      actorRole: "user",
+      targetType: "user",
+      targetId: user.id,
+      action: "BODY_WEIGHT_RECORDED",
+      metadata: { weight, date: date.toISOString() },
+      requestId,
     });
 
     return apiSuccess({ weight: entry.weight });

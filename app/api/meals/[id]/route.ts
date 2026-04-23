@@ -13,6 +13,7 @@ import {
   apiSuccess,
   apiTooManyRequests,
 } from "@/lib/apiResponse";
+import { logAdminAction, getRequestId } from "@/lib/auditService";
 
 export async function PATCH(
   request: NextRequest,
@@ -69,6 +70,18 @@ export async function PATCH(
     include: { food: true },
   });
 
+  // Log meal update
+  const requestId = getRequestId(request);
+  await logAdminAction(prisma, {
+    actorId: user.id,
+    actorRole: "user",
+    targetType: "user",
+    targetId: user.id,
+    action: "MEAL_UPDATED",
+    metadata: { mealEntryId: updated.id, serving },
+    requestId,
+  });
+
   return apiSuccess({
     item: {
       id: updated.id,
@@ -99,7 +112,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<unknown> },
 ) {
   const guard = await requireUser();
@@ -129,6 +142,18 @@ export async function DELETE(
 
   await prisma.mealEntry.delete({
     where: { id: existing.id },
+  });
+
+  // Log meal deletion
+  const requestId = getRequestId(request);
+  await logAdminAction(prisma, {
+    actorId: user.id,
+    actorRole: "user",
+    targetType: "user",
+    targetId: user.id,
+    action: "MEAL_DELETED",
+    metadata: { mealEntryId: id },
+    requestId,
   });
 
   return apiSuccess({ success: true });
