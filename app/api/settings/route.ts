@@ -11,6 +11,7 @@ import {
   apiTooManyRequests,
 } from "@/lib/apiResponse";
 import { logAdminAction, getRequestId } from "@/lib/auditService";
+import { CACHE_DURATIONS, getCacheControlHeader } from "@/lib/cacheKeys";
 
 // GET /api/settings - Get user settings
 export async function GET() {
@@ -43,7 +44,9 @@ export async function GET() {
       return apiNotFound("User not found", "USER_NOT_FOUND");
     }
 
-    return apiSuccess(settingsUser);
+    const response = apiSuccess(settingsUser);
+    response.headers.set("Cache-Control", getCacheControlHeader(CACHE_DURATIONS.userSettings));
+    return response;
   } catch (error) {
     return apiInternalError("settings/GET", error, "Failed to fetch settings");
   }
@@ -152,6 +155,7 @@ export async function PUT(request: NextRequest) {
       requestId,
     });
 
+    // Cache is revalidated via unstable_cache() TTL (300 sec) in server components
     return apiSuccess(updatedUser);
   } catch (error) {
     return apiInternalError("settings/PUT", error, "Failed to update settings");

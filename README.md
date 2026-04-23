@@ -115,6 +115,38 @@ await logAdminAction(prisma, {
   });
   ```
 
+## Caching and Data-Fetch Strategy
+
+The app uses a three-tier caching strategy to balance performance, freshness, and security:
+
+**Development Behavior (Lax Caching):**
+
+- In development (`NODE_ENV !== "production"`), caching defaults are intentionally relaxed to reduce stale data confusion during debugging.
+- Server-component cache TTLs are set to `0` in dev through `lib/cacheKeys.ts`, and API responses can use no-store headers where needed.
+- Production keeps the stricter TTL and cache-control policy.
+
+**Sensitive Routes (No Cache):**
+
+- Authentication, account operations (export, deletion), admin mutations, and rate-limited routes use `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` to prevent cache bypass attacks and ensure real-time authorization checks.
+- Example: [app/api/account/export/route.ts](app/api/account/export/route.ts#L147)
+
+**Read-Heavy Routes (Controlled Caching):**
+
+- User-scoped data (settings, meals, weight entries, favorites) cached 1–30 minutes depending on update frequency.
+- Global read-only data (food search, admin lists) cached 10–30 minutes.
+- Uses `Cache-Control: private, max-age=<seconds>` in production with environment-aware TTLs.
+
+**Server Component Optimization:**
+
+- Use `unstable_cache()` with revalidation tags to prevent redundant API calls across multiple pages accessing the same user-specific data.
+- Wrap user fetches with `{ revalidate: 300, tags: ['resource:userId'] }` to cache responses while ensuring mutations bust the cache.
+
+**Cache Invalidation Pattern:**
+
+- Define cache tags in `lib/cacheKeys.ts` following `{resource}:{userId}` format for user-scoped data and `{resource}` for global data.
+- After state-changing operations, return fresh data and rely on environment-aware TTL revalidation; use explicit tag revalidation only where the route context supports it.
+- This ensures consistency without requiring full page revalidation.
+
 ## Tech Stack
 
 - **Framework:** Next.js 16.1.6 (App Router)

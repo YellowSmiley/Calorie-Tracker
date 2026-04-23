@@ -1,8 +1,10 @@
 import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "./components/DashboardClient";
 import { SettingsData, UserSettings } from "./settings/types";
 import { redirect } from "next/navigation";
+import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
 
 type DashboardUserData = SettingsData & {
   isActive: boolean;
@@ -17,24 +19,32 @@ export default async function Home() {
   }
 
   // Fetch user settings and goals
-  const user = (await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      calorieGoal: true,
-      proteinGoal: true,
-      carbGoal: true,
-      fatGoal: true,
-      saturatesGoal: true,
-      sugarsGoal: true,
-      fibreGoal: true,
-      saltGoal: true,
-      calorieUnit: true,
-      weightUnit: true,
-      bodyWeightUnit: true,
-      isActive: true,
-      blackMarks: true,
-    },
-  })) as DashboardUserData;
+  const user = (await unstable_cache(
+    async () =>
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          calorieGoal: true,
+          proteinGoal: true,
+          carbGoal: true,
+          fatGoal: true,
+          saturatesGoal: true,
+          sugarsGoal: true,
+          fibreGoal: true,
+          saltGoal: true,
+          calorieUnit: true,
+          weightUnit: true,
+          bodyWeightUnit: true,
+          isActive: true,
+          blackMarks: true,
+        },
+      }),
+    [CACHE_TAGS.userSettings(session.user.id)],
+    {
+      revalidate: CACHE_DURATIONS.userSettings,
+      tags: [CACHE_TAGS.userSettings(session.user.id)],
+    }
+  )()) as DashboardUserData;
 
   if (user && user.isActive === false) {
     redirect("/login?banned=1");

@@ -1,8 +1,10 @@
 import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import DiaryClient from "./DiaryClient";
 import type { FoodItem, Meal } from "./types";
 import { SettingsData, UserSettings } from "../settings/types";
+import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
 
 const initialMeals: Meal[] = [
   { name: "Breakfast", items: [] },
@@ -37,23 +39,31 @@ export default async function DiaryPage({
   }
 
   // Fetch user settings for unit preferences
-  const user = (await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      calorieUnit: true,
-      weightUnit: true,
-      bodyWeightUnit: true,
-      volumeUnit: true,
-      calorieGoal: true,
-      proteinGoal: true,
-      carbGoal: true,
-      fatGoal: true,
-      saturatesGoal: true,
-      sugarsGoal: true,
-      fibreGoal: true,
-      saltGoal: true,
-    },
-  })) as SettingsData;
+  const user = (await unstable_cache(
+    async () =>
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          calorieUnit: true,
+          weightUnit: true,
+          bodyWeightUnit: true,
+          volumeUnit: true,
+          calorieGoal: true,
+          proteinGoal: true,
+          carbGoal: true,
+          fatGoal: true,
+          saturatesGoal: true,
+          sugarsGoal: true,
+          fibreGoal: true,
+          saltGoal: true,
+        },
+      }),
+    [CACHE_TAGS.userSettings(session.user.id)],
+    {
+      revalidate: CACHE_DURATIONS.userSettings,
+      tags: [CACHE_TAGS.userSettings(session.user.id)],
+    }
+  )()) as SettingsData;
 
   const userSettings: UserSettings = {
     calorieUnit: user?.calorieUnit ?? "kcal",

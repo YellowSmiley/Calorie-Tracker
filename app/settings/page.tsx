@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import SettingsClient from "./SettingsClient";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +11,7 @@ import {
   SettingsData,
   UserSettings,
 } from "./types";
+import { CACHE_TAGS, CACHE_DURATIONS } from "@/lib/cacheKeys";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -19,23 +21,31 @@ export default async function SettingsPage() {
   }
 
   // Fetch user settings
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      calorieGoal: true,
-      proteinGoal: true,
-      carbGoal: true,
-      fatGoal: true,
-      saturatesGoal: true,
-      sugarsGoal: true,
-      fibreGoal: true,
-      saltGoal: true,
-      calorieUnit: true,
-      weightUnit: true,
-      bodyWeightUnit: true,
-      volumeUnit: true,
-    },
-  });
+  const user = await unstable_cache(
+    async () =>
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          calorieGoal: true,
+          proteinGoal: true,
+          carbGoal: true,
+          fatGoal: true,
+          saturatesGoal: true,
+          sugarsGoal: true,
+          fibreGoal: true,
+          saltGoal: true,
+          calorieUnit: true,
+          weightUnit: true,
+          bodyWeightUnit: true,
+          volumeUnit: true,
+        },
+      }),
+    [CACHE_TAGS.userSettings(session.user.id)],
+    {
+      revalidate: CACHE_DURATIONS.userSettings,
+      tags: [CACHE_TAGS.userSettings(session.user.id)],
+    }
+  )();
 
   const initialSettings: SettingsData = {
     calorieGoal: user?.calorieGoal ?? 3000,
