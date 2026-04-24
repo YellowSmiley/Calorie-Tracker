@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { MealType, Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/apiGuards";
 import {
   apiBadRequest,
@@ -20,6 +20,11 @@ type MealFavoriteDelegate = {
     Prisma.MealFavoriteGetPayload<{
       include: { _count: { select: { items: true } } };
     }>
+  >;
+  findUnique: (args: Prisma.MealFavoriteFindUniqueArgs) => Promise<
+    Prisma.MealFavoriteGetPayload<{
+      include: { _count: { select: { items: true } } };
+    }> | null
   >;
 };
 
@@ -101,25 +106,41 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const favorite = await mealFavorite.create({
-      data: {
-        userId: user.id,
-        name: name.trim(),
-        mealType,
-        items: {
-          create: entries.map((entry, index) => ({
-            foodId: entry.foodId,
-            serving: entry.serving,
-            sortOrder: index,
-          })),
+    const favorite = await prisma.$transaction(async (tx) => {
+      const createdFavorite = await tx.mealFavorite.create({
+        data: {
+          userId: user.id,
+          name: name.trim(),
+          mealType: mealType as MealType,
         },
-      },
-      include: {
-        _count: {
-          select: { items: true },
+      });
+
+      await tx.mealFavoriteItem.createMany({
+        data: entries.map((entry, index) => ({
+          favoriteId: createdFavorite.id,
+          foodId: entry.foodId,
+          serving: entry.serving,
+          sortOrder: index,
+        })),
+      });
+
+      return tx.mealFavorite.findUnique({
+        where: { id: createdFavorite.id },
+        include: {
+          _count: {
+            select: { items: true },
+          },
         },
-      },
+      });
     });
+
+    if (!favorite) {
+      return apiInternalError(
+        "meal-favorites/save-current/POST",
+        new Error("Saved favorite could not be reloaded"),
+        "Failed to save favorite",
+      );
+    }
 
     return apiSuccess(
       {

@@ -11,10 +11,26 @@ type Limiter = {
 };
 
 let redisClient: Redis | null = null;
+let hasLoggedRedisConnectionError = false;
+let isRedisRateLimitAvailable = true;
+
+function isRedisConnectivityError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const errorCode = "code" in error ? String(error.code) : "";
+  return (
+    errorCode === "ECONNREFUSED" ||
+    error.message.includes("ECONNREFUSED") ||
+    error.message.includes("Connection is closed") ||
+    error.message.includes("connect ECONNREFUSED")
+  );
+}
 
 function getRedisClient(): Redis | null {
   const redisUrl = process.env.REDIS_URL?.trim();
-  if (!redisUrl) {
+  if (!redisUrl || !isRedisRateLimitAvailable) {
     return null;
   }
 
@@ -23,12 +39,24 @@ function getRedisClient(): Redis | null {
       maxRetriesPerRequest: 1,
       enableOfflineQueue: false,
       lazyConnect: true,
+      retryStrategy: () => null,
+      reconnectOnError: () => false,
     });
 
     redisClient.on("error", (error) => {
-      if (process.env.NODE_ENV === "development") {
+      if (
+        process.env.NODE_ENV === "development" &&
+        !hasLoggedRedisConnectionError
+      ) {
+        hasLoggedRedisConnectionError = true;
+        isRedisRateLimitAvailable = false;
         console.error("Redis rate-limit client error:", error);
       }
+    });
+
+    redisClient.on("ready", () => {
+      hasLoggedRedisConnectionError = false;
+      isRedisRateLimitAvailable = true;
     });
   }
 
@@ -46,12 +74,33 @@ function createLimiter(
     return memoryLimiter;
   }
 
-  return new RateLimiterRedis({
+  const redisLimiter = new RateLimiterRedis({
     storeClient: client,
     keyPrefix,
     insuranceLimiter: memoryLimiter,
     ...options,
   });
+
+  return {
+    async consume(key: string) {
+      if (!isRedisRateLimitAvailable) {
+        return memoryLimiter.consume(key);
+      }
+
+      try {
+        return await redisLimiter.consume(key);
+      } catch (error) {
+        if (isRedisConnectivityError(error)) {
+          isRedisRateLimitAvailable = false;
+          redisClient?.disconnect();
+          redisClient = null;
+          return memoryLimiter.consume(key);
+        }
+
+        throw error;
+      }
+    },
+  };
 }
 
 // Auth endpoints: 5 attempts per 60s, block for 5 minutes

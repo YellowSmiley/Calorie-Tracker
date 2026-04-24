@@ -162,7 +162,7 @@ export default function MealFavoritesPickerSidebar({
         <div className="w-12" />
       </div>
 
-      <div className="flex flex-col h-full p-4">
+      <div className="flex flex-1 min-h-0 flex-col p-4">
         <div className="mx-auto w-full max-w-3xl flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden flex flex-col">
           <SearchInput
             value={searchQuery}
