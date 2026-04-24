@@ -13,6 +13,7 @@ import DashboardPanel from "./DashboardPanel";
 import DashboardSegmentedControl from "./DashboardSegmentedControl";
 import NutritionMetricCard from "./NutritionMetricCard";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { track } from "@vercel/analytics";
 
 type TimeRange = "day" | "week" | "month";
 
@@ -204,6 +205,9 @@ export default function NutritionSummaryPanel({
       date.setMonth(date.getMonth() - 1);
     }
     onDateChange(date.toISOString().split("T")[0]);
+    track("nutrition_summary_date_changed", {
+      timeRange,
+    });
   };
 
   const handleNextDate = () => {
@@ -216,6 +220,9 @@ export default function NutritionSummaryPanel({
       date.setMonth(date.getMonth() + 1);
     }
     onDateChange(date.toISOString().split("T")[0]);
+    track("nutrition_summary_date_changed", {
+      timeRange,
+    });
   };
 
   const formatMetricValue = (metric: NutritionMetricConfig, value: number) => {

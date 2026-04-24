@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 const TUTORIAL_STATE_KEY = "dashboard-quick-start-collapsed";
 
@@ -36,6 +37,18 @@ export default function DashboardQuickStartTutorial() {
     }
   }, [hasLoadedPreference, isCollapsed]);
 
+  const handleToggleTutorial = () => {
+    setIsCollapsed((previous) => {
+      const nextCollapsed = !previous;
+
+      trackEvent(nextCollapsed ? "tutorial_closed" : "tutorial_opened", {
+        tutorial: "dashboard_quick_start",
+      });
+
+      return nextCollapsed;
+    });
+  };
+
   return (
     <section className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -44,7 +57,7 @@ export default function DashboardQuickStartTutorial() {
         </h3>
         <button
           type="button"
-          onClick={() => setIsCollapsed((previous) => !previous)}
+          onClick={handleToggleTutorial}
           aria-expanded={!isCollapsed}
           aria-controls="dashboard-quick-tutorial-content"
           className="ct-button-secondary h-10 w-full rounded-lg px-4 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500 sm:w-auto"

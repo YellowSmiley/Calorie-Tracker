@@ -1,3 +1,4 @@
+import { trackEvent } from "@/app/components/analyticsEvents";
 import { useRef, useState } from "react";
 import Tesseract from "tesseract.js";
 
@@ -77,6 +78,9 @@ export default function NutritionLabelPhotoInput({
 
   function handleTakePhoto() {
     fileInputRef.current?.click();
+    trackEvent("nutrition_label_photo_input_take_photo_clicked", {
+      // No personally identifiable information should be included in analytics events.
+    });
   }
 
   return (

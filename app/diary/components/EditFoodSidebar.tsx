@@ -21,6 +21,7 @@ import ValidatedNumberField from "./ValidatedNumberField";
 import LoadingButton from "@/app/components/LoadingButton";
 import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
 import InfoAlert from "@/app/components/InfoAlert";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface EditFoodSidebarProps {
   isOpen: boolean;
@@ -674,9 +675,12 @@ export default function EditFoodSidebar({
                   </p>
                   <button
                     type="button"
-                    onClick={() =>
-                      onReport?.(food.id, reportReason.trim() || undefined)
-                    }
+                    onClick={() => {
+                      trackEvent("report_food_clicked", {
+                        // No personally identifiable information should be included in analytics events.
+                      });
+                      onReport?.(food.id, reportReason.trim() || undefined);
+                    }}
                     disabled={isReporting || hasUserReported || !canReport}
                     className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
                     data-testid="add-food-report-button"

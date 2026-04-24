@@ -22,6 +22,7 @@ import {
   AcceptedCalorieUnits,
   AcceptedWeightedUnits,
 } from "../types";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface GoalRecommendations {
   calorieGoal: number;
@@ -133,6 +134,9 @@ export default function GoalsCalculatorSection({
       saltGoal: convertWeightForDisplay(derivedLimits.saltGrams, weightUnit),
     });
     setStatusMessage("Goals applied. Save Settings to keep these values.");
+    trackEvent("goals_calculated", {
+      // No personally identifiable information should be included in analytics events.
+    });
   };
 
   return (

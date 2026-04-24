@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import PendingLink from "@/app/components/PendingLink";
+import { track } from "@vercel/analytics";
 
 function getConsentSnapshot() {
   return localStorage.getItem("cookie-consent");
@@ -27,6 +28,9 @@ export default function CookieBanner() {
   const handleAcknowledge = () => {
     localStorage.setItem("cookie-consent", "acknowledged");
     setDismissed(true);
+    track("cookie_banner_acknowledged", {
+      // No personally identifiable information should be included in analytics events.
+    });
   };
 
   if (consent || dismissed) return null;

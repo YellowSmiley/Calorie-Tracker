@@ -2,6 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import AppModal from "./AppModal";
+import { trackEvent } from "./analyticsEvents";
 
 interface HelpButtonProps {
   /** Modal title */
@@ -20,10 +21,26 @@ export default function HelpButton({
 }: HelpButtonProps) {
   const [showModal, setShowModal] = useState(false);
 
+  const handleOpenHelp = () => {
+    setShowModal(true);
+    trackEvent("help_opened", {
+      helpTitle: title,
+      helpLabel: ariaLabel,
+    });
+  };
+
+  const handleCloseHelp = () => {
+    setShowModal(false);
+    trackEvent("help_closed", {
+      helpTitle: title,
+      helpLabel: ariaLabel,
+    });
+  };
+
   return (
     <>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={handleOpenHelp}
         aria-label={ariaLabel}
         className="ct-link-accent inline text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-zinc-500 dark:focus:ring-offset-zinc-950"
         type="button"
@@ -34,14 +51,14 @@ export default function HelpButton({
 
       <AppModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={handleCloseHelp}
         title={title}
         closeAriaLabel="Close help"
         dataTestId={dataTestId}
         bodyClassName="p-4 overflow-y-auto max-h-[calc(100vh-8.5rem)] sm:max-h-[60vh]"
         footer={
           <button
-            onClick={() => setShowModal(false)}
+            onClick={handleCloseHelp}
             className="w-full rounded-lg bg-foreground px-4 py-2 font-medium text-background transition-opacity hover:opacity-90"
             data-testid={dataTestId ? `${dataTestId}-footer-button` : undefined}
           >

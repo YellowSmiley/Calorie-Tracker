@@ -13,6 +13,7 @@ import {
 import { getCalorieForDisplay } from "@/lib/unitConversions";
 import ValidatedTextField from "@/app/components/ValidatedTextField";
 import LoadingButton from "@/app/components/LoadingButton";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface FavoriteMealEditorSidebarProps {
   isOpen: boolean;
@@ -292,7 +293,12 @@ export default function FavoriteMealEditorSidebar({
                       <button
                         type="button"
                         className="rounded-lg border border-solid border-black/8 hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] px-4 py-2 text-center text-sm font-medium text-black dark:text-zinc-50 transition-colors"
-                        onClick={() => setShowFoodList(true)}
+                        onClick={() => {
+                          setShowFoodList(true);
+                          trackEvent("favorite_add_food_button_clicked", {
+                            // No personally identifiable information should be included in analytics events.
+                          });
+                        }}
                         data-testid="favorite-add-food-button"
                       >
                         Add Food
@@ -329,6 +335,9 @@ export default function FavoriteMealEditorSidebar({
         onClose={() => setShowFoodList(false)}
         onSelectFood={handleAddFood}
         onOpenCreateForm={() => {
+          trackEvent("create_food_opened_from_favorite_editor", {
+            // No personally identifiable information should be included in analytics events.
+          });
           onError("Create food from Settings > My Foods, then add it here.");
         }}
         userSettings={userSettings}

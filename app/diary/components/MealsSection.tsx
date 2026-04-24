@@ -17,6 +17,7 @@ import HelpButton from "@/app/components/HelpButton";
 import LoadingButton from "@/app/components/LoadingButton";
 import { getCalorieForDisplay } from "@/lib/unitConversions";
 import { calculateNutritionTotals } from "@/lib/nutritionSummary";
+import { trackEvent } from "@/app/components/analyticsEvents";
 import type { FoodItem, Meal } from "../types";
 import { UserSettings } from "@/app/settings/types";
 import { FoodWithCreator } from "@/app/api/admin/foods/route";
@@ -140,6 +141,12 @@ export default function MealsSection({
               : meal,
           ),
         );
+
+        trackEvent("meal_item_added", {
+          source: "food_list",
+          mealType: mealTypeByIndex[selectedMealIndex],
+          date: currentDate,
+        });
       }
 
       setShowFoodList(false);
@@ -212,6 +219,12 @@ export default function MealsSection({
                 : meal,
             ),
           );
+
+          trackEvent("meal_item_added", {
+            source: "custom_food",
+            mealType: mealTypeByIndex[selectedMealIndex],
+            date: currentDate,
+          });
         }
       }
 
@@ -258,6 +271,11 @@ export default function MealsSection({
               : meal,
           ),
         );
+
+        trackEvent("meal_item_edited", {
+          mealType: mealTypeByIndex[editTarget.mealIndex],
+          date: currentDate,
+        });
       }
 
       setShowEditForm(false);
@@ -401,6 +419,11 @@ export default function MealsSection({
         );
       }
 
+      trackEvent("meal_favorite_saved", {
+        mealType: mealTypeByIndex[mealIndex],
+        date: currentDate,
+      });
+
       setSaveFavoriteMealIndex(null);
       setSaveFavoriteName("");
     } catch (err) {
@@ -437,6 +460,12 @@ export default function MealsSection({
           index === clearMealIndex ? { ...meal, items: [] } : meal,
         ),
       );
+
+      trackEvent("meal_cleared", {
+        mealType: mealTypeByIndex[clearMealIndex],
+        date: currentDate,
+      });
+
       setClearMealIndex(null);
     } catch (err) {
       onError(err instanceof Error ? err.message : "Failed to clear meal");
@@ -489,6 +518,10 @@ export default function MealsSection({
                         onError(null);
                         setSaveFavoriteMealIndex(mealIndex);
                         setSaveFavoriteName(`${meal.name} Favorite`);
+                        trackEvent("save_favorite_opened", {
+                          mealType: mealTypeByIndex[mealIndex],
+                          date: currentDate,
+                        });
                       }}
                       disabled={isSavingFavorite}
                       className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
@@ -498,7 +531,13 @@ export default function MealsSection({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFavoritePickerMealIndex(mealIndex)}
+                      onClick={() => {
+                        setFavoritePickerMealIndex(mealIndex);
+                        trackEvent("apply_favorite_opened", {
+                          mealType: mealTypeByIndex[mealIndex],
+                          date: currentDate,
+                        });
+                      }}
                       className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                       data-testid={`apply-favorite-${meal.name.toLowerCase()}`}
                     >
@@ -506,7 +545,13 @@ export default function MealsSection({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setClearMealIndex(mealIndex)}
+                      onClick={() => {
+                        setClearMealIndex(mealIndex);
+                        trackEvent("clear_meal_opened", {
+                          mealType: mealTypeByIndex[mealIndex],
+                          date: currentDate,
+                        });
+                      }}
                       className="ct-button-secondary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                       data-testid={`clear-meal-${meal.name.toLowerCase()}`}
                     >
@@ -589,6 +634,10 @@ export default function MealsSection({
                           onClick={() => {
                             setSelectedMealIndex(mealIndex);
                             setShowFoodList(true);
+                            trackEvent("add_item_opened", {
+                              mealType: mealTypeByIndex[mealIndex],
+                              date: currentDate,
+                            });
                           }}
                         >
                           <td colSpan={3} className="px-4 py-3 text-center">
@@ -620,6 +669,9 @@ export default function MealsSection({
         }}
         onSelectFood={addFoodFromList}
         onOpenCreateForm={() => {
+          trackEvent("create_food_opened_from_food_list", {
+            // No personally identifiable information should be included in analytics events.
+          });
           onError(null);
           setShowCreateForm(true);
         }}

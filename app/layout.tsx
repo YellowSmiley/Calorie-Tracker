@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import RouteLoadingIndicator from "./components/RouteLoadingIndicator";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ClientAnalyticsTracker from "./components/ClientAnalyticsTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,9 +65,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
-        <Analytics />
-        <SpeedInsights />
         <Providers>
+          <ClientAnalyticsTracker />
           <Suspense fallback={null}>
             <RouteLoadingIndicator />
           </Suspense>
@@ -93,6 +93,8 @@ export default function RootLayout({
             `,
           }}
         />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

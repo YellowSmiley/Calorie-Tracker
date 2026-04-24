@@ -10,6 +10,7 @@ import {
   getWeightForDisplay,
 } from "@/lib/unitConversions";
 import { UserSettings } from "@/app/settings/types";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface MealFavoritesPickerSidebarProps {
   isOpen: boolean;
@@ -103,6 +104,11 @@ export default function MealFavoritesPickerSidebar({
         throw new Error(data.error || "Failed to apply favorite");
       }
 
+      trackEvent("meal_favorite_applied", {
+        mealType: targetMealType,
+        date: currentDate,
+      });
+
       setSearchQuery("");
       onApplied();
       onClose();
@@ -115,6 +121,10 @@ export default function MealFavoritesPickerSidebar({
 
   const handleClose = () => {
     setSearchQuery("");
+    trackEvent("apply_favorite_closed", {
+      mealType: targetMealType,
+      date: currentDate,
+    });
     onClose();
   };
 

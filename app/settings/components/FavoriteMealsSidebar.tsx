@@ -14,6 +14,7 @@ import {
   FavoriteMealDetail,
   FavoriteMealSummary,
 } from "@/app/meal-favorites/types";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface FavoriteMealsSidebarProps {
   isOpen: boolean;
@@ -82,6 +83,9 @@ export default function FavoriteMealsSidebar({
   const openEditorForCreate = () => {
     setEditingFavorite(null);
     setShowEditor(true);
+    trackEvent("favorite_create_button_clicked", {
+      // No personally identifiable information should be included in analytics events.
+    });
   };
 
   const openEditorForEdit = async (favoriteId: string) => {
@@ -233,7 +237,12 @@ export default function FavoriteMealsSidebar({
                     onClick={(event) => event.stopPropagation()}
                   >
                     <button
-                      onClick={() => setDeleteTarget(favorite)}
+                      onClick={() => {
+                        setDeleteTarget(favorite);
+                        trackEvent("favorite_delete_button_clicked", {
+                          // No personally identifiable information should be included in analytics events.
+                        });
+                      }}
                       className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                     >
                       Delete

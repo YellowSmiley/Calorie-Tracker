@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface TrendMeasurementsAccordionProps {
   title: string;
@@ -17,11 +18,23 @@ export default function TrendMeasurementsAccordion({
 }: TrendMeasurementsAccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  const handleToggle = () => {
+    setIsOpen((current) => {
+      const nextOpen = !current;
+
+      trackEvent(nextOpen ? "charts_accordion_opened" : "charts_accordion_closed", {
+        section: title,
+      });
+
+      return nextOpen;
+    });
+  };
+
   return (
     <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
       <button
         type="button"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={handleToggle}
         className="flex w-full flex-col gap-3 rounded-lg p-4 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900 sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex min-w-0 items-center gap-3">

@@ -8,6 +8,7 @@ import {
   getWeightForDisplay,
 } from "@/lib/unitConversions";
 import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface MealItemRowProps {
   item: FoodItem;
@@ -76,6 +77,9 @@ export default function MealItemRow({
         <button
           onClick={(event) => {
             event.stopPropagation();
+            trackEvent("meal_item_remove_clicked", {
+              item: item.id,
+            });
             onRemove(mealIndex, item.id);
           }}
           className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"

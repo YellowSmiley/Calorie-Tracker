@@ -10,6 +10,7 @@ import { UserSettings } from "../../settings/types";
 import LoadingButton from "@/app/components/LoadingButton";
 import AppModal from "@/app/components/AppModal";
 import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 type DeleteFoodModalItem = {
   name: string;
@@ -79,6 +80,9 @@ export default function DeleteFoodModal({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              trackEvent("delete_food_confirmed", {
+                // No personally identifiable information should be included in analytics events.
+              });
               onConfirm();
             }}
             isLoading={isLoading}

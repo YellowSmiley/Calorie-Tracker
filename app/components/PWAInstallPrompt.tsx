@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
+import { trackEvent } from "./analyticsEvents";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -98,8 +99,18 @@ export default function PWAInstallPrompt() {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
+    trackEvent("pwa_install_clicked", {
+      source: "install_prompt",
+      hasManualHint: showManualInstallHint,
+    });
+
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+
+    trackEvent("pwa_install_result", {
+      outcome,
+      source: "install_prompt",
+    });
 
     // Treat any completed install flow as actioned so prompt doesn't reappear.
     if (outcome === "accepted" || outcome === "dismissed") {
@@ -110,6 +121,11 @@ export default function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
+    trackEvent("pwa_install_not_now", {
+      source: "install_prompt",
+      hasManualHint: showManualInstallHint,
+    });
+
     acknowledgeInstallPrompt();
     setDeferredPrompt(null);
     setShowManualInstallHint(false);

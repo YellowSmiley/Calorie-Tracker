@@ -16,6 +16,7 @@ import BarcodeInput from "./BarcodeInput";
 import ValidatedNumberField from "../ValidatedNumberField";
 import ValidatedTextField from "../../../components/ValidatedTextField";
 import LoadingButton from "@/app/components/LoadingButton";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 export type CreateFoodSidebarOnSubmitData = Omit<
   FoodItem,
@@ -320,6 +321,10 @@ export default function CreateFoodSidebar({
       defaultServingAmount: servingAmount > 0 ? servingAmount : null,
       defaultServingDescription:
         formData.defaultServingDescription.trim() || null,
+    });
+
+    trackEvent(editingFood ? "food_edited" : "food_created", {
+      // No personally identifiable information should be included in analytics events.
     });
   };
 

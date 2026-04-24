@@ -186,3 +186,10 @@ For this workspace, local Playwright is only reliable when tests are run one at 
 - Use semantic HTML, associated labels, keyboard-accessible controls, and visible focus states for all interactive elements.
 - Provide screen-reader support with meaningful names, instructions, and live/error messaging where relevant.
 - Ensure color is not the only way information is conveyed.
+
+## Analytics Instrumentation Standards
+
+- Track meaningful user actions with Vercel Analytics using shared helpers in `app/components/analyticsEvents.ts`.
+- For all new user-facing functionality, explicitly evaluate whether the flow should emit analytics events (for example open, submit, success, failure, dismiss, and toggle actions).
+- If an action is intentionally not tracked, explain why in the final response.
+- Keep event names stable and descriptive to avoid breaking downstream reporting (for example `meal_item_added`, `meal_favorite_applied`, `charts_date_range_changed`).

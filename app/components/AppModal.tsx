@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useId } from "react";
 
 interface AppModalProps {
@@ -33,10 +34,17 @@ export default function AppModal({
     return null;
   }
 
+  const handleOnClose = () => {
+    track("app_modal_closed", {
+      title,
+    });
+    onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-0 sm:p-4"
-      onClick={onClose}
+      onClick={handleOnClose}
       data-testid={dataTestId ? `${dataTestId}-overlay` : undefined}
     >
       <div
@@ -60,7 +68,7 @@ export default function AppModal({
             </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleOnClose}
               aria-label={closeAriaLabel}
               className="rounded-lg p-1 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
               data-testid={

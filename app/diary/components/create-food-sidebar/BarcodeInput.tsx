@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface BarcodeInputProps {
   onExtract: (data: Partial<Record<string, string>>) => void;
@@ -108,6 +109,9 @@ export default function BarcodeInput({ onExtract }: BarcodeInputProps) {
 
   function handleTakePhoto() {
     fileInputRef.current?.click();
+    trackEvent("barcode_input_take_photo_clicked", {
+      // No personally identifiable information should be included in analytics events.
+    });
   }
 
   return (

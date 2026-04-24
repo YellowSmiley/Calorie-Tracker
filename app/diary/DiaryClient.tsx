@@ -10,6 +10,7 @@ import type { Meal } from "./types";
 import { UserSettings } from "../settings/types";
 import { startRouteLoading } from "@/app/components/routeLoading";
 import AppHeader from "@/app/components/AppHeader";
+import { trackEvent } from "../components/analyticsEvents";
 
 export interface DiaryClientProps {
   initialMeals: Meal[];
@@ -73,6 +74,9 @@ export default function DiaryClient({
     date.setDate(date.getDate() - 1);
     const newDate = date.toISOString().split("T")[0];
     handleDateChange(newDate);
+    trackEvent("diary_date_changed", {
+      direction: "previous",
+    });
   };
 
   const handleNextDay = () => {
@@ -80,6 +84,9 @@ export default function DiaryClient({
     date.setDate(date.getDate() + 1);
     const newDate = date.toISOString().split("T")[0];
     handleDateChange(newDate);
+    trackEvent("diary_date_changed", {
+      direction: "next",
+    });
   };
 
   return (

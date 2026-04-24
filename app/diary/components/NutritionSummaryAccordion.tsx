@@ -10,6 +10,7 @@ import {
   type NutritionTotals,
 } from "@/lib/nutritionSummary";
 import { UserSettings } from "../../settings/types";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 interface NutritionSummaryAccordionProps {
   title: string;
@@ -42,7 +43,13 @@ export default function NutritionSummaryAccordion({
     <div className={className}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          trackEvent("nutrition_summary_accordion_toggled", {
+            title,
+            isOpen: !isOpen,
+          });
+        }}
         className="w-full flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
         data-testid={`${testIdPrefix}-accordion-button`}
       >

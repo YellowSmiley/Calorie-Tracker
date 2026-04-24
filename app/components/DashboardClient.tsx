@@ -9,6 +9,7 @@ import NutritionSummaryPanel from "./dashboard/NutritionSummaryPanel";
 import { UserSettings } from "../settings/types";
 import AppHeader from "@/app/components/AppHeader";
 import AppModal from "@/app/components/AppModal";
+import { trackEvent } from "@/app/components/analyticsEvents";
 
 type TimeRange = "day" | "week" | "month";
 type ChartDateRange = "1m" | "3m" | "6m" | "1y" | "all";
@@ -114,6 +115,27 @@ export default function DashboardClient({
     year: "numeric",
   });
 
+  const handleTimeRangeChange = (nextRange: TimeRange) => {
+    setTimeRange(nextRange);
+    trackEvent("dashboard_time_range_changed", {
+      range: nextRange,
+    });
+  };
+
+  const handleChartDateRangeChange = (nextRange: ChartDateRange) => {
+    setChartDateRange(nextRange);
+    trackEvent("charts_date_range_changed", {
+      range: nextRange,
+    });
+  };
+
+  const handleSelectedDateChange = (nextDate: string) => {
+    setSelectedDate(nextDate);
+    trackEvent("dashboard_date_changed", {
+      date: nextDate,
+    });
+  };
+
   return (
     <div className="min-h-full flex flex-col">
       <AppHeader
@@ -149,9 +171,9 @@ export default function DashboardClient({
 
           <NutritionSummaryPanel
             timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
+            onTimeRangeChange={handleTimeRangeChange}
             selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
+            onDateChange={handleSelectedDateChange}
             totals={totals}
             userGoals={userGoals}
             userSettings={userSettings}
@@ -179,7 +201,7 @@ export default function DashboardClient({
               <DashboardSegmentedControl<ChartDateRange>
                 value={chartDateRange}
                 options={CHART_RANGE_OPTIONS}
-                onChange={setChartDateRange}
+                onChange={handleChartDateRangeChange}
                 isLoading={isLoading}
                 fullWidthOnMobile
               />
@@ -213,7 +235,12 @@ export default function DashboardClient({
         bodyClassName="p-4"
         footer={
           <button
-            onClick={() => setShowModerationWarning(false)}
+            onClick={() => {
+              setShowModerationWarning(false);
+              trackEvent("account_warning_closed", {
+                title: "Account Warning",
+              });
+            }}
             className="ct-button-primary w-full rounded-lg px-4 py-2 font-medium"
             data-testid="account-warning-close"
           >

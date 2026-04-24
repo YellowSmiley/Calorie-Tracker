@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import { trackEvent } from "./analyticsEvents";
 
 declare global {
   interface Window {
@@ -103,6 +104,9 @@ export default function AdSense({ className }: AdSenseProps) {
     );
     setIsVisible(false);
     scheduleReopen(ADSENSE_REAPPEAR_MS);
+    trackEvent("adsense_closed", {
+      delayMs: ADSENSE_REAPPEAR_MS,
+    });
   };
 
   if (!isVisible) {

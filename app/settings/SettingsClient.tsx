@@ -22,6 +22,7 @@ import { getApiErrorMessage } from "@/lib/apiError";
 import { unwrapApiData } from "@/lib/apiClient";
 import LoadingButton from "@/app/components/LoadingButton";
 import AppHeader from "../components/AppHeader";
+import { trackEvent } from "../components/analyticsEvents";
 
 interface SettingsClientProps {
   userSettings: UserSettings;
@@ -305,6 +306,9 @@ export default function SettingsClient({
   const handleExportData = async () => {
     setIsExporting(true);
     setExportMessage(null);
+    trackEvent("export_data_button_clicked", {
+      // No personally identifiable information should be included in analytics events.
+    });
     try {
       const response = await fetch("/api/account/export");
       if (!response.ok) throw new Error("Export failed");
@@ -393,6 +397,9 @@ export default function SettingsClient({
               onDeleteClick={() => {
                 setDeleteMessage(null);
                 setShowDeleteConfirm(true);
+                trackEvent("delete_account_button_clicked", {
+                  // No personally identifiable information should be included in analytics events.
+                });
               }}
               onDeleteConfirm={handleDeleteAccount}
               onDeleteCancel={() => {
@@ -419,8 +426,18 @@ export default function SettingsClient({
 
             <ActionsSection
               isAdmin={session?.user?.isAdmin || false}
-              onMyFoodsClick={() => setShowMyFoods(true)}
-              onFavoriteMealsClick={() => setShowFavoriteMeals(true)}
+              onMyFoodsClick={() => {
+                setShowMyFoods(true);
+                trackEvent("my_foods_button_clicked", {
+                  // No personally identifiable information should be included in analytics events.
+                });
+              }}
+              onFavoriteMealsClick={() => {
+                setShowFavoriteMeals(true);
+                trackEvent("favorite_meals_button_clicked", {
+                  // No personally identifiable information should be included in analytics events.
+                });
+              }}
             />
           </form>
         </div>

@@ -17,6 +17,7 @@ import SearchInput from "./SearchInput";
 import DataTableShell from "./DataTableShell";
 import LoadingButton from "./LoadingButton";
 import { formatFoodNameForDisplay } from "@/lib/foodNameDisplay";
+import { trackEvent } from "./analyticsEvents";
 
 interface FoodTableProps {
   userSettings: UserSettings;
@@ -328,7 +329,12 @@ export default function FoodTable({
                       : "You haven't created any foods yet. Click 'Create Food' to get started."}
                 </p>
                 <button
-                  onClick={() => setShowCreateForm(true)}
+                  onClick={() => {
+                    setShowCreateForm(true);
+                    trackEvent("create_food_button_clicked", {
+                      // No personally identifiable information should be included in analytics events.
+                    });
+                  }}
                   className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                   data-testid="create-food-button"
                 >
@@ -341,7 +347,12 @@ export default function FoodTable({
             !isLoading && foods.length > 0 && foods.length >= total ? (
               <div className="px-4 py-4 text-center">
                 <button
-                  onClick={() => setShowCreateForm(true)}
+                  onClick={() => {
+                    setShowCreateForm(true);
+                    trackEvent("create_food_button_clicked", {
+                      // No personally identifiable information should be included in analytics events.
+                    });
+                  }}
                   className="ct-button-primary h-10 rounded-lg px-4 text-sm font-medium transition-colors"
                   data-testid="create-food-button"
                 >
@@ -414,6 +425,9 @@ export default function FoodTable({
                   onClick={() => {
                     setDeleteTarget(food);
                     setShowDeleteModal(true);
+                    trackEvent("delete_food_button_clicked", {
+                      // No personally identifiable information should be included in analytics events.
+                    });
                   }}
                   className="ct-button-danger-subtle rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                   data-testid={`delete-food-button-${i}`}
@@ -464,6 +478,9 @@ export default function FoodTable({
                     setDeleteTarget(fullFood);
                     setShowDeleteModal(true);
                   }
+                  trackEvent("delete_food_button_clicked", {
+                    // No personally identifiable information should be included in analytics events.
+                  });
                 }}
                 data-testid="food-table-edit-delete"
               >
