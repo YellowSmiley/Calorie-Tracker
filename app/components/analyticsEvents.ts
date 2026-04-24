@@ -1,11 +1,17 @@
 "use client";
 
-import { track } from "@vercel/analytics";
-
 type AnalyticsProperties = Record<
   string,
   string | number | boolean | null | undefined
 >;
+
+declare global {
+  interface Window {
+    va?: {
+      track: (name: string, properties?: AnalyticsProperties) => void;
+    };
+  }
+}
 
 export function trackEvent(name: string, properties: AnalyticsProperties = {}) {
   if (typeof window === "undefined") {
@@ -13,7 +19,7 @@ export function trackEvent(name: string, properties: AnalyticsProperties = {}) {
   }
 
   try {
-    track(name, properties);
+    window.va?.track(name, properties);
   } catch {
     // Avoid blocking user interactions if analytics is unavailable.
   }

@@ -11,6 +11,8 @@ import {
 // (account deletion guards, last-admin protections, and mutation error feedback states).
 // TODO(playwright): add admin moderation journey coverage for user action service extraction
 // (add/remove marks, auto-ban on third mark, and clear-punishments blacklist cleanup).
+// TODO(playwright): validate analytics instrumentation for help modal usage,
+// route-level page tracking, and PWA install/not-now prompt actions.
 
 const fillInputs = async (page: Page, values: Record<string, string>) => {
   for (const [testId, value] of Object.entries(values)) {

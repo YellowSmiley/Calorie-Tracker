@@ -66,7 +66,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
         <Providers>
-          <ClientAnalyticsTracker />
+          <Suspense fallback={null}>
+            <ClientAnalyticsTracker />
+          </Suspense>
           <Suspense fallback={null}>
             <RouteLoadingIndicator />
           </Suspense>

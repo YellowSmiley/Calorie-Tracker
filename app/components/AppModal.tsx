@@ -1,7 +1,7 @@
 "use client";
 
-import { track } from "@vercel/analytics";
 import { useId } from "react";
+import { trackEvent } from "./analyticsEvents";
 
 interface AppModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export default function AppModal({
   }
 
   const handleOnClose = () => {
-    track("app_modal_closed", {
+    trackEvent("app_modal_closed", {
       title,
     });
     onClose();

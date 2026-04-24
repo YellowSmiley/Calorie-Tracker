@@ -15,6 +15,8 @@ import { FoodItem } from "@/app/diary/types";
 
 // TODO(playwright): add/expand diary API edge-case coverage for meal service refactors
 // (date parsing boundaries, serving recalculation precision, and API error-state UX).
+// TODO(playwright): validate diary analytics instrumentation for add/edit item,
+// save meal as favorite, apply favorite meal, and clear meal flows.
 
 function randomFoodName() {
   return "TestFood-" + Math.random().toString(36).substring(2, 10);

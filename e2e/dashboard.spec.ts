@@ -7,6 +7,8 @@ import { resetSettings } from "./helpers";
 // (verification link lifecycle, reset-token lifecycle, and weak-password error UX).
 // TODO(playwright): cover closeable AppHeader ad behavior (close action, cooldown,
 // and reappearance) for Dashboard/Diary/Settings in both default and converted units.
+// TODO(playwright): validate dashboard analytics instrumentation for tutorial toggle,
+// chart accordion open/close, and chart date-range changes.
 
 const goals = {
   calories: 3000,
