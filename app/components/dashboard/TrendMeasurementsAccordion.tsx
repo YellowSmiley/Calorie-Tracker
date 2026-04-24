@@ -22,9 +22,12 @@ export default function TrendMeasurementsAccordion({
     setIsOpen((current) => {
       const nextOpen = !current;
 
-      trackEvent(nextOpen ? "charts_accordion_opened" : "charts_accordion_closed", {
-        section: title,
-      });
+      trackEvent(
+        nextOpen ? "charts_accordion_opened" : "charts_accordion_closed",
+        {
+          section: title,
+        },
+      );
 
       return nextOpen;
     });

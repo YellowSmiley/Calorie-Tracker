@@ -7,10 +7,7 @@ type AnalyticsProperties = Record<
   string | number | boolean | null | undefined
 >;
 
-export function trackEvent(
-  name: string,
-  properties: AnalyticsProperties = {},
-) {
+export function trackEvent(name: string, properties: AnalyticsProperties = {}) {
   if (typeof window === "undefined") {
     return;
   }
