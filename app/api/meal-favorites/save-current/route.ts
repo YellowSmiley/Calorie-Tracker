@@ -21,11 +21,11 @@ type MealFavoriteDelegate = {
       include: { _count: { select: { items: true } } };
     }>
   >;
-  findUnique: (args: Prisma.MealFavoriteFindUniqueArgs) => Promise<
-    Prisma.MealFavoriteGetPayload<{
-      include: { _count: { select: { items: true } } };
-    }> | null
-  >;
+  findUnique: (
+    args: Prisma.MealFavoriteFindUniqueArgs,
+  ) => Promise<Prisma.MealFavoriteGetPayload<{
+    include: { _count: { select: { items: true } } };
+  }> | null>;
 };
 
 const getDateRange = (dateString: string) => {
