@@ -398,6 +398,24 @@ export default function MealsSection({
     setMeals(data.meals);
   };
 
+  const handleFavoriteApplied = async (result: {
+    mealType: MealType;
+    items: FoodItem[];
+  }) => {
+    const mealIndex = mealTypeByIndex.indexOf(result.mealType);
+
+    if (mealIndex === -1) {
+      await refreshMealsForDate();
+      return;
+    }
+
+    setMeals((prev) =>
+      prev.map((meal, index) =>
+        index === mealIndex ? { ...meal, items: result.items } : meal,
+      ),
+    );
+  };
+
   const handleSaveMealAsFavorite = async (mealIndex: number, name: string) => {
     setIsSavingFavorite(true);
     onError(null);
@@ -732,7 +750,7 @@ export default function MealsSection({
           currentDate={currentDate}
           userSettings={userSettings}
           onClose={() => setFavoritePickerMealIndex(null)}
-          onApplied={refreshMealsForDate}
+          onApplied={handleFavoriteApplied}
           onError={onError}
         />
       )}

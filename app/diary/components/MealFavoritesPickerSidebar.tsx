@@ -11,6 +11,12 @@ import {
 } from "@/lib/unitConversions";
 import { UserSettings } from "@/app/settings/types";
 import { trackEvent } from "@/app/components/analyticsEvents";
+import type { FoodItem } from "../types";
+
+type ApplyFavoriteResult = {
+  mealType: MealType;
+  items: FoodItem[];
+};
 
 interface MealFavoritesPickerSidebarProps {
   isOpen: boolean;
@@ -18,7 +24,7 @@ interface MealFavoritesPickerSidebarProps {
   currentDate: string;
   userSettings: UserSettings;
   onClose: () => void;
-  onApplied: () => void;
+  onApplied: (result: ApplyFavoriteResult) => Promise<void> | void;
   onError: (message: string | null) => void;
 }
 
@@ -104,13 +110,25 @@ export default function MealFavoritesPickerSidebar({
         throw new Error(data.error || "Failed to apply favorite");
       }
 
+      const data = (await response.json()) as {
+        mealType?: MealType;
+        items?: FoodItem[];
+      };
+
+      if (!data.mealType || !Array.isArray(data.items)) {
+        throw new Error("Failed to apply favorite");
+      }
+
       trackEvent("meal_favorite_applied", {
         mealType: targetMealType,
         date: currentDate,
       });
 
       setSearchQuery("");
-      onApplied();
+      await onApplied({
+        mealType: data.mealType,
+        items: data.items,
+      });
       onClose();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Failed to apply favorite");
