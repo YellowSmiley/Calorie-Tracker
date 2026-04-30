@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { trackEvent } from "./analyticsEvents";
+import { Capacitor } from "@capacitor/core";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -55,6 +56,10 @@ export default function PWAInstallPrompt() {
   const [showManualInstallHint, setShowManualInstallHint] = useState(false);
 
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      return;
+    }
+
     // Mirror cookie banner behavior: once actioned, do not show again.
     if (consent === ACKNOWLEDGED_VALUE || isInstallPromptAcknowledged()) {
       return;
