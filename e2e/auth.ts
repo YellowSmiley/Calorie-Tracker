@@ -6,6 +6,8 @@ const testerPassword = process.env.E2E_TEST_PASSWORD ?? "";
 // TODO(playwright): add dedicated auth UX flow specs for login journeys
 // (invalid credentials error state, forgot-password interaction, Google sign-in,
 // and post-login redirect/callbackUrl behavior).
+// TODO(playwright): add native-shell coverage to assert PWA install prompt is hidden
+// and Google auth callback behavior remains stable in Capacitor builds.
 
 export const login = async (page: Page) => {
   await page.goto("/login");

@@ -232,8 +232,8 @@ export default function RegisterPage() {
                       autoComplete="name"
                       placeholder="Optional"
                       dataTestId="name"
-                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      labelClassName="block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="w-full h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <div className="grid gap-2 text-left">
@@ -259,8 +259,8 @@ export default function RegisterPage() {
                       required
                       dataTestId="email"
                       error={fieldErrors.email}
-                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      labelClassName="block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="w-full h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <div className="grid gap-2 text-left">
@@ -291,8 +291,8 @@ export default function RegisterPage() {
                       minLength={8}
                       dataTestId="password"
                       error={fieldErrors.password}
-                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      labelClassName="block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="w-full h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                     <p className="text-xs text-zinc-500">
                       Must be at least 8 characters, incl. uppercase, lowercase,
@@ -328,8 +328,8 @@ export default function RegisterPage() {
                       required
                       dataTestId="confirm-password"
                       error={fieldErrors.confirmPassword}
-                      labelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                      inputClassName="h-10 rounded-md border bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
+                      labelClassName="block mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                      inputClassName="w-full h-10 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black px-3 text-sm text-black dark:text-zinc-50"
                     />
                   </div>
                   <button

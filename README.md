@@ -307,13 +307,16 @@ npx prisma studio        # Open Prisma Studio (database GUI)
 npx prisma migrate dev   # Run database migrations
 
 # Mobile App (Capacitor)
-npm run cap:add:android  # Add Android platform
-npm run cap:add:ios      # Add iOS platform (macOS only)
-npm run cap:sync         # Sync web build to native projects
-npm run cap:open:android # Open Android Studio
-npm run cap:open:ios     # Open Xcode
-npm run cap:run:android  # Build and run on Android device/emulator
-npm run cap:run:ios      # Build and run on iOS device/simulator
+npm run cap:add:android       # Add Android platform
+npm run cap:add:ios           # Add iOS platform (macOS only)
+npm run cap:sync              # Sync (no server URL — uses bundled files)
+npm run cap:sync:dev:android  # Sync for Android emulator (local dev)
+npm run cap:sync:prod:android # Sync for Android pointing at .env.production URL
+npm run cap:sync:prod:ios     # Sync for iOS pointing at .env.production URL (macOS only)
+npm run cap:open:android      # Open Android Studio
+npm run cap:open:ios          # Open Xcode
+npm run cap:run:android       # Build and run on Android device/emulator
+npm run cap:run:ios           # Build and run on iOS device/simulator
 ```
 
 ## Mobile App & PWA
@@ -363,33 +366,80 @@ npm run cap:open:ios        # Open in Xcode (macOS only)
 
 **Pointing Capacitor at a server:**
 
-`capacitor.config.ts` reads a `CAP_SERVER_URL` env var at sync time. Set it before running `npm run cap:sync` and the app will load that URL in the WebView instead of the bundled static files.
+`capacitor.config.ts` reads `CAP_SERVER_URL` at sync time. The recommended approach is to set it in your `.env.production` file and use the dedicated sync scripts, which load it automatically via `dotenv`:
 
 ```bash
-# Local dev (device must be on the same network as your machine)
-CAP_SERVER_URL=http://192.168.1.100:3000 npm run cap:sync
+# Production (reads CAP_SERVER_URL from .env.production)
+npm run cap:sync:prod:android
+npm run cap:sync:prod:ios        # macOS only
 
-# Production
-CAP_SERVER_URL=https://calorietracker.yourdomain.com npm run cap:sync
+# Local dev — Android emulator (uses hardcoded 10.0.2.2 loopback)
+npm run cap:sync:dev:android
+
+# Local dev — physical device (set your machine's LAN IP)
+# Find with: ipconfig (Windows) or ifconfig (Mac/Linux)
+CAP_SERVER_URL=http://192.168.1.100:3000 npx cap sync
 
 # Revert to bundled static files
 npm run cap:sync   # (no CAP_SERVER_URL set)
 ```
 
-> **Note:** For local dev, use your machine's LAN IP — not `localhost`, which resolves to the device itself. Find it with `ipconfig` (Windows) or `ifconfig` (Mac/Linux). HTTP cleartext is enabled automatically when the URL starts with `http://`.
+> **Note:** `CAP_SERVER_URL` in `.env.production` is **not** loaded automatically by `cap sync` — only by Next.js during `npm run build`. The `cap:sync:prod:*` scripts explicitly load `.env.production` before running sync.
 
 **Deploying to Android (Google Play):**
 
-1. Build and sync: `npm run build ; npm run cap:sync`
+1. Build and sync: `npm run build ; npm run cap:sync:prod:android`
 2. Open Android Studio: `npm run cap:open:android`
 3. Update `versionCode` and `versionName` in `android/app/build.gradle`
 4. **Build > Generate Signed Bundle / APK** → choose **Android App Bundle (.aab)**
 5. Create or select a keystore when prompted — keep the keystore file safe
 6. Upload the `.aab` to [Google Play Console](https://play.google.com/console) under your app's release track
 
+**Testing on a physical Android device (debug APK):**
+
+The quickest way to test on a real phone without going through the Play Store:
+
+1. Build and sync:
+
+   ```bash
+   npm run build
+   npm run cap:sync:prod:android   # or cap:sync:dev:android for local dev
+   ```
+
+2. Open Android Studio: `npm run cap:open:android`
+3. Enable **USB debugging** on your phone: Settings → About Phone → tap Build Number 7 times → Developer Options → USB Debugging
+4. Connect your phone via USB and accept the prompt on the device
+5. Select your device from the target dropdown in Android Studio and click **Run ▶**
+
+   Android Studio will build a debug APK, install it, and launch the app automatically.
+
+   **Or generate a standalone APK to sideload:**
+   - **Build > Build Bundle(s) / APK(s) > Build APK(s)**
+   - Find the APK at `android/app/build/outputs/apk/debug/app-debug.apk`
+   - Transfer to your phone (USB, email, cloud) and open it to install (requires allowing installs from unknown sources)
+
+**Inspecting the app WebView from desktop Chrome (Android):**
+
+Use this when debugging login/network issues on a real device.
+
+1. On your phone, enable **Developer options** and **USB debugging**
+2. Connect the phone by USB and accept the trust/debug prompt
+3. Build/run a **debug** variant from Android Studio (not a release APK)
+4. On desktop Chrome, open `chrome://inspect/#devices`
+5. Enable **Discover USB devices**
+6. Under your device, find `com.calorietracker.app` and click **Inspect**
+7. Use **Console** and **Network** tabs to inspect requests like `/api/auth/callback/credentials`
+
+If the app does not appear in inspect:
+
+- Replug USB and re-accept the device trust prompt
+- Ensure USB debugging is still enabled
+- Re-run the app from Android Studio using the Run button
+- Refresh `chrome://inspect/#devices`
+
 **Deploying to iOS (Apple App Store — macOS only):**
 
-1. Build and sync: `npm run build ; npm run cap:sync`
+1. Build and sync: `npm run build ; npm run cap:sync:prod:ios`
 2. Open Xcode: `npm run cap:open:ios`
 3. Select your Team under **Signing & Capabilities** and set a unique Bundle Identifier
 4. Bump the **Version** and **Build** numbers in the project target

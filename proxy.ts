@@ -22,10 +22,45 @@ function checkCsrf(request: NextRequest): NextResponse | null {
   }
 
   const origin = request.headers.get("origin");
+  const referer = request.headers.get("referer");
 
   // Allow requests with no origin (same-origin navigation, server-side)
   if (!origin) {
     return null;
+  }
+
+  // Always allow same-origin mutations for the current request host.
+  // This supports local LAN testing (e.g., phone on 192.168.x.x) while
+  // preserving strict cross-origin blocking.
+  if (origin === request.nextUrl.origin) {
+    return null;
+  }
+
+  // Some Android WebView/Capacitor flows submit with Origin: null.
+  // Accept only if Referer proves it came from the same app origin.
+  if (origin === "null" && referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (refererOrigin === request.nextUrl.origin) {
+        return null;
+      }
+    } catch {
+      // invalid referer URL
+    }
+  }
+
+  // Capacitor WebView can send origin as capacitor://localhost while the app
+  // is actually served from http(s)://<host>. Allow only when referer confirms
+  // the same origin as the current request.
+  if (origin === "capacitor://localhost" && referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (refererOrigin === request.nextUrl.origin) {
+        return null;
+      }
+    } catch {
+      // invalid referer URL
+    }
   }
 
   const allowedUrl = runtimeEnv.AUTH_URL;
