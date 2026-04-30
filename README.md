@@ -93,6 +93,12 @@ See [Open Food Facts Terms of Use](https://world.openfoodfacts.org/terms-of-use)
    STRIPE_WEBHOOK_SECRET="whsec_..."
    ```
 
+   **Environment file conventions:**
+   - `.env` — local development values (do not commit secrets)
+   - `.env.production` — production values used when `NODE_ENV=production` (e.g. a production build run locally or in CI)
+
+   Next.js merges these in priority order: `.env.production.local` > `.env.local` > `.env.production` > `.env`. For day-to-day local dev, `.env` is sufficient. For production deployments via Docker or a managed host, set env vars directly in the platform (Docker `.env` file, Vercel dashboard, Railway variables, etc.) rather than committing a `.env.production` file.
+
    The server validates these required runtime variables once during startup and fails fast if any are missing or malformed.
 
    `REDIS_URL` is optional in local development. If set, rate limiting uses shared Redis storage for multi-instance deployments. If omitted, the app falls back to in-memory limiting.
@@ -354,6 +360,23 @@ npm run cap:open:ios        # Open in Xcode (macOS only)
 
 1. **Static Export** — Set `output: "export"` in `next.config.ts` for 100% offline (no API routes)
 2. **Connected App** — Deploy to Vercel/AWS, point Capacitor to hosted URL (requires internet)
+
+**Pointing Capacitor at a server:**
+
+`capacitor.config.ts` reads a `CAP_SERVER_URL` env var at sync time. Set it before running `npm run cap:sync` and the app will load that URL in the WebView instead of the bundled static files.
+
+```bash
+# Local dev (device must be on the same network as your machine)
+CAP_SERVER_URL=http://192.168.1.100:3000 npm run cap:sync
+
+# Production
+CAP_SERVER_URL=https://calorietracker.yourdomain.com npm run cap:sync
+
+# Revert to bundled static files
+npm run cap:sync   # (no CAP_SERVER_URL set)
+```
+
+> **Note:** For local dev, use your machine's LAN IP — not `localhost`, which resolves to the device itself. Find it with `ipconfig` (Windows) or `ifconfig` (Mac/Linux). HTTP cleartext is enabled automatically when the URL starts with `http://`.
 
 **Deploying to Android (Google Play):**
 
