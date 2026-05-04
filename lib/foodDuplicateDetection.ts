@@ -17,7 +17,7 @@ export type DuplicateCheckInput = {
 
 export const CALORIE_TOLERANCE = 50;
 export const NUTRITION_TOLERANCE = 5;
-export const MIN_NAME_OVERLAP = 0.5;
+export const MIN_NAME_OVERLAP = 0.6;
 
 export function normalizeName(value: string) {
   return value

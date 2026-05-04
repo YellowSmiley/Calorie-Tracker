@@ -122,6 +122,28 @@ describe("foodDuplicateDetection helpers", () => {
       expect(result.likelyDuplicate).toBe(true);
     });
 
+    it("allows distinct meats with shared descriptor tokens", () => {
+      const result = isLikelyDuplicate(
+        { ...baseFood, name: "Pork Mince" },
+        { ...baseFood, name: "Beef Mince" },
+      );
+
+      expect(result.nameScore).toBe(0.5);
+      expect(result.nutritionMatch).toBe(true);
+      expect(result.likelyDuplicate).toBe(false);
+    });
+
+    it("allows significantly different names with identical macros", () => {
+      const result = isLikelyDuplicate(
+        { ...baseFood, name: "Bread" },
+        { ...baseFood, name: "Flour" },
+      );
+
+      expect(result.nameScore).toBe(0);
+      expect(result.nutritionMatch).toBe(true);
+      expect(result.likelyDuplicate).toBe(false);
+    });
+
     it("does not flag when one nutrition field is out of tolerance", () => {
       const result = isLikelyDuplicate(baseFood, {
         ...baseFood,
