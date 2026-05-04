@@ -153,10 +153,10 @@ describe("calculateGoalRecommendations", () => {
     expect(highLoss).not.toBeNull();
     expect(extremeLoss).not.toBeNull();
 
-    expect((highLoss?.calorieTargetKcal ?? 0)).toBeLessThan(
+    expect(highLoss?.calorieTargetKcal ?? 0).toBeLessThan(
       normalLoss?.calorieTargetKcal ?? 0,
     );
-    expect((highLoss?.calorieTargetKcal ?? 0)).toBeGreaterThan(
+    expect(highLoss?.calorieTargetKcal ?? 0).toBeGreaterThan(
       extremeLoss?.calorieTargetKcal ?? 0,
     );
   });
@@ -221,10 +221,10 @@ describe("calculateGoalRecommendations", () => {
     expect(highGain).not.toBeNull();
     expect(extremeGain).not.toBeNull();
 
-    expect((highGain?.calorieTargetKcal ?? 0)).toBeGreaterThan(
+    expect(highGain?.calorieTargetKcal ?? 0).toBeGreaterThan(
       normalGain?.calorieTargetKcal ?? 0,
     );
-    expect((highGain?.calorieTargetKcal ?? 0)).toBeLessThan(
+    expect(highGain?.calorieTargetKcal ?? 0).toBeLessThan(
       extremeGain?.calorieTargetKcal ?? 0,
     );
   });
