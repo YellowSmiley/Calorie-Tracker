@@ -317,6 +317,12 @@ npm run cap:open:android      # Open Android Studio
 npm run cap:open:ios          # Open Xcode
 npm run cap:run:android       # Build and run on Android device/emulator
 npm run cap:run:ios           # Build and run on iOS device/simulator
+
+# Mobile App (React Native / Expo pilot)
+npm run mobile:install         # Install mobile workspace dependencies
+npm run mobile:start           # Start Expo development server
+npm run mobile:android         # Build/run Android app from Expo workspace
+npm run mobile:ios             # Build/run iOS app from Expo workspace
 ```
 
 ## Mobile App & PWA
@@ -358,6 +364,26 @@ npm run cap:sync            # Build and sync
 npm run cap:open:android    # Open in Android Studio
 npm run cap:open:ios        # Open in Xcode (macOS only)
 ```
+
+### React Native Mobile App (Expo Pilot)
+
+This repository now includes an initial React Native app at `mobile/` to begin
+native-first migration while reusing the existing backend APIs.
+
+**Current pilot scope:**
+
+- Credentials sign-in against existing NextAuth endpoints (`/api/auth/*`)
+- Minimal signed-in home screen shell for iterative feature porting
+
+**Run locally:**
+
+```bash
+npm run mobile:install
+EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000 npm run mobile:start
+```
+
+Use your machine LAN IP instead of `10.0.2.2` when running on a physical
+device (for example `http://192.168.0.83:3000`).
 
 **Build Options:**
 

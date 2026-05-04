@@ -122,7 +122,7 @@ export const searchPaginationQuerySchema = z
 export const dashboardGetQuerySchema = z
   .object({
     range: z.enum(["day", "week", "month"]).optional(),
-    chartRange: z.enum(["1m", "3m", "6m", "1y", "all"]).optional(),
+    chartRange: z.enum(["1w", "1m", "3m", "6m", "1y", "all"]).optional(),
     date: isoDateSchema.optional(),
   })
   .passthrough();

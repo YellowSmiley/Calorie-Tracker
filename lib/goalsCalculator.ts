@@ -1,7 +1,7 @@
 export type GoalType = "lose" | "maintain" | "gain" | "muscle";
 export type ActivityLevel = "sedentary" | "light" | "moderate" | "very";
 export type SexType = "male" | "female";
-export type WeightChangePace = "mild" | "normal";
+export type WeightChangePace = "mild" | "normal" | "high" | "extreme";
 
 export interface GoalCalculatorInput {
   age: number;
@@ -11,6 +11,12 @@ export interface GoalCalculatorInput {
   goal: GoalType;
   activity: ActivityLevel;
   weightChangePace: WeightChangePace;
+}
+
+export interface CustomCalorieGoalCalculatorInput {
+  calorieTargetKcal: number;
+  weightKg: number;
+  goal: GoalType;
 }
 
 export interface GoalRecommendationsBase {
@@ -43,6 +49,8 @@ const PROTEIN_FACTORS: Record<GoalType, number> = {
 
 const CALORIE_ADJUSTMENT_FOR_MILD = 275;
 const CALORIE_ADJUSTMENT_FOR_NORMAL = 550;
+const CALORIE_ADJUSTMENT_FOR_HIGH = 825;
+const CALORIE_ADJUSTMENT_FOR_EXTREME = 1100;
 
 const FAT_RATIOS: Record<GoalType, number> = {
   lose: 0.3,
@@ -52,6 +60,26 @@ const FAT_RATIOS: Record<GoalType, number> = {
 };
 
 const roundToTenth = (value: number) => Math.round(value * 10) / 10;
+
+const buildGoalRecommendations = (
+  calorieTargetKcal: number,
+  weightKg: number,
+  goal: GoalType,
+): GoalRecommendationsBase => {
+  const proteinGrams = weightKg * PROTEIN_FACTORS[goal];
+  const fatGrams = (calorieTargetKcal * FAT_RATIOS[goal]) / 9;
+  const carbGrams = Math.max(
+    0,
+    (calorieTargetKcal - proteinGrams * 4 - fatGrams * 9) / 4,
+  );
+
+  return {
+    calorieTargetKcal,
+    proteinGrams: roundToTenth(proteinGrams),
+    carbGrams: roundToTenth(carbGrams),
+    fatGrams: roundToTenth(fatGrams),
+  };
+};
 
 export function getGoalCalculatorValidationError(
   input: GoalCalculatorInput,
@@ -86,11 +114,19 @@ export function calculateGoalRecommendations(
     input.goal === "lose"
       ? input.weightChangePace === "mild"
         ? -CALORIE_ADJUSTMENT_FOR_MILD
-        : -CALORIE_ADJUSTMENT_FOR_NORMAL
+        : input.weightChangePace === "normal"
+          ? -CALORIE_ADJUSTMENT_FOR_NORMAL
+          : input.weightChangePace === "high"
+            ? -CALORIE_ADJUSTMENT_FOR_HIGH
+            : -CALORIE_ADJUSTMENT_FOR_EXTREME
       : input.goal === "gain"
         ? input.weightChangePace === "mild"
           ? CALORIE_ADJUSTMENT_FOR_MILD
-          : CALORIE_ADJUSTMENT_FOR_NORMAL
+          : input.weightChangePace === "normal"
+            ? CALORIE_ADJUSTMENT_FOR_NORMAL
+            : input.weightChangePace === "high"
+              ? CALORIE_ADJUSTMENT_FOR_HIGH
+              : CALORIE_ADJUSTMENT_FOR_EXTREME
         : input.goal === "muscle"
           ? 200
           : 0;
@@ -100,19 +136,40 @@ export function calculateGoalRecommendations(
     Math.round(maintenanceCalories + calorieAdjustment),
   );
 
-  const proteinGrams = input.weightKg * PROTEIN_FACTORS[input.goal];
-  const fatGrams = (calorieTargetKcal * FAT_RATIOS[input.goal]) / 9;
-  const carbGrams = Math.max(
-    0,
-    (calorieTargetKcal - proteinGrams * 4 - fatGrams * 9) / 4,
-  );
-
-  return {
+  return buildGoalRecommendations(
     calorieTargetKcal,
-    proteinGrams: roundToTenth(proteinGrams),
-    carbGrams: roundToTenth(carbGrams),
-    fatGrams: roundToTenth(fatGrams),
-  };
+    input.weightKg,
+    input.goal,
+  );
+}
+
+export function getCustomCalorieGoalValidationError(
+  input: CustomCalorieGoalCalculatorInput,
+): string | null {
+  if (input.weightKg < 30 || input.weightKg > 300) {
+    return "Enter a weight between 30 and 300 kg.";
+  }
+
+  if (input.calorieTargetKcal < 1200 || input.calorieTargetKcal > 10000) {
+    return "Enter calories between 1200 and 10000 kcal.";
+  }
+
+  return null;
+}
+
+export function calculateGoalRecommendationsFromCalories(
+  input: CustomCalorieGoalCalculatorInput,
+): GoalRecommendationsBase | null {
+  const validationError = getCustomCalorieGoalValidationError(input);
+  if (validationError) {
+    return null;
+  }
+
+  return buildGoalRecommendations(
+    Math.round(input.calorieTargetKcal),
+    input.weightKg,
+    input.goal,
+  );
 }
 
 export function calculateMicronutrientLimitsFromCalories(

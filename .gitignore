@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -62,3 +63,9 @@ ios/
 .capacitor/
 
 .eslintcache
+
+# Expo / React Native mobile workspace generated files
+/mobile/.expo/
+/mobile/.expo-shared/
+/mobile/android/
+/mobile/ios/

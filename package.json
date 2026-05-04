@@ -27,7 +27,11 @@
     "cap:open:android": "npx cap open android",
     "cap:open:ios": "npx cap open ios",
     "cap:run:android": "npx cap run android",
-    "cap:run:ios": "npx cap run ios"
+    "cap:run:ios": "npx cap run ios",
+    "mobile:install": "npm --prefix mobile install",
+    "mobile:start": "npm --prefix mobile start",
+    "mobile:android": "npm --prefix mobile run android",
+    "mobile:ios": "npm --prefix mobile run ios"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

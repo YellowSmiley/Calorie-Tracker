@@ -155,7 +155,7 @@ describe("apiSchemas", () => {
   test("accepts valid dashboard query", () => {
     const result = dashboardGetQuerySchema.safeParse({
       range: "week",
-      chartRange: "3m",
+      chartRange: "1w",
       date: "2026-04-20",
     });
 

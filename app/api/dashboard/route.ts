@@ -87,6 +87,9 @@ const getTrendBounds = async (
     const start = new Date(baseDate);
 
     switch (chartRange) {
+      case "1w":
+        start.setDate(start.getDate() - 7);
+        break;
       case "1m":
         start.setMonth(start.getMonth() - 1);
         break;

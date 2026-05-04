@@ -9,6 +9,8 @@ import { resetSettings } from "./helpers";
 // and reappearance) for Dashboard/Diary/Settings in both default and converted units.
 // TODO(playwright): validate dashboard analytics instrumentation for tutorial toggle,
 // chart accordion open/close, and chart date-range changes.
+// TODO(playwright): add coverage for Charts & Trends 1W selector state,
+// trend summary copy, and parity with 1M/3M/6M behavior in default and converted units.
 
 const goals = {
   calories: 3000,

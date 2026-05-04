@@ -1,7 +1,10 @@
 import {
   calculateMicronutrientLimitsFromCalories,
   calculateGoalRecommendations,
+  calculateGoalRecommendationsFromCalories,
+  CustomCalorieGoalCalculatorInput,
   getGoalCalculatorValidationError,
+  getCustomCalorieGoalValidationError,
   GoalCalculatorInput,
 } from "./goalsCalculator";
 
@@ -109,6 +112,55 @@ describe("calculateGoalRecommendations", () => {
     ).toBe(true);
   });
 
+  it("uses a larger calorie adjustment for extreme vs normal weight loss", () => {
+    const extremeLoss = calculateGoalRecommendations({
+      ...validInput,
+      goal: "lose",
+      weightChangePace: "extreme",
+    });
+    const normalLoss = calculateGoalRecommendations({
+      ...validInput,
+      goal: "lose",
+      weightChangePace: "normal",
+    });
+
+    expect(extremeLoss).not.toBeNull();
+    expect(normalLoss).not.toBeNull();
+    expect(
+      (extremeLoss?.calorieTargetKcal ?? 0) <
+        (normalLoss?.calorieTargetKcal ?? 0),
+    ).toBe(true);
+  });
+
+  it("places high weight loss pace between normal and extreme", () => {
+    const normalLoss = calculateGoalRecommendations({
+      ...validInput,
+      goal: "lose",
+      weightChangePace: "normal",
+    });
+    const highLoss = calculateGoalRecommendations({
+      ...validInput,
+      goal: "lose",
+      weightChangePace: "high",
+    });
+    const extremeLoss = calculateGoalRecommendations({
+      ...validInput,
+      goal: "lose",
+      weightChangePace: "extreme",
+    });
+
+    expect(normalLoss).not.toBeNull();
+    expect(highLoss).not.toBeNull();
+    expect(extremeLoss).not.toBeNull();
+
+    expect((highLoss?.calorieTargetKcal ?? 0)).toBeLessThan(
+      normalLoss?.calorieTargetKcal ?? 0,
+    );
+    expect((highLoss?.calorieTargetKcal ?? 0)).toBeGreaterThan(
+      extremeLoss?.calorieTargetKcal ?? 0,
+    );
+  });
+
   it("uses different calorie adjustments for mild and normal weight gain", () => {
     const mildGain = calculateGoalRecommendations({
       ...validInput,
@@ -126,6 +178,55 @@ describe("calculateGoalRecommendations", () => {
     expect(
       (normalGain?.calorieTargetKcal ?? 0) > (mildGain?.calorieTargetKcal ?? 0),
     ).toBe(true);
+  });
+
+  it("uses a larger calorie adjustment for extreme vs normal weight gain", () => {
+    const extremeGain = calculateGoalRecommendations({
+      ...validInput,
+      goal: "gain",
+      weightChangePace: "extreme",
+    });
+    const normalGain = calculateGoalRecommendations({
+      ...validInput,
+      goal: "gain",
+      weightChangePace: "normal",
+    });
+
+    expect(extremeGain).not.toBeNull();
+    expect(normalGain).not.toBeNull();
+    expect(
+      (extremeGain?.calorieTargetKcal ?? 0) >
+        (normalGain?.calorieTargetKcal ?? 0),
+    ).toBe(true);
+  });
+
+  it("places high weight gain pace between normal and extreme", () => {
+    const normalGain = calculateGoalRecommendations({
+      ...validInput,
+      goal: "gain",
+      weightChangePace: "normal",
+    });
+    const highGain = calculateGoalRecommendations({
+      ...validInput,
+      goal: "gain",
+      weightChangePace: "high",
+    });
+    const extremeGain = calculateGoalRecommendations({
+      ...validInput,
+      goal: "gain",
+      weightChangePace: "extreme",
+    });
+
+    expect(normalGain).not.toBeNull();
+    expect(highGain).not.toBeNull();
+    expect(extremeGain).not.toBeNull();
+
+    expect((highGain?.calorieTargetKcal ?? 0)).toBeGreaterThan(
+      normalGain?.calorieTargetKcal ?? 0,
+    );
+    expect((highGain?.calorieTargetKcal ?? 0)).toBeLessThan(
+      extremeGain?.calorieTargetKcal ?? 0,
+    );
   });
 
   it("returns different results for realistic user profiles", () => {
@@ -211,5 +312,42 @@ describe("calculateMicronutrientLimitsFromCalories", () => {
     expect(limits.sugarsGrams).toBe(0);
     expect(limits.fibreGrams).toBe(0);
     expect(limits.saltGrams).toBe(6);
+  });
+});
+
+describe("custom calorie goal calculation", () => {
+  const validCustomInput: CustomCalorieGoalCalculatorInput = {
+    calorieTargetKcal: 2200,
+    weightKg: 80,
+    goal: "maintain",
+  };
+
+  it("validates custom calorie input", () => {
+    expect(getCustomCalorieGoalValidationError(validCustomInput)).toBeNull();
+    expect(
+      getCustomCalorieGoalValidationError({
+        ...validCustomInput,
+        calorieTargetKcal: 900,
+      }),
+    ).toBe("Enter calories between 1200 and 10000 kcal.");
+  });
+
+  it("returns null for invalid custom calorie input", () => {
+    const result = calculateGoalRecommendationsFromCalories({
+      ...validCustomInput,
+      weightKg: 20,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("calculates recommendations from a custom calorie target", () => {
+    const result = calculateGoalRecommendationsFromCalories(validCustomInput);
+
+    expect(result).not.toBeNull();
+    expect(result?.calorieTargetKcal).toBe(2200);
+    expect(result?.proteinGrams).toBeGreaterThan(0);
+    expect(result?.carbGrams).toBeGreaterThan(0);
+    expect(result?.fatGrams).toBeGreaterThan(0);
   });
 });

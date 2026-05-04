@@ -13,6 +13,10 @@ import {
 // (add/remove marks, auto-ban on third mark, and clear-punishments blacklist cleanup).
 // TODO(playwright): validate analytics instrumentation for help modal usage,
 // route-level page tracking, and PWA install/not-now prompt actions.
+// TODO(playwright): add Goal Calculator either-or flow coverage for profile-based
+// versus custom-calorie mode, including validation and apply-goals outcomes.
+// TODO(playwright): add Goal Calculator weekly pace coverage for mild/normal/extreme
+// options and resulting goal recalculations.
 
 const fillInputs = async (page: Page, values: Record<string, string>) => {
   for (const [testId, value] of Object.entries(values)) {

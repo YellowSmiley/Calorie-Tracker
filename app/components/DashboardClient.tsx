@@ -12,7 +12,7 @@ import AppModal from "@/app/components/AppModal";
 import { trackEvent } from "@/app/components/analyticsEvents";
 
 type TimeRange = "day" | "week" | "month";
-type ChartDateRange = "1m" | "3m" | "6m" | "1y" | "all";
+type ChartDateRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
 
 interface DashboardClientProps {
   userName: string;
@@ -41,6 +41,7 @@ interface DashboardClientProps {
 }
 
 const CHART_RANGE_OPTIONS = [
+  { value: "1w", label: "1W" },
   { value: "1m", label: "1M" },
   { value: "3m", label: "3M" },
   { value: "6m", label: "6M" },
